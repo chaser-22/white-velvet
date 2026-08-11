@@ -11,7 +11,9 @@ export function ImagePlaceholder({ label, tone = "navy", className = "" }: { lab
   );
 }
 
-export function ServiceGrid({ limit }: { limit?: number }) {
+export function ServiceGrid({ limit, headingLevel = 3 }: { limit?: number; headingLevel?: 2 | 3 }) {
+  const Heading = headingLevel === 2 ? "h2" : "h3";
+
   return (
     <div className="service-grid">
       {services.slice(0, limit ?? services.length).map((service) => (
@@ -20,7 +22,7 @@ export function ServiceGrid({ limit }: { limit?: number }) {
             <span>{service.number}</span>
             <small>{service.kicker}</small>
           </div>
-          <h3>{service.title}</h3>
+          <Heading>{service.title}</Heading>
           <p>{service.short}</p>
           <Link className="card-link" href={`/tjanster/${service.slug}`}>
             Läs om tjänsten <span aria-hidden="true">↗</span>
@@ -41,7 +43,9 @@ export function SectionHeading({ eyebrow, title, copy, align = "left" }: { eyebr
   );
 }
 
-export function BeforeAfterCard({ index, caption }: { index: number; caption: string }) {
+export function BeforeAfterCard({ index, caption, headingLevel = 3 }: { index: number; caption: string; headingLevel?: 2 | 3 }) {
+  const Heading = headingLevel === 2 ? "h2" : "h3";
+
   return (
     <article className="result-card">
       <div className={`comparison comparison-${index}`} role="img" aria-label={`Platshållare för före- och efterbild: ${caption}`}>
@@ -51,7 +55,7 @@ export function BeforeAfterCard({ index, caption }: { index: number; caption: st
       </div>
       <div className="result-caption">
         <span>PROJEKT {String(index).padStart(2, "0")}</span>
-        <h3>{caption}</h3>
+        <Heading>{caption}</Heading>
         <p>Material, behandling och ort läggs in tillsammans med de riktiga bilderna.</p>
       </div>
     </article>

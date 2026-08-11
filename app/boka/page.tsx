@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { QuoteForm } from "../components/QuoteForm";
 import { PageHero } from "../components/SitePieces";
 
-export const metadata: Metadata = { title: "Få offert", description: "Be om en personlig offert för mattvätt, möbeltvätt eller golvvård i Västerås." };
+export const metadata: Metadata = {
+  title: "Få offert",
+  description: "Be om en personlig offert för mattvätt, möbeltvätt eller golvvård i Västerås.",
+  alternates: { canonical: "https://white-velvet.se/boka" },
+};
 
 export default function QuotePage() {
   return (

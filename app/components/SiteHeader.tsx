@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const navigation = [
   { href: "/tjanster", label: "Tjänster" },
@@ -15,6 +15,20 @@ const navigation = [
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      setOpen(false);
+      menuButtonRef.current?.focus();
+    }
+
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [open]);
 
   return (
     <header className="site-header">
@@ -28,11 +42,13 @@ export function SiteHeader() {
         </Link>
 
         <button
+          ref={menuButtonRef}
           className="menu-toggle"
           type="button"
           aria-label={open ? "Stäng meny" : "Öppna meny"}
           aria-expanded={open}
           aria-controls="primary-navigation"
+          aria-haspopup="true"
           onClick={() => setOpen((value) => !value)}
         >
           <span />
@@ -45,6 +61,7 @@ export function SiteHeader() {
               key={item.href}
               className={pathname === item.href || pathname.startsWith(`${item.href}/`) ? "active" : ""}
               href={item.href}
+              aria-current={pathname === item.href || pathname.startsWith(`${item.href}/`) ? "page" : undefined}
               onClick={() => setOpen(false)}
             >
               {item.label}

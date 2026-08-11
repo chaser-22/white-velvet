@@ -8,11 +8,14 @@ export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
   const requestedHost = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "white-velvet.se";
   const normalizedHost = requestedHost.trim().toLowerCase();
-  const allowedHost =
-    normalizedHost === "white-velvet.se" ||
-    normalizedHost === "www.white-velvet.se" ||
-    normalizedHost === "localhost:3002" ||
-    normalizedHost.endsWith(".chatgpt.site");
+  const allowedHosts = new Set([
+    "white-velvet.se",
+    "www.white-velvet.se",
+    "white-velvet-vasteras.ennnyy.chatgpt.site",
+    "localhost:3002",
+    "127.0.0.1:3002",
+  ]);
+  const allowedHost = allowedHosts.has(normalizedHost);
   const host = allowedHost && /^[a-z0-9.-]+(?::\d{1,5})?$/.test(normalizedHost)
     ? normalizedHost
     : "white-velvet.se";
@@ -23,11 +26,14 @@ export async function generateMetadata(): Promise<Metadata> {
   const description = "Professionell mattvätt, möbeltvätt och golvvård i Västerås. Be om en personlig offert från White Velvet.";
 
   return {
+    metadataBase: new URL("https://white-velvet.se"),
     title: { default: title, template: "%s | White Velvet" },
     description,
+    alternates: { canonical: "https://white-velvet.se/" },
     openGraph: {
       type: "website",
       locale: "sv_SE",
+      url: "https://white-velvet.se/",
       title,
       description,
       images: [{ url: `${origin}/og.png`, width: 1792, height: 922, alt: "White Velvet — textil- och golvvård i Västerås" }],

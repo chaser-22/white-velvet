@@ -4,6 +4,7 @@ import { CtaBand, ImagePlaceholder, PageHero, SectionHeading, ServiceGrid } from
 export const metadata: Metadata = {
   title: "Tjänster",
   description: "Utforska White Velvets tjänster inom mattvätt, möbeltvätt, golvpolering samt rengöring av båt och husbil.",
+  alternates: { canonical: "https://white-velvet.se/tjanster" },
 };
 
 export default function ServicesPage() {
@@ -11,7 +12,7 @@ export default function ServicesPage() {
     <>
       <PageHero eyebrow="TJÄNSTER" title="Rätt behandling börjar med rätt bedömning." copy="Välj en tjänst för att se vad som ingår, vad vi behöver veta och hur du går vidare med en personlig offert." />
       <section className="section">
-        <div className="container"><ServiceGrid /></div>
+        <div className="container"><ServiceGrid headingLevel={2} /></div>
       </section>
       <section className="section section-soft">
         <div className="container story-grid reverse">

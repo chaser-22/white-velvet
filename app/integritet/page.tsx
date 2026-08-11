@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { PageHero } from "../components/SitePieces";
 
-export const metadata: Metadata = { title: "Integritet", robots: { index: false, follow: true } };
+export const metadata: Metadata = {
+  title: "Integritet",
+  robots: { index: false, follow: true },
+  alternates: { canonical: "https://white-velvet.se/integritet" },
+};
 
 export default function PrivacyPage() {
   return (

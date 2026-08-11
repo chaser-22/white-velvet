@@ -3,7 +3,9 @@ import handler from "vinext/server/app-router-entry";
 import { getSecurityHeaders } from "../security-headers";
 
 interface Env {
-  ASSETS: Fetcher;
+  ASSETS: {
+    fetch(request: Request): Promise<Response>;
+  };
 }
 
 interface ExecutionContext {
@@ -31,7 +33,7 @@ function secureResponse(response: Response, request: Request, nonce?: string): R
   headers.delete("Server");
   headers.delete("X-Powered-By");
 
-  return new Response(response.body, {
+  return new Response(request.method === "HEAD" ? null : response.body, {
     status: response.status,
     statusText: response.statusText,
     headers,
@@ -47,10 +49,11 @@ const worker = {
       );
     }
 
+    const requestUrl = new URL(request.url);
+    const development = requestUrl.hostname === "localhost" || requestUrl.hostname === "127.0.0.1";
+    const nonce = development ? undefined : createNonce();
+
     try {
-      const requestUrl = new URL(request.url);
-      const development = requestUrl.hostname === "localhost" || requestUrl.hostname === "127.0.0.1";
-      const nonce = development ? undefined : createNonce();
       let securedRequest = request;
 
       if (nonce) {
@@ -64,7 +67,7 @@ const worker = {
       return secureResponse(response, request, nonce);
     } catch (error) {
       console.error("request_failed", error instanceof Error ? error.message : "unknown_error");
-      return secureResponse(new Response("Internal Server Error", { status: 500 }), request);
+      return secureResponse(new Response("Internal Server Error", { status: 500 }), request, nonce);
     }
   },
 };

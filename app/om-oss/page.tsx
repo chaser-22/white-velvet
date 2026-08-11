@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { CtaBand, ImagePlaceholder, PageHero, SectionHeading } from "../components/SitePieces";
 
-export const metadata: Metadata = { title: "Om oss", description: "Lär känna White Velvet och vårt arbetssätt i Västerås." };
+export const metadata: Metadata = {
+  title: "Om oss",
+  description: "Lär känna White Velvet och vårt arbetssätt i Västerås.",
+  alternates: { canonical: "https://white-velvet.se/om-oss" },
+};
 
 export default function AboutPage() {
   return (

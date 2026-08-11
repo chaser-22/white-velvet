@@ -3,7 +3,11 @@ import Link from "next/link";
 import { CtaBand, PageHero } from "../components/SitePieces";
 import { services } from "../site-data";
 
-export const metadata: Metadata = { title: "Priser", description: "Så fungerar pris och offert för White Velvets rengöringstjänster." };
+export const metadata: Metadata = {
+  title: "Priser",
+  description: "Så fungerar pris och offert för White Velvets rengöringstjänster.",
+  alternates: { canonical: "https://white-velvet.se/priser" },
+};
 
 export default function PricingPage() {
   return (

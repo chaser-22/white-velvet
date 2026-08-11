@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHero } from "../components/SitePieces";
 
-export const metadata: Metadata = { title: "Kontakt", description: "Kontakta White Velvet i Västerås via telefon, e-post eller offertformulär." };
+export const metadata: Metadata = {
+  title: "Kontakt",
+  description: "Kontakta White Velvet i Västerås via telefon, e-post eller offertformulär.",
+  alternates: { canonical: "https://white-velvet.se/kontakt" },
+};
 
 export default function ContactPage() {
   return (

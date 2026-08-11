@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { CtaBand, PageHero } from "../components/SitePieces";
 import { faqs } from "../site-data";
 
-export const metadata: Metadata = { title: "Frågor & svar", description: "Svar på vanliga frågor om White Velvets tjänster, priser och bokning." };
+export const metadata: Metadata = {
+  title: "Frågor & svar",
+  description: "Svar på vanliga frågor om White Velvets tjänster, priser och bokning.",
+  alternates: { canonical: "https://white-velvet.se/faq" },
+};
 
 export default function FaqPage() {
   return (

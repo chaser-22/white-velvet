@@ -1,37 +1,98 @@
 # White Velvet security policy
 
-## Current attack surface
+## Scope and security objective
 
-The public site is intentionally small. It has no user accounts, database, cookies, third-party scripts, file uploads, secrets in the client, or active form submission endpoint. The quote form is a local demonstration and does not transmit personal data.
+This repository contains a public marketing website. It is designed to minimize its attack surface rather than claim that it is unhackable. The current application has no user accounts, database, cookies, analytics, third-party browser scripts, file uploads, client secrets, or active form-submission endpoint.
+
+The quote form is an explicitly labelled demonstration. It validates the user-facing flow locally but does not transmit or store personal information.
+
+## Threat model
+
+### Assets
+
+- Site availability and content integrity
+- The White Velvet brand and contact details
+- Future quote-request personal data
+- Hosted deployment credentials and environment values
+
+### Current trust boundaries
+
+1. A visitor's browser sends GET or HEAD requests to the Sites/Cloudflare edge.
+2. The edge worker passes allowed requests to the vinext application router.
+3. Static application assets are served from the same origin.
+4. The local development server is bound to `127.0.0.1` and is not a public service.
+
+There is currently no browser-to-database, browser-to-email, upload, authentication, payment, or analytics boundary.
+
+### Relevant threats
+
+- Cross-site scripting or unsafe browser execution
+- Host-header injection into social metadata
+- Clickjacking, MIME confusion, referrer leakage, and unnecessary browser permissions
+- Accidental secret or source-map publication
+- Unsupported state-changing methods
+- Dependency or image-parser denial of service
+- Misleading collection of personal information before a real backend and privacy policy exist
 
 ## Implemented controls
 
-- Security headers are applied both by Next-compatible routing and again at the Cloudflare Worker boundary.
-- Content Security Policy limits scripts, styles, images, connections, forms, frames, workers, and embedded objects.
+- A per-request cryptographic nonce and strict-dynamic Content Security Policy are used for production HTML.
+- CSP restricts scripts, styles, images, connections, forms, frames, workers, embedded objects, and base URLs.
+- HSTS is returned for HTTPS application responses.
+- Clickjacking is blocked with CSP `frame-ancestors 'none'` and `X-Frame-Options: DENY`.
+- MIME sniffing, referrer leakage, cross-origin opener/resource behavior, and legacy XSS filtering are explicitly controlled.
 - Camera, microphone, location, payment, USB, display capture, and other unused browser capabilities are disabled.
-- Clickjacking, MIME sniffing, referrer leakage, cross-origin isolation issues, and unnecessary server identification are restricted.
-- HTTPS responses receive HSTS.
-- The edge worker accepts only GET and HEAD. All state-changing HTTP methods return 405 until a real, secured form endpoint is built.
-- The unused image optimization endpoint is disabled, removing an unnecessary parser surface.
-- The demo form uses field length and format limits, a honeypot, and a minimum completion time. These improve the user-facing template but are not substitutes for server-side controls.
-- Host-derived metadata is restricted to known domains to prevent Host header injection.
+- Only GET and HEAD are accepted. POST, PUT, PATCH, DELETE, and OPTIONS return 405 until an authenticated and validated write endpoint exists.
+- HEAD responses contain no body.
+- Production browser source maps are disabled and automated tests reject emitted `.map` files.
+- Host-derived metadata accepts only the production domains, the exact Sites hostname, and local test hosts. Untrusted hosts fall back to `white-velvet.se`.
+- The unused image route redirects same-origin image requests without parsing them and rejects external, protocol-relative, and data URLs.
+- Runtime errors return a generic 500 response. Browser responses do not expose server-identification headers.
 - Environment files, generated output, credentials, and local runtime data are excluded from source control.
+- The demo form has client-side length/format limits, a honeypot, and a minimum completion time, but these are not treated as server-side security controls.
 
-## Requirements before enabling form submissions or uploads
+## Dependency status
 
-Do not change the demo form into a live endpoint without all of the following:
+The production dependency audit reports zero known vulnerabilities.
 
-1. Validate and normalize every field on the server with strict size limits and an allowlist schema.
-2. Verify the request Origin and reject cross-site submissions.
-3. Add server-side rate limits by IP and normalized contact identifier.
-4. Add Cloudflare Turnstile and validate every token server-side. Client-only validation is not protection.
-5. Use short request-body limits and explicit content types.
-6. Store secrets only as hosted environment secrets, never in source or browser code.
-7. Redact personal information from logs and define a retention/deletion schedule.
-8. If uploads are enabled, use a separate private bucket, random object names, MIME and magic-byte validation, size and pixel limits, malware scanning, and image re-encoding before any public delivery.
-9. Add monitoring for error spikes, rate-limit events, abuse, and deployment changes.
-10. Review the privacy policy and processor agreements before collecting real customer data.
+The complete development-tool audit currently reports three transitive findings:
+
+- One low-severity `@babel/core` source-map file-read advisory used through lint tooling.
+- Two high-severity `image-size` denial-of-service advisories reported through `vinext`.
+
+These packages are not production dependencies. The site accepts no uploads, uses no `next/image` component, rejects remote image-optimizer inputs, and has regression tests for that boundary. No patched `image-size` release is currently available in the installed dependency line. Update the toolchain when compatible patched releases become available and rerun the full suite.
+
+## Requirements before enabling submissions or uploads
+
+Do not convert the demo into a live endpoint until all of the following are implemented and tested:
+
+1. Select a delivery/storage provider and document its data-processing terms.
+2. Validate and normalize every field on the server with an allowlist schema and strict byte/character limits.
+3. Reject unexpected fields, unsupported content types, oversized bodies, and cross-site Origins.
+4. Add server-side IP/contact rate limits, replay controls, and monitored abuse thresholds.
+5. Add Cloudflare Turnstile or an equivalent control and verify every token server-side.
+6. Store credentials only as hosted secrets; never expose them to browser code or source control.
+7. Redact personal information from logs and define retention, access, export, and deletion procedures.
+8. Send success only after the authoritative backend accepts the request; provide safe failure and retry states.
+9. Review and publish the final privacy notice before collecting information.
+10. Add endpoint integration tests, monitoring, and an operational owner.
+
+If uploads are later enabled, use a private bucket, randomized object names, size/pixel limits, MIME plus magic-byte checks, malware scanning, image re-encoding, access controls, and retention deletion. Do not request direct camera permission unless a separately reviewed feature genuinely requires it.
+
+## Operational verification
+
+Before each release, run:
+
+```powershell
+npm run check
+npm audit --omit=dev
+npm audit
+```
+
+Also verify the deployed HTTPS headers after authentication, confirm the expected access policy, review worker logs for unexpected errors, and retain the previous known-good Sites version for rollback.
+
+Automated checks and this review do not replace an independent penetration test. A professional test is appropriate before introducing public writes, personal-data storage, uploads, authentication, payments, or materially new third-party integrations.
 
 ## Reporting a vulnerability
 
-Report suspected vulnerabilities to info@white-velvet.com. Do not include passwords, customer data, or other sensitive material in the first message.
+Report suspected vulnerabilities to `info@white-velvet.com`. Do not include passwords, customer data, or other sensitive material in the first message.

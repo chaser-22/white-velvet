@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { services } from "../site-data";
 
@@ -9,10 +10,54 @@ export function QuoteForm() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
   const formStartedAt = useRef(0);
+  const formRef = useRef<HTMLFormElement>(null);
+  const successRef = useRef<HTMLDivElement>(null);
+  const stepHeadingRefs = useRef<Array<HTMLLegendElement | null>>([]);
+  const previousStep = useRef(1);
 
   useEffect(() => {
     formStartedAt.current = Date.now();
+
+    function selectRequestedService() {
+      const requestedService = new URLSearchParams(window.location.search).get("service");
+      if (requestedService && services.some((item) => item.slug === requestedService)) {
+        setService(requestedService);
+      }
+    }
+
+    selectRequestedService();
+    window.addEventListener("popstate", selectRequestedService);
+    return () => window.removeEventListener("popstate", selectRequestedService);
   }, []);
+
+  useEffect(() => {
+    if (previousStep.current !== step) {
+      stepHeadingRefs.current[step - 1]?.focus();
+      previousStep.current = step;
+    }
+  }, [step]);
+
+  useEffect(() => {
+    if (sent) successRef.current?.focus();
+  }, [sent]);
+
+  function goToStep(nextStep: number) {
+    setError("");
+    setStep(nextStep);
+  }
+
+  function validateDetailsStep() {
+    const stepFieldset = formRef.current?.querySelector<HTMLFieldSetElement>('[data-form-step="2"]');
+    const invalidField = stepFieldset?.querySelector<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(":invalid");
+
+    if (invalidField) {
+      invalidField.reportValidity();
+      invalidField.focus();
+      return;
+    }
+
+    goToStep(3);
+  }
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,13 +80,13 @@ export function QuoteForm() {
 
   if (sent) {
     return (
-      <div className="form-success" role="status">
+      <div className="form-success" role="status" tabIndex={-1} ref={successRef}>
         <span className="eyebrow">DEMOFLÖDE</span>
         <h2>Tack — formuläret fungerar.</h2>
         <p>
           Inga uppgifter har skickats. Koppla e-post, lagring och bekräftelser när White Velvet har valt den slutliga lösningen.
         </p>
-        <button className="text-link" type="button" onClick={() => { setSent(false); setStep(1); formStartedAt.current = Date.now(); }}>
+        <button className="text-link" type="button" onClick={() => { setSent(false); setStep(1); previousStep.current = 1; formStartedAt.current = Date.now(); }}>
           Börja om
         </button>
       </div>
@@ -51,21 +96,22 @@ export function QuoteForm() {
   const selected = services.find((item) => item.slug === service) ?? services[0];
 
   return (
-    <form className="quote-form" action="/boka" method="post" onSubmit={submit}>
+    <form className="quote-form" action="/boka" method="post" onSubmit={submit} ref={formRef}>
       <label className="honeypot" aria-hidden="true">
         Lämna detta fält tomt
         <input name="website" tabIndex={-1} autoComplete="off" />
       </label>
+      <p className="demo-notice"><strong>Demo:</strong> formuläret skickar eller sparar inga personuppgifter.</p>
       {error && <p className="form-error" role="alert">{error}</p>}
-      <div className="form-progress" aria-label={`Steg ${step} av 3`}>
+      <div className="form-progress" role="progressbar" aria-label="Offertförfrågans steg" aria-valuemin={1} aria-valuemax={3} aria-valuenow={step}>
         {[1, 2, 3].map((item) => (
           <span key={item} className={item <= step ? "complete" : ""} />
         ))}
+        <span className="sr-only">Steg {step} av 3</span>
       </div>
 
-      {step === 1 && (
-        <fieldset>
-          <legend>Vad vill du ha hjälp med?</legend>
+      <fieldset hidden={step !== 1} data-form-step="1">
+          <legend ref={(element) => { stepHeadingRefs.current[0] = element; }} tabIndex={-1}>Vad vill du ha hjälp med?</legend>
           <p className="form-intro">Välj en tjänst så anpassar vi nästa steg.</p>
           <div className="service-options">
             {services.map((item) => (
@@ -84,16 +130,14 @@ export function QuoteForm() {
             ))}
           </div>
           <div className="form-actions form-actions-end">
-            <button className="button button-dark" type="button" onClick={() => setStep(2)}>
+            <button className="button button-dark" type="button" onClick={() => goToStep(2)}>
               Fortsätt
             </button>
           </div>
-        </fieldset>
-      )}
+      </fieldset>
 
-      {step === 2 && (
-        <fieldset>
-          <legend>Berätta lite mer</legend>
+      <fieldset hidden={step !== 2} data-form-step="2">
+          <legend ref={(element) => { stepHeadingRefs.current[1] = element; }} tabIndex={-1}>Berätta lite mer</legend>
           <p className="form-intro">Du har valt <strong>{selected.title}</strong>.</p>
           <div className="field-grid">
             <label className="field field-full">
@@ -119,15 +163,13 @@ export function QuoteForm() {
             </div>
           </div>
           <div className="form-actions">
-            <button className="button button-ghost" type="button" onClick={() => setStep(1)}>Tillbaka</button>
-            <button className="button button-dark" type="button" onClick={() => setStep(3)}>Fortsätt</button>
+            <button className="button button-ghost" type="button" onClick={() => goToStep(1)}>Tillbaka</button>
+            <button className="button button-dark" type="button" onClick={validateDetailsStep}>Fortsätt</button>
           </div>
-        </fieldset>
-      )}
+      </fieldset>
 
-      {step === 3 && (
-        <fieldset>
-          <legend>Hur når vi dig?</legend>
+      <fieldset hidden={step !== 3} data-form-step="3">
+          <legend ref={(element) => { stepHeadingRefs.current[2] = element; }} tabIndex={-1}>Hur når vi dig?</legend>
           <p className="form-intro">Fyll i dina uppgifter. Detta är fortfarande ett demoformulär.</p>
           <div className="field-grid">
             <label className="field">
@@ -143,16 +185,15 @@ export function QuoteForm() {
               <input name="email" type="email" autoComplete="email" required maxLength={254} placeholder="namn@exempel.se" />
             </label>
             <label className="checkbox-field field-full">
-              <input type="checkbox" required />
-              <span>Jag godkänner att uppgifterna används för att hantera min offertförfrågan.</span>
+              <input type="checkbox" name="privacyAccepted" value="yes" required />
+              <span>Jag har läst informationen om personuppgifter i <Link href="/integritet">integritetspolicyn</Link>.</span>
             </label>
           </div>
           <div className="form-actions">
-            <button className="button button-ghost" type="button" onClick={() => setStep(2)}>Tillbaka</button>
-            <button className="button button-dark" type="submit">Skicka förfrågan</button>
+            <button className="button button-ghost" type="button" onClick={() => goToStep(2)}>Tillbaka</button>
+            <button className="button button-dark" type="submit">Visa demoresultat</button>
           </div>
-        </fieldset>
-      )}
+      </fieldset>
     </form>
   );
 }
