@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -34,11 +35,15 @@ export function SiteHeader() {
     <header className="site-header">
       <div className="header-inner container">
         <Link className="brand" href="/" aria-label="White Velvet, startsida" onClick={() => setOpen(false)}>
-          <span className="brand-mark" aria-hidden="true">WV</span>
-          <span className="brand-type">
-            <strong>WHITE VELVET</strong>
-            <small>TEXTIL- & GOLVVÅRD</small>
-          </span>
+          <Image
+            className="brand-logo"
+            src="/brand/white-velvet-logo.png"
+            width={640}
+            height={400}
+            alt=""
+            priority
+            unoptimized
+          />
         </Link>
 
         <button

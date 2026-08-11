@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import Image from "next/image";
 import Link from "next/link";
 import "./globals.css";
 import { SiteHeader } from "./components/SiteHeader";
@@ -29,6 +30,10 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL("https://white-velvet.se"),
     title: { default: title, template: "%s | White Velvet" },
     description,
+    icons: {
+      icon: [{ url: "/brand/white-velvet-logo.png", type: "image/png" }],
+      apple: [{ url: "/brand/white-velvet-logo.png", type: "image/png" }],
+    },
     alternates: { canonical: "https://white-velvet.se/" },
     openGraph: {
       type: "website",
@@ -53,8 +58,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <div className="container footer-main">
             <div>
               <Link className="brand footer-brand" href="/" aria-label="White Velvet, startsida">
-                <span className="brand-mark" aria-hidden="true">WV</span>
-                <span className="brand-type"><strong>WHITE VELVET</strong><small>TEXTIL- & GOLVVÅRD</small></span>
+                <Image
+                  className="brand-logo"
+                  src="/brand/white-velvet-logo.png"
+                  width={640}
+                  height={400}
+                  alt=""
+                  loading="lazy"
+                  unoptimized
+                />
               </Link>
               <p className="footer-note">Professionell rengöring med fokus på material, känsla och ett väl utfört resultat.</p>
             </div>

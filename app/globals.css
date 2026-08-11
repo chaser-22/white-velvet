@@ -55,11 +55,9 @@ p { text-wrap: pretty; }
 
 .site-header { position: sticky; z-index: 50; top: 0; background: rgba(8, 27, 37, .96); color: white; backdrop-filter: blur(14px); border-bottom: 1px solid var(--white-line); }
 .header-inner { height: 86px; display: flex; align-items: center; justify-content: space-between; }
-.brand { display: inline-flex; align-items: center; gap: 13px; }
-.brand-mark { width: 48px; height: 48px; display: grid; place-items: center; border: 1px solid rgba(228, 212, 177, .55); color: var(--gold-light); font-family: var(--serif); font-size: 1.18rem; letter-spacing: -.06em; }
-.brand-type { display: flex; flex-direction: column; line-height: 1.15; }
-.brand-type strong { font-family: var(--serif); font-size: 1.05rem; font-weight: 500; letter-spacing: .08em; }
-.brand-type small { margin-top: 5px; color: #a9b2b5; font-size: .52rem; font-weight: 700; letter-spacing: .2em; }
+.brand { display: inline-flex; align-items: center; }
+.brand-logo { display: block; width: 108px; height: auto; mix-blend-mode: screen; }
+.footer-brand .brand-logo { width: 154px; }
 .nav { display: flex; align-items: center; gap: 27px; }
 .nav > a:not(.button) { position: relative; color: #d7dcde; font-size: .73rem; font-weight: 700; letter-spacing: .08em; }
 .nav > a:not(.button)::after { content: ""; position: absolute; left: 0; right: 100%; bottom: -8px; height: 1px; background: var(--gold); transition: right .2s ease; }
@@ -366,7 +364,6 @@ p { text-wrap: pretty; }
 @media (max-width: 590px) {
   .container { width: calc(100% - 30px); }
   .section { padding: 68px 0; }
-  .brand-type small { display: none; }
   .hero-grid { padding-top: 62px; }
   .hero-copy h1 { font-size: 3.55rem; }
   .hero-copy > p { font-size: .95rem; }
@@ -412,8 +409,7 @@ p { text-wrap: pretty; }
   .page-hero h1 { font-size: 2.85rem; overflow-wrap: anywhere; }
   .service-hero-copy h1 { font-size: 3.2rem; overflow-wrap: anywhere; }
   .legal-copy h2 { font-size: 2.1rem; }
-  .brand-mark { width: 44px; height: 44px; }
-  .brand-type strong { font-size: .9rem; }
+  .brand-logo { width: 96px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

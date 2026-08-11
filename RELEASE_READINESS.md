@@ -159,7 +159,7 @@ Production LCP, CLS, and INP must be measured after deploying the exact release 
 | RR-001 | P1 | The quote form sends nothing | Complete `/boka`; success explicitly says no data was sent | Select a provider and implement the server-side controls in `SECURITY.md`, or replace the form with truthful phone/email-only contact |
 | RR-002 | P1 | Privacy policy is a visible draft | Open `/integritet` | Provide legally reviewed controller, purposes, legal basis, processors, retention, rights, and cookie information before collection |
 | RR-003 | P1 | Public pages contain launch placeholders | Prices, reviews, metrics, service areas, hours, organization number, team/story, galleries, and project details visibly say they will be added | Supply and approve the final business content or remove the unfinished sections |
-| RR-004 | P1 | Product imagery and official logo/favicon are incomplete | Placeholder panels appear throughout; no favicon link exists | Supply logo/favicon, hero/team/service photos, and approved before/after images with usage consent |
+| RR-004 | P1 | Production photography is incomplete | The official supplied logo is integrated in the header, footer, and icon metadata, but placeholder panels remain throughout | Supply hero/team/service photos and approved before/after images with usage consent |
 | RR-005 | P1 | Current deployment is not the audited worktree | Sites version 2 points to commit `b58347285fca96de224490b9c9d11c43410f7eb3`; this audit has local changes after that commit | Commit the audited source, save a new Sites version, deploy privately, and rerun deployed checks |
 | RR-006 | P1 | Actual application headers on the deployed URL were not authenticated-verified | Anonymous request returns 401 from the sign-in gate with no application CSP/HSTS | Verify the exact private release through an authorized session before changing access |
 | RR-007 | P2 | No production Web Vitals evidence | Lighthouse/field measurements unavailable on the private current version | Measure mobile/desktop production and remediate any LCP ≤2.5 s, CLS ≤0.1, or INP ≤200 ms misses |
@@ -175,7 +175,7 @@ Public release gate result: **failed**
 
 Provide the following in one later handoff:
 
-1. Official logo files, favicon, brand usage rules, and approved social-card status.
+1. Approved hero, team, service, and before/after photography with usage consent.
 2. Hero, team, service, equipment, and before/after photographs plus permission to publish them.
 3. Organization number, confirmed phone/email/address, opening/telephone hours, response-time wording, and service areas.
 4. Final service list, including whether boat/motorhome cleaning is offered.
