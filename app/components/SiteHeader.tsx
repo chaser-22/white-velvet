@@ -1,0 +1,61 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+
+const navigation = [
+  { href: "/tjanster", label: "Tjänster" },
+  { href: "/fore-efter", label: "Före & efter" },
+  { href: "/priser", label: "Priser" },
+  { href: "/om-oss", label: "Om oss" },
+  { href: "/faq", label: "Frågor & svar" },
+];
+
+export function SiteHeader() {
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => setOpen(false), [pathname]);
+
+  return (
+    <header className="site-header">
+      <div className="header-inner container">
+        <Link className="brand" href="/" aria-label="White Velvet, startsida">
+          <span className="brand-mark" aria-hidden="true">WV</span>
+          <span className="brand-type">
+            <strong>WHITE VELVET</strong>
+            <small>TEXTIL- & GOLVVÅRD</small>
+          </span>
+        </Link>
+
+        <button
+          className="menu-toggle"
+          type="button"
+          aria-label={open ? "Stäng meny" : "Öppna meny"}
+          aria-expanded={open}
+          aria-controls="primary-navigation"
+          onClick={() => setOpen((value) => !value)}
+        >
+          <span />
+          <span />
+        </button>
+
+        <nav id="primary-navigation" className={open ? "nav open" : "nav"} aria-label="Huvudmeny">
+          {navigation.map((item) => (
+            <Link
+              key={item.href}
+              className={pathname === item.href || pathname.startsWith(`${item.href}/`) ? "active" : ""}
+              href={item.href}
+            >
+              {item.label}
+            </Link>
+          ))}
+          <Link className="button button-small button-light nav-cta" href="/boka">
+            Få offert
+          </Link>
+        </nav>
+      </div>
+    </header>
+  );
+}
