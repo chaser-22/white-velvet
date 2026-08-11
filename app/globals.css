@@ -253,6 +253,8 @@ p { text-wrap: pretty; }
 .quote-section { background: var(--cream); }
 .quote-layout { display: grid; grid-template-columns: 1fr 330px; gap: 30px; align-items: start; }
 .quote-form { min-height: 640px; padding: 44px; background: var(--paper); box-shadow: 0 20px 60px rgba(8,27,37,.07); }
+.honeypot { position: absolute !important; left: -10000px !important; width: 1px !important; height: 1px !important; overflow: hidden !important; }
+.form-error { margin: 0 0 22px; padding: 12px 14px; border-left: 3px solid #9f3028; background: #f7e7e4; color: #6f211c; font-size: .86rem; }
 .quote-form fieldset { margin: 0; padding: 0; border: 0; }
 .quote-form legend { font-family: var(--serif); font-size: 2.2rem; line-height: 1.2; }
 .form-intro { margin: 10px 0 30px; color: var(--muted); }

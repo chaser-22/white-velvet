@@ -1,15 +1,35 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { services } from "../site-data";
 
 export function QuoteForm() {
   const [step, setStep] = useState(1);
   const [service, setService] = useState("mattvatt");
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
+  const formStartedAt = useRef(0);
+
+  useEffect(() => {
+    formStartedAt.current = Date.now();
+  }, []);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
+    const data = new FormData(form);
+
+    if (String(data.get("website") ?? "").trim() !== "") {
+      setError("Förfrågan kunde inte behandlas.");
+      return;
+    }
+
+    if (Date.now() - formStartedAt.current < 1500) {
+      setError("Vänta ett ögonblick och försök igen.");
+      return;
+    }
+
+    setError("");
     setSent(true);
   }
 
@@ -21,7 +41,7 @@ export function QuoteForm() {
         <p>
           Inga uppgifter har skickats. Koppla e-post, lagring och bekräftelser när White Velvet har valt den slutliga lösningen.
         </p>
-        <button className="text-link" type="button" onClick={() => { setSent(false); setStep(1); }}>
+        <button className="text-link" type="button" onClick={() => { setSent(false); setStep(1); formStartedAt.current = Date.now(); }}>
           Börja om
         </button>
       </div>
@@ -31,7 +51,12 @@ export function QuoteForm() {
   const selected = services.find((item) => item.slug === service) ?? services[0];
 
   return (
-    <form className="quote-form" onSubmit={submit}>
+    <form className="quote-form" action="/boka" method="post" onSubmit={submit}>
+      <label className="honeypot" aria-hidden="true">
+        Lämna detta fält tomt
+        <input name="website" tabIndex={-1} autoComplete="off" />
+      </label>
+      {error && <p className="form-error" role="alert">{error}</p>}
       <div className="form-progress" aria-label={`Steg ${step} av 3`}>
         {[1, 2, 3].map((item) => (
           <span key={item} className={item <= step ? "complete" : ""} />
@@ -73,11 +98,11 @@ export function QuoteForm() {
           <div className="field-grid">
             <label className="field field-full">
               <span>Vad ska rengöras?</span>
-              <textarea name="details" rows={5} required placeholder="Exempel: en tresitssoffa i tyg med två fläckar..." />
+              <textarea name="details" rows={5} required minLength={10} maxLength={2000} autoComplete="off" placeholder="Exempel: en tresitssoffa i tyg med två fläckar..." />
             </label>
             <label className="field">
               <span>Postnummer</span>
-              <input name="postcode" inputMode="numeric" required placeholder="Exempel: 722 10" />
+              <input name="postcode" inputMode="numeric" required minLength={3} maxLength={12} pattern="[0-9\\s-]{3,12}" placeholder="Exempel: 722 10" />
             </label>
             <label className="field">
               <span>Önskad tid</span>
@@ -107,15 +132,15 @@ export function QuoteForm() {
           <div className="field-grid">
             <label className="field">
               <span>Namn</span>
-              <input name="name" autoComplete="name" required placeholder="För- och efternamn" />
+              <input name="name" autoComplete="name" required minLength={2} maxLength={100} placeholder="För- och efternamn" />
             </label>
             <label className="field">
               <span>Telefon</span>
-              <input name="phone" type="tel" autoComplete="tel" required placeholder="07X-XXX XX XX" />
+              <input name="phone" type="tel" autoComplete="tel" required minLength={6} maxLength={32} pattern="[0-9\\s+()\\-]{6,32}" placeholder="07X-XXX XX XX" />
             </label>
             <label className="field field-full">
               <span>E-post</span>
-              <input name="email" type="email" autoComplete="email" required placeholder="namn@exempel.se" />
+              <input name="email" type="email" autoComplete="email" required maxLength={254} placeholder="namn@exempel.se" />
             </label>
             <label className="checkbox-field field-full">
               <input type="checkbox" required />

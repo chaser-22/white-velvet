@@ -1,0 +1,4 @@
+Contact: mailto:info@white-velvet.com
+Canonical: https://white-velvet.se/.well-known/security.txt
+Preferred-Languages: sv, en
+Expires: 2027-08-11T00:00:00.000Z

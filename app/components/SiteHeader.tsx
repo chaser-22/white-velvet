@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const navigation = [
   { href: "/tjanster", label: "Tjänster" },
@@ -16,12 +16,10 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
-  useEffect(() => setOpen(false), [pathname]);
-
   return (
     <header className="site-header">
       <div className="header-inner container">
-        <Link className="brand" href="/" aria-label="White Velvet, startsida">
+        <Link className="brand" href="/" aria-label="White Velvet, startsida" onClick={() => setOpen(false)}>
           <span className="brand-mark" aria-hidden="true">WV</span>
           <span className="brand-type">
             <strong>WHITE VELVET</strong>
@@ -47,11 +45,12 @@ export function SiteHeader() {
               key={item.href}
               className={pathname === item.href || pathname.startsWith(`${item.href}/`) ? "active" : ""}
               href={item.href}
+              onClick={() => setOpen(false)}
             >
               {item.label}
             </Link>
           ))}
-          <Link className="button button-small button-light nav-cta" href="/boka">
+          <Link className="button button-small button-light nav-cta" href="/boka" onClick={() => setOpen(false)}>
             Få offert
           </Link>
         </nav>

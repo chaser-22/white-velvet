@@ -6,8 +6,18 @@ import { SiteHeader } from "./components/SiteHeader";
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
-  const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "white-velvet.se";
-  const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https");
+  const requestedHost = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "white-velvet.se";
+  const normalizedHost = requestedHost.trim().toLowerCase();
+  const allowedHost =
+    normalizedHost === "white-velvet.se" ||
+    normalizedHost === "www.white-velvet.se" ||
+    normalizedHost === "localhost:3002" ||
+    normalizedHost.endsWith(".chatgpt.site");
+  const host = allowedHost && /^[a-z0-9.-]+(?::\d{1,5})?$/.test(normalizedHost)
+    ? normalizedHost
+    : "white-velvet.se";
+  const forwardedProtocol = requestHeaders.get("x-forwarded-proto");
+  const protocol = host.startsWith("localhost:") && forwardedProtocol !== "https" ? "http" : "https";
   const origin = `${protocol}://${host}`;
   const title = "White Velvet | Professionell textil- och golvvård i Västerås";
   const description = "Professionell mattvätt, möbeltvätt och golvvård i Västerås. Be om en personlig offert från White Velvet.";

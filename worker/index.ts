@@ -1,17 +1,9 @@
-/** Cloudflare Worker entry point for the vinext-starter template. */
-import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
+/** Cloudflare Worker entry point for the White Velvet site. */
 import handler from "vinext/server/app-router-entry";
+import { getSecurityHeaders } from "../security-headers";
 
 interface Env {
   ASSETS: Fetcher;
-  DB: D1Database;
-  IMAGES: {
-    input(stream: ReadableStream): {
-      transform(options: Record<string, unknown>): {
-        output(options: { format: string; quality: number }): Promise<{ response(): Response }>;
-      };
-    };
-  };
 }
 
 interface ExecutionContext {
@@ -19,28 +11,61 @@ interface ExecutionContext {
   passThroughOnException(): void;
 }
 
-// Image security config. SVG sources with .svg extension auto-skip the
-// optimization endpoint on the client side (served directly, no proxy).
-// To route SVGs through the optimizer (with security headers), set
-// dangerouslyAllowSVG: true in next.config.js and uncomment below:
-// const imageConfig: ImageConfig = { dangerouslyAllowSVG: true };
+const ALLOWED_METHODS = new Set(["GET", "HEAD"]);
+
+function createNonce(): string {
+  const bytes = new Uint8Array(18);
+  crypto.getRandomValues(bytes);
+  return btoa(String.fromCharCode(...bytes));
+}
+
+function secureResponse(response: Response, request: Request, nonce?: string): Response {
+  const requestUrl = new URL(request.url);
+  const development = requestUrl.hostname === "localhost" || requestUrl.hostname === "127.0.0.1";
+  const headers = new Headers(response.headers);
+
+  for (const [name, value] of Object.entries(getSecurityHeaders({ development, https: requestUrl.protocol === "https:", nonce }))) {
+    headers.set(name, value);
+  }
+
+  headers.delete("Server");
+  headers.delete("X-Powered-By");
+
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
 
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    const url = new URL(request.url);
-
-    if (url.pathname === "/_vinext/image") {
-      const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
-      return handleImageOptimization(request, {
-        fetchAsset: (path) => env.ASSETS.fetch(new Request(new URL(path, request.url))),
-        transformImage: async (body, { width, format, quality }) => {
-          const result = await env.IMAGES.input(body).transform(width > 0 ? { width } : {}).output({ format, quality });
-          return result.response();
-        },
-      }, allowedWidths);
+    if (!ALLOWED_METHODS.has(request.method)) {
+      return secureResponse(
+        new Response("Method Not Allowed", { status: 405, headers: { Allow: "GET, HEAD" } }),
+        request,
+      );
     }
 
-    return handler.fetch(request, env, ctx);
+    try {
+      const requestUrl = new URL(request.url);
+      const development = requestUrl.hostname === "localhost" || requestUrl.hostname === "127.0.0.1";
+      const nonce = development ? undefined : createNonce();
+      let securedRequest = request;
+
+      if (nonce) {
+        const requestHeaders = new Headers(request.headers);
+        requestHeaders.set("x-nonce", nonce);
+        requestHeaders.set("content-security-policy", getSecurityHeaders({ nonce, https: true })["Content-Security-Policy"]);
+        securedRequest = new Request(request, { headers: requestHeaders });
+      }
+
+      const response = await handler.fetch(securedRequest, env, ctx);
+      return secureResponse(response, request, nonce);
+    } catch (error) {
+      console.error("request_failed", error instanceof Error ? error.message : "unknown_error");
+      return secureResponse(new Response("Internal Server Error", { status: 500 }), request);
+    }
   },
 };
 
