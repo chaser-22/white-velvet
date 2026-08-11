@@ -17,9 +17,9 @@ The quote form is an explicitly labelled demonstration. It validates the user-fa
 
 ### Current trust boundaries
 
-1. A visitor's browser sends GET or HEAD requests to the Sites/Cloudflare edge.
-2. The edge worker passes allowed requests to the vinext application router.
-3. Static application assets are served from the same origin.
+1. A visitor's browser sends requests to either the Sites/Cloudflare edge or Vercel.
+2. Sites uses the defensive edge worker; Vercel uses the Nitro serverless adapter and its committed platform-header policy.
+3. Both runtimes pass allowed requests to the same vinext application router and serve static assets from the same origin.
 4. The local development server is bound to `127.0.0.1` and is not a public service.
 
 There is currently no browser-to-database, browser-to-email, upload, authentication, payment, or analytics boundary.
@@ -37,6 +37,7 @@ There is currently no browser-to-database, browser-to-email, upload, authenticat
 ## Implemented controls
 
 - A per-request cryptographic nonce and strict-dynamic Content Security Policy are used for production HTML.
+- Vercel applies a static restrictive CSP and the same frame, MIME, referrer, permissions, HSTS, and cross-origin policies through `vercel.json`; the Cloudflare worker retains the per-request nonce policy.
 - CSP restricts scripts, styles, images, connections, forms, frames, workers, embedded objects, and base URLs.
 - HSTS is returned for HTTPS application responses.
 - Clickjacking is blocked with CSP `frame-ancestors 'none'` and `X-Frame-Options: DENY`.
@@ -53,14 +54,14 @@ There is currently no browser-to-database, browser-to-email, upload, authenticat
 
 ## Dependency status
 
-The production dependency audit reports zero known vulnerabilities.
+The last production-only audit before adding the Nitro adapter reported zero known vulnerabilities. The adapter installation completed with the same three findings in the complete dependency tree described below. A fresh production-only registry audit is required before public launch because the post-adapter audit request was unavailable in the current execution environment.
 
 The complete development-tool audit currently reports three transitive findings:
 
 - One low-severity `@babel/core` source-map file-read advisory used through lint tooling.
 - Two high-severity `image-size` denial-of-service advisories reported through `vinext`.
 
-These packages are not production dependencies. The site accepts no uploads, uses no `next/image` component, rejects remote image-optimizer inputs, and has regression tests for that boundary. No patched `image-size` release is currently available in the installed dependency line. Update the toolchain when compatible patched releases become available and rerun the full suite.
+The site accepts no uploads, uses only unoptimized same-origin `next/image` output for the supplied logo, rejects remote image-optimizer inputs, and has regression tests for that boundary. No patched `image-size` release is currently available in the installed dependency line. Update the toolchain when compatible patched releases become available and rerun both audits.
 
 ## Requirements before enabling submissions or uploads
 

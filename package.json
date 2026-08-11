@@ -8,13 +8,16 @@
   "scripts": {
     "dev": "vinext dev",
     "build": "vinext build",
+    "build:vercel": "vite build --mode vercel",
     "start": "vinext start",
     "test": "npm run build && node --test tests/*.test.mjs",
-    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
+    "test:vercel": "npm run build:vercel && node --test tests/vercel-output.vercel.mjs",
+    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern .vercel",
     "typecheck": "tsc --noEmit",
-    "check": "npm run lint && npm run typecheck && npm test"
+    "check": "npm run lint && npm run typecheck && npm test && npm run test:vercel"
   },
   "dependencies": {
+    "nitro": "3.0.260610-beta",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },

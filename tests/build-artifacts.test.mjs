@@ -31,8 +31,20 @@ test("production output contains required Sites artifacts and no source maps", a
   assert.equal(relativeFiles.some((file) => file.endsWith(".map")), false);
 });
 
+test("declares a Nitro-backed Vercel deployment target", async () => {
+  const packageJson = JSON.parse(await readFile(path.join(projectRoot, "package.json"), "utf8"));
+  const vercelConfig = JSON.parse(await readFile(path.join(projectRoot, "vercel.json"), "utf8"));
+
+  assert.equal(packageJson.scripts["build:vercel"], "vite build --mode vercel");
+  assert.match(packageJson.dependencies.nitro, /^3\./);
+  assert.equal(vercelConfig.framework, "nitro");
+  assert.equal(vercelConfig.buildCommand, "npm run build:vercel");
+  assert.equal("outputDirectory" in vercelConfig, false);
+  assert.ok(vercelConfig.headers.some((entry) => entry.source === "/(.*)"));
+});
+
 test("tracked source contains no environment files or private-key material", async () => {
-  const ignoredDirectories = new Set([".git", ".next", ".vinext", ".wrangler", "dist", "node_modules", "work"]);
+  const ignoredDirectories = new Set([".git", ".next", ".output", ".vercel", ".vinext", ".wrangler", "dist", "node_modules", "work"]);
 
   async function walkSource(directory) {
     const entries = await readdir(directory, { withFileTypes: true });

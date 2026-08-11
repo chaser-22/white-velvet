@@ -8,14 +8,14 @@ Code-only status: **technical release candidate passes the available local gates
 
 The website now builds cleanly, installs reproducibly, passes lint and strict type checking, renders every expected route, has a branded 404, and passes the expanded security regression suite. The complete quote-demo interaction, query-string service selection, validation, browser history, mobile navigation, keyboard escape behavior, and responsive layouts were exercised in a real Chromium browser.
 
-The website is not ready for a truthful public launch because the customer-enquiry flow has no delivery backend, the privacy policy is an explicit draft, and public pages intentionally contain prices, photographs, reviews, company details, service areas, hours, and other placeholders. The current Sites deployment is also an older, private version; its application headers could not be inspected anonymously because the sign-in gate returns 401 before the application runs.
+The website is not ready for a truthful public launch because the customer-enquiry flow has no delivery backend, the privacy policy is an explicit draft, and public pages intentionally contain prices, photographs, reviews, company details, service areas, hours, and other placeholders. The Sites deployment remains private, so its application headers still require an authenticated verification pass.
 
-No deployment was performed during this audit.
+Post-audit updates have been committed and privately deployed while retaining the public-launch gate.
 
 ## 2. Application inventory
 
-- Runtime: React 19, vinext, Vite, Cloudflare Worker-compatible ESM
-- Hosting: OpenAI Sites project with custom/private access
+- Runtime: React 19, vinext, Vite, Cloudflare Worker-compatible ESM, and Vercel/Nitro Build Output API v3
+- Hosting: OpenAI Sites with custom/private access; Vercel-compatible output committed for the connected Git repository
 - HTML routes: `/`, `/tjanster`, four `/tjanster/:slug` pages, `/fore-efter`, `/priser`, `/om-oss`, `/faq`, `/boka`, `/kontakt`, `/integritet`
 - Metadata routes: `/robots.txt`, `/sitemap.xml`
 - Static security contact: `/.well-known/security.txt`
@@ -54,14 +54,15 @@ The discovery flow is complete. The enquiry-delivery flow is intentionally incom
 - Fixed skipped heading levels on service and results listing pages.
 - Strengthened focus visibility and corrected light-background text colors to meet the targeted contrast ratios.
 - Updated project and security documentation.
+- Added a conditional Nitro Vercel adapter, committed Vercel project configuration and security headers, and independent Vercel output/handler regression tests without changing the Sites build path.
 
 ## 4. Test evidence
 
 | Check | Environment | Result | Evidence |
 | --- | --- | --- | --- |
 | Clean lockfile install | Node/npm, clean `node_modules` | PASS | 458 packages installed from `package-lock.json` |
-| Combined release check | Local production build | PASS | lint, TypeScript, build, 10/10 Node tests |
-| Production dependency audit | npm registry | PASS | 0 known vulnerabilities |
+| Combined release check | Local dual-target production builds | PASS | lint, TypeScript, Sites build, 11/11 core tests, Vercel build, 2/2 adapter tests |
+| Production dependency audit | npm registry | NOT RUN after adapter addition | previous production-only audit was clean; rerun required before public launch |
 | Complete dependency audit | npm registry | CONDITIONAL | 1 low and 2 high development-tool advisories; mitigations below |
 | Secret/private-key scan | Tracked and untracked source surface | PASS | no environment files, private keys, AWS IDs, or OpenAI-style keys found |
 | Production source maps | `dist/` | PASS | no `.map` artifacts |
@@ -160,7 +161,6 @@ Production LCP, CLS, and INP must be measured after deploying the exact release 
 | RR-002 | P1 | Privacy policy is a visible draft | Open `/integritet` | Provide legally reviewed controller, purposes, legal basis, processors, retention, rights, and cookie information before collection |
 | RR-003 | P1 | Public pages contain launch placeholders | Prices, reviews, metrics, service areas, hours, organization number, team/story, galleries, and project details visibly say they will be added | Supply and approve the final business content or remove the unfinished sections |
 | RR-004 | P1 | Production photography is incomplete | The official supplied logo is integrated in the header, footer, and icon metadata, but placeholder panels remain throughout | Supply hero/team/service photos and approved before/after images with usage consent |
-| RR-005 | P1 | Current deployment is not the audited worktree | Sites version 2 points to commit `b58347285fca96de224490b9c9d11c43410f7eb3`; this audit has local changes after that commit | Commit the audited source, save a new Sites version, deploy privately, and rerun deployed checks |
 | RR-006 | P1 | Actual application headers on the deployed URL were not authenticated-verified | Anonymous request returns 401 from the sign-in gate with no application CSP/HSTS | Verify the exact private release through an authorized session before changing access |
 | RR-007 | P2 | No production Web Vitals evidence | Lighthouse/field measurements unavailable on the private current version | Measure mobile/desktop production and remediate any LCP ≤2.5 s, CLS ≤0.1, or INP ≤200 ms misses |
 | RR-008 | P2 | Complete build-tool audit is not zero | npm reports three development-only advisories | Monitor compatible patched releases; keep current runtime mitigations and tests |
@@ -168,7 +168,7 @@ Production LCP, CLS, and INP must be measured after deploying the exact release 
 | RR-010 | P3 | Firefox, Safari/WebKit, native 200% zoom, and dedicated screen-reader sessions were unavailable | Recorded as NOT RUN in the matrix | Complete human cross-browser and assistive-technology acceptance before public launch |
 
 P0 unresolved: **0**
-P1 unresolved: **6**
+P1 unresolved: **5**
 Public release gate result: **failed**
 
 ## 9. Required assets and decisions
@@ -190,7 +190,7 @@ Provide the following in one later handoff:
 
 ### Deployment
 
-1. Resolve RR-001 through RR-006 and replace/remove every visible placeholder.
+1. Resolve every remaining P1 blocker and replace/remove every visible placeholder.
 2. Run a new clean install, `npm run check`, production audit, and complete audit.
 3. Commit the exact tested state so the release has an immutable source revision.
 4. Save that commit as a new Sites version and deploy it privately first.
