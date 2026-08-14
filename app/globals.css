@@ -91,6 +91,9 @@ p { text-wrap: pretty; }
 .placeholder-sand > span { color: #765d36; }
 .image-placeholder > strong { max-width: 280px; font-family: var(--serif); font-size: 1.5rem; font-weight: 400; line-height: 1.2; }
 .image-placeholder > small { margin-top: 8px; opacity: .65; font-size: .66rem; letter-spacing: .08em; }
+.site-image { position: relative; overflow: hidden; background: var(--cream); isolation: isolate; }
+.site-image::after { content: ""; position: absolute; z-index: 1; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); }
+.site-image img { object-fit: cover; }
 
 .section-heading { max-width: 680px; }
 .section-heading.center { margin-inline: auto; text-align: center; }
@@ -102,9 +105,12 @@ p { text-wrap: pretty; }
 
 .section-services { background: var(--paper); }
 .service-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
-.service-card { min-height: 365px; display: flex; flex-direction: column; padding: 28px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); background: rgba(255,255,255,.25); transition: background .25s ease, transform .25s ease; }
+.service-card { min-height: 520px; display: flex; flex-direction: column; padding: 28px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); background: rgba(255,255,255,.25); transition: background .25s ease, transform .25s ease; }
 .service-card:hover { z-index: 2; background: white; transform: translateY(-7px); box-shadow: 0 25px 55px rgba(8,27,37,.09); }
-.service-card-top { display: flex; align-items: center; justify-content: space-between; padding-bottom: 80px; }
+.service-card-media { height: 185px; margin: -28px -28px 24px; }
+.service-card-media img { object-position: center 58%; transition: transform .45s ease; }
+.service-card:hover .service-card-media img { transform: scale(1.025); }
+.service-card-top { display: flex; align-items: center; justify-content: space-between; padding-bottom: 34px; }
 .service-card-top > span { font-family: var(--serif); font-size: 1.1rem; color: var(--gold-text); }
 .service-card-top small { max-width: 110px; color: var(--muted); font-size: .6rem; font-weight: 700; letter-spacing: .12em; text-align: right; text-transform: uppercase; }
 .service-card h2, .service-card h3 { margin-bottom: 16px; font-family: var(--serif); font-size: 2rem; font-weight: 400; }

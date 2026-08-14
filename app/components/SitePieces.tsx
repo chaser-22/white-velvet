@@ -1,5 +1,26 @@
+import Image from "next/image";
 import Link from "next/link";
 import { services } from "../site-data";
+
+export function SiteImage({
+  src,
+  alt,
+  className = "",
+  priority = false,
+  sizes = "(max-width: 768px) 100vw, 50vw",
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  priority?: boolean;
+  sizes?: string;
+}) {
+  return (
+    <div className={`site-image ${className}`}>
+      <Image src={src} alt={alt} fill sizes={sizes} priority={priority} unoptimized />
+    </div>
+  );
+}
 
 export function ImagePlaceholder({ label, tone = "navy", className = "" }: { label: string; tone?: "navy" | "sand" | "blue"; className?: string }) {
   return (
@@ -18,6 +39,12 @@ export function ServiceGrid({ limit, headingLevel = 3 }: { limit?: number; headi
     <div className="service-grid">
       {services.slice(0, limit ?? services.length).map((service) => (
         <article className="service-card" key={service.slug}>
+          <SiteImage
+            src={service.image}
+            alt={service.imageAlt}
+            className="service-card-media"
+            sizes="(max-width: 760px) 100vw, (max-width: 1100px) 50vw, 25vw"
+          />
           <div className="service-card-top">
             <span>{service.number}</span>
             <small>{service.kicker}</small>

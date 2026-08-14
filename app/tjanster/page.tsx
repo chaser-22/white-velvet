@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CtaBand, ImagePlaceholder, PageHero, SectionHeading, ServiceGrid } from "../components/SitePieces";
+import { CtaBand, PageHero, SectionHeading, ServiceGrid, SiteImage } from "../components/SitePieces";
 
 export const metadata: Metadata = {
   title: "Tjänster",
@@ -21,7 +21,11 @@ export default function ServicesPage() {
             <p className="large-copy">Vi börjar med att förstå ytan, smutsen och målet. Därefter föreslår vi en metod — utan att lova mer än materialet tillåter.</p>
             <ul className="check-list"><li>Bedömning före behandling</li><li>Tydlig förväntansbild</li><li>Anpassad metod och utrustning</li><li>Skötselråd efteråt</li></ul>
           </div>
-          <ImagePlaceholder label="Utrustning och materialbedömning" tone="navy" className="story-image" />
+          <SiteImage
+            src="/images/professional-cleaning-tools.webp"
+            alt="Professionella verktyg och materialprover för textilvård"
+            className="story-image"
+          />
         </div>
       </section>
       <CtaBand />

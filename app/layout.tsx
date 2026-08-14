@@ -21,7 +21,8 @@ export async function generateMetadata(): Promise<Metadata> {
     ? normalizedHost
     : "white-velvet.se";
   const forwardedProtocol = requestHeaders.get("x-forwarded-proto");
-  const protocol = host.startsWith("localhost:") && forwardedProtocol !== "https" ? "http" : "https";
+  const isLocalHost = host.startsWith("localhost:") || host.startsWith("127.0.0.1:");
+  const protocol = isLocalHost && forwardedProtocol !== "https" ? "http" : "https";
   const origin = `${protocol}://${host}`;
   const title = "White Velvet | Professionell textil- och golvvård i Västerås";
   const description = "Professionell mattvätt, möbeltvätt och golvvård i Västerås. Be om en personlig offert från White Velvet.";

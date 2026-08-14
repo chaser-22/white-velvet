@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BeforeAfterCard, CtaBand, ImagePlaceholder, SectionHeading, ServiceGrid } from "./components/SitePieces";
+import { BeforeAfterCard, CtaBand, SectionHeading, ServiceGrid, SiteImage } from "./components/SitePieces";
 import { faqs } from "./site-data";
 
 export default function HomePage() {
@@ -20,7 +20,13 @@ export default function HomePage() {
           </div>
           <div className="hero-visual">
             <div className="hero-frame">
-              <ImagePlaceholder label="Närbild på professionell möbeltvätt" tone="blue" className="hero-placeholder" />
+              <SiteImage
+                src="/images/upholstery-cleaning.webp"
+                alt="Professionell rengöring av en ljus tygsoffa"
+                className="hero-placeholder"
+                priority
+                sizes="(max-width: 900px) 100vw, 480px"
+              />
               <div className="hero-badge">
                 <span>01</span>
                 <p>Riktigt arbete.<br />Riktiga resultat.</p>
@@ -84,7 +90,11 @@ export default function HomePage() {
 
       <section className="section section-story">
         <div className="container story-grid">
-          <ImagePlaceholder label="White Velvet-teamet i arbete" tone="sand" className="story-image" />
+          <SiteImage
+            src="/images/professional-cleaning-tools.webp"
+            alt="Professionella textilvårdsverktyg förberedda för materialbedömning"
+            className="story-image"
+          />
           <div className="story-copy">
             <SectionHeading eyebrow="WHITE VELVET" title="Professionell känsla, personligt bemötande." />
             <p>
