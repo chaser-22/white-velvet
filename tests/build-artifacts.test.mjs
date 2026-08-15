@@ -41,6 +41,7 @@ test("declares a Nitro-backed Vercel deployment target", async () => {
   assert.equal(vercelConfig.buildCommand, "npm run build:vercel");
   assert.equal("outputDirectory" in vercelConfig, false);
   assert.ok(vercelConfig.headers.some((entry) => entry.source === "/(.*)"));
+  assert.match(JSON.stringify(vercelConfig), /frame-src https:\/\/www\.openstreetmap\.org/);
 });
 
 test("tracked source contains no environment files or private-key material", async () => {

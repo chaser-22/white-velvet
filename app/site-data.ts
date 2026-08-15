@@ -12,6 +12,17 @@ export type Service = {
   note: string;
 };
 
+export const businessLocation = {
+  address: "Ankargatan 27",
+  postalCity: "723 48 Västerås",
+  latitude: 59.5978565,
+  longitude: 16.5860643,
+  mapEmbedUrl:
+    "https://www.openstreetmap.org/export/embed.html?bbox=16.5750643%2C59.5923565%2C16.5970643%2C59.6033565&layer=mapnik&marker=59.5978565%2C16.5860643",
+  directionsUrl:
+    "https://www.google.com/maps/dir/?api=1&destination=Ankargatan%2027%2C%20723%2048%20V%C3%A4ster%C3%A5s",
+} as const;
+
 export const services: Service[] = [
   {
     slug: "mattvatt",

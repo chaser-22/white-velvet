@@ -15,7 +15,7 @@ export function buildContentSecurityPolicy(development = false, nonce?: string):
     "base-uri 'self'",
     "object-src 'none'",
     "frame-ancestors 'none'",
-    "frame-src 'none'",
+    "frame-src https://www.openstreetmap.org",
     "form-action 'self'",
     `script-src ${scriptSources}`,
     "script-src-attr 'none'",

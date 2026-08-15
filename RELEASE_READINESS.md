@@ -1,6 +1,6 @@
 # White Velvet release-readiness report
 
-Audit date: 2026-08-11 (Europe/Stockholm)
+Audit date: 2026-08-15 (Europe/Stockholm)
 Public-release decision: **NO-GO**
 Code-only status: **technical release candidate passes the available local gates**
 
@@ -24,7 +24,7 @@ Post-audit updates have been committed and privately deployed while retaining th
 - Authentication inside the application: none
 - Cookies/local storage/session storage: none used by the application
 - Analytics/advertising: none
-- Third-party browser scripts, fonts, maps, or embeds: none
+- Third-party browser surface: one opt-in, credentialless and sandboxed OpenStreetMap frame for the verified business address
 - Uploads: none
 - Form: three-step, client-only demonstration; POST is rejected at the edge
 
@@ -55,13 +55,15 @@ The discovery flow is complete. The enquiry-delivery flow is intentionally incom
 - Strengthened focus visibility and corrected light-background text colors to meet the targeted contrast ratios.
 - Updated project and security documentation.
 - Added a conditional Nitro Vercel adapter, committed Vercel project configuration and security headers, and independent Vercel output/handler regression tests without changing the Sites build path.
+- Replaced the map placeholder with an opt-in OpenStreetMap view centered on the verified Ankargatan 27 building, plus an exact external directions link.
+- Added generated editorial service photography as optimized local WebP assets without representing it as customer evidence or real staff.
 
 ## 4. Test evidence
 
 | Check | Environment | Result | Evidence |
 | --- | --- | --- | --- |
 | Clean lockfile install | Node/npm, clean `node_modules` | PASS | 458 packages installed from `package-lock.json` |
-| Combined release check | Local dual-target production builds | PASS | lint, TypeScript, Sites build, 11/11 core tests, Vercel build, 2/2 adapter tests |
+| Combined release check | Local dual-target production builds | PASS | lint, TypeScript, Sites build, 12/12 core tests, Vercel build, 2/2 adapter tests |
 | Production dependency audit | npm registry | NOT RUN after adapter addition | previous production-only audit was clean; rerun required before public launch |
 | Complete dependency audit | npm registry | CONDITIONAL | 1 low and 2 high development-tool advisories; mitigations below |
 | Secret/private-key scan | Tracked and untracked source surface | PASS | no environment files, private keys, AWS IDs, or OpenAI-style keys found |
@@ -72,9 +74,10 @@ The discovery flow is complete. The enquiry-delivery flow is intentionally incom
 | Security headers | Built edge worker | PASS | CSP, nonce, HSTS, frame, MIME, referrer, permissions, COOP/COEP/CORP checks passed |
 | Host-header safety | Built edge worker | PASS | untrusted hosts, including arbitrary `chatgpt.site` hosts, were not reflected |
 | Image parser boundary | Built edge worker | PASS | same-origin redirect only; external, protocol-relative, and data URLs rejected |
-| Responsive matrix | In-app Chromium | PASS | 88/88 route/viewport combinations |
+| Responsive matrix | In-app Chromium | PASS | previous 88/88 full matrix plus 48/48 post-map regression checks |
 | Browser runtime | Fresh Chromium tab | PASS | no console errors or warnings across route sweep |
 | Quote demo flow | Chromium, mobile and desktop | PASS | preselection, empty validation, data preservation, consent, success, restart |
+| Location map | Chromium, mobile and desktop | PASS | verified address/coordinates, opt-in load, attribution, hide control, directions URL, no overflow |
 | Mobile navigation/history | Chromium at 320 px | PASS | hidden links skipped, Escape closes/restores focus, back/forward paths correct |
 | Authenticated deployed app headers | Current Sites URL | NOT RUN | sign-in gate returned 401 before the application; requires authenticated post-deploy check |
 | Lighthouse/Core Web Vitals | Production deployment | NOT RUN | no authenticated production measurement surface was available |
@@ -149,7 +152,7 @@ Representative evidence:
 - Built client output: approximately 2.5 MiB total across 30 files.
 - The social preview PNG is approximately 2.08 MiB and is not loaded by normal page navigation.
 - The two largest JavaScript chunks are approximately 186 KiB each before transfer compression; the site CSS is approximately 32 KiB.
-- There are no third-party fonts, scripts, embeds, or page photographs in the current build.
+- There are no third-party fonts or parent-page scripts. Five optimized local service photographs are used, and the OpenStreetMap frame loads only after visitor action.
 
 Production LCP, CLS, and INP must be measured after deploying the exact release candidate behind an authenticated/private preview and again after public access/CDN configuration is final.
 
@@ -160,7 +163,7 @@ Production LCP, CLS, and INP must be measured after deploying the exact release 
 | RR-001 | P1 | The quote form sends nothing | Complete `/boka`; success explicitly says no data was sent | Select a provider and implement the server-side controls in `SECURITY.md`, or replace the form with truthful phone/email-only contact |
 | RR-002 | P1 | Privacy policy is a visible draft | Open `/integritet` | Provide legally reviewed controller, purposes, legal basis, processors, retention, rights, and cookie information before collection |
 | RR-003 | P1 | Public pages contain launch placeholders | Prices, reviews, metrics, service areas, hours, organization number, team/story, galleries, and project details visibly say they will be added | Supply and approve the final business content or remove the unfinished sections |
-| RR-004 | P1 | Production photography is incomplete | The official supplied logo is integrated in the header, footer, and icon metadata, but placeholder panels remain throughout | Supply hero/team/service photos and approved before/after images with usage consent |
+| RR-004 | P1 | Authentic proof photography is incomplete | The official logo and generated editorial service images are integrated, but team and customer before/after panels still require real approved photos | Supply team photos and approved before/after images with usage consent |
 | RR-006 | P1 | Actual application headers on the deployed URL were not authenticated-verified | Anonymous request returns 401 from the sign-in gate with no application CSP/HSTS | Verify the exact private release through an authorized session before changing access |
 | RR-007 | P2 | No production Web Vitals evidence | Lighthouse/field measurements unavailable on the private current version | Measure mobile/desktop production and remediate any LCP ≤2.5 s, CLS ≤0.1, or INP ≤200 ms misses |
 | RR-008 | P2 | Complete build-tool audit is not zero | npm reports three development-only advisories | Monitor compatible patched releases; keep current runtime mitigations and tests |
@@ -175,16 +178,15 @@ Public release gate result: **failed**
 
 Provide the following in one later handoff:
 
-1. Approved hero, team, service, and before/after photography with usage consent.
-2. Hero, team, service, equipment, and before/after photographs plus permission to publish them.
-3. Organization number, confirmed phone/email/address, opening/telephone hours, response-time wording, and service areas.
-4. Final service list, including whether boat/motorhome cleaning is offered.
-5. Approved prices, minimum charges, travel charges, inclusions, VAT/RUT wording, and quote rules.
-6. Verified reviews, customer names/initials, source links, ratings, and consent.
-7. Company story, team names, experience, verified project/years metrics, and any certifications or environmental claims.
-8. Final privacy/legal content and the person responsible for data requests.
-9. Quote-delivery choice: email service, CRM, database, or phone/email-only; expected notifications and retention period.
-10. Desired launch access: private acceptance, workspace-only, custom allowlist, or public; and the final custom-domain/DNS plan.
+1. Approved team and before/after photography with usage consent.
+2. Organization number, confirmed opening/telephone hours, response-time wording, and service areas.
+3. Final service list, including whether boat/motorhome cleaning is offered.
+4. Approved prices, minimum charges, travel charges, inclusions, VAT/RUT wording, and quote rules.
+5. Verified reviews, customer names/initials, source links, ratings, and consent.
+6. Company story, team names, experience, verified project/years metrics, and any certifications or environmental claims.
+7. Final privacy/legal content, including the opt-in map provider, and the person responsible for data requests.
+8. Quote-delivery choice: email service, CRM, database, or phone/email-only; expected notifications and retention period.
+9. Desired launch access: private acceptance, workspace-only, custom allowlist, or public; and the final custom-domain/DNS plan.
 
 ## 10. Deployment and rollback procedure
 

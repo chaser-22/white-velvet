@@ -2,7 +2,7 @@
 
 ## Scope and security objective
 
-This repository contains a public marketing website. It is designed to minimize its attack surface rather than claim that it is unhackable. The current application has no user accounts, database, cookies, analytics, third-party browser scripts, file uploads, client secrets, or active form-submission endpoint.
+This repository contains a public marketing website. It is designed to minimize its attack surface rather than claim that it is unhackable. The current application has no user accounts, database, first-party cookies, analytics, file uploads, client secrets, or active form-submission endpoint. The only third-party browser surface is an opt-in OpenStreetMap frame for the verified business location.
 
 The quote form is an explicitly labelled demonstration. It validates the user-facing flow locally but does not transmit or store personal information.
 
@@ -21,6 +21,7 @@ The quote form is an explicitly labelled demonstration. It validates the user-fa
 2. Sites uses the defensive edge worker; Vercel uses the Nitro serverless adapter and its committed platform-header policy.
 3. Both runtimes pass allowed requests to the same vinext application router and serve static assets from the same origin.
 4. The local development server is bound to `127.0.0.1` and is not a public service.
+5. OpenStreetMap is contacted only after a visitor selects **Visa interaktiv karta**. The frame is credentialless, sandboxed, and restricted to the single allowlisted origin.
 
 There is currently no browser-to-database, browser-to-email, upload, authentication, payment, or analytics boundary.
 
@@ -33,12 +34,14 @@ There is currently no browser-to-database, browser-to-email, upload, authenticat
 - Unsupported state-changing methods
 - Dependency or image-parser denial of service
 - Misleading collection of personal information before a real backend and privacy policy exist
+- Unnecessary third-party map requests or an over-broad framing policy
 
 ## Implemented controls
 
 - A per-request cryptographic nonce and strict-dynamic Content Security Policy are used for production HTML.
 - Vercel applies a static restrictive CSP and the same frame, MIME, referrer, permissions, HSTS, and cross-origin policies through `vercel.json`; the Cloudflare worker retains the per-request nonce policy.
 - CSP restricts scripts, styles, images, connections, forms, frames, workers, embedded objects, and base URLs.
+- CSP permits frames only from `https://www.openstreetmap.org`. The map frame is opt-in, credentialless, sandboxed, and can be removed from the page again by the visitor.
 - HSTS is returned for HTTPS application responses.
 - Clickjacking is blocked with CSP `frame-ancestors 'none'` and `X-Frame-Options: DENY`.
 - MIME sniffing, referrer leakage, cross-origin opener/resource behavior, and legacy XSS filtering are explicitly controlled.
@@ -76,6 +79,7 @@ Do not convert the demo into a live endpoint until all of the following are impl
 7. Redact personal information from logs and define retention, access, export, and deletion procedures.
 8. Send success only after the authoritative backend accepts the request; provide safe failure and retry states.
 9. Review and publish the final privacy notice before collecting information.
+   The notice should also disclose the on-demand OpenStreetMap request and link to its privacy information.
 10. Add endpoint integration tests, monitoring, and an operational owner.
 
 If uploads are later enabled, use a private bucket, randomized object names, size/pixel limits, MIME plus magic-byte checks, malware scanning, image re-encoding, access controls, and retention deletion. Do not request direct camera permission unless a separately reviewed feature genuinely requires it.

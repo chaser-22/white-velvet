@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LocationMap } from "./components/LocationMap";
 import { BeforeAfterCard, CtaBand, SectionHeading, ServiceGrid, SiteImage } from "./components/SitePieces";
 import { faqs } from "./site-data";
 
@@ -128,13 +129,10 @@ export default function HomePage() {
       <section className="section section-area">
         <div className="container area-grid">
           <div>
-            <SectionHeading eyebrow="NÄRA DIG" title="Med Västerås som utgångspunkt." copy="White Velvet utgår från Västerås. Den slutliga listan över serviceområden och eventuell framkörning läggs in före lansering." />
-            <div className="area-tags"><span>Västerås</span><span>[Ort läggs till]</span><span>[Ort läggs till]</span></div>
+            <SectionHeading eyebrow="NÄRA DIG" title="Med Västerås som utgångspunkt." copy="White Velvet finns på Ankargatan 27 i Västerås. Kontakta oss för att bekräfta tillgänglighet och eventuell framkörning för ditt område." />
+            <div className="area-tags"><span>Västerås</span><span>Ankargatan 27</span><span>723 48</span></div>
           </div>
-          <div className="map-placeholder" role="img" aria-label="Kartplatshållare för serviceområde">
-            <span className="map-pin">WV</span>
-            <p>KARTA & SERVICEOMRÅDE</p>
-          </div>
+          <LocationMap />
         </div>
       </section>
 

@@ -26,7 +26,8 @@ npm test
 ## Current architecture
 
 - Public content routes under `app/`
-- No accounts, cookies, analytics, database, uploads, or third-party browser scripts
+- No accounts, cookies, analytics, database, uploads, or third-party scripts in the parent page
+- Opt-in, credentialless OpenStreetMap frame for the verified business location; it loads only after the visitor chooses to show it
 - Edge worker in `worker/index.ts`
 - Nitro adapter selected automatically for Vercel builds
 - Shared defensive response policy in `security-headers.ts`

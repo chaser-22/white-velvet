@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import "./globals.css";
 import { SiteHeader } from "./components/SiteHeader";
+import { businessLocation } from "./site-data";
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
@@ -82,7 +83,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               <strong>Kontakt</strong>
               <a href="tel:+46739140145">073-914 01 45</a>
               <a href="mailto:info@white-velvet.com">info@white-velvet.com</a>
-              <span>Ankargatan 27, Västerås</span>
+              <a href={businessLocation.directionsUrl} target="_blank" rel="noopener noreferrer">{businessLocation.address}, Västerås</a>
               <span>Öppettider: [läggs till]</span>
             </div>
             <div className="footer-column">

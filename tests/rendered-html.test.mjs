@@ -50,6 +50,7 @@ test("renders the White Velvet site with defensive browser headers", async () =>
   assert.match(response.headers.get("permissions-policy") ?? "", /microphone=\(\)/);
   assert.match(response.headers.get("permissions-policy") ?? "", /geolocation=\(\)/);
   assert.match(response.headers.get("content-security-policy") ?? "", /frame-ancestors 'none'/);
+  assert.match(response.headers.get("content-security-policy") ?? "", /frame-src https:\/\/www\.openstreetmap\.org/);
   assert.equal(response.headers.get("x-powered-by"), null);
   assert.equal(response.headers.get("server"), null);
 
@@ -58,6 +59,17 @@ test("renders the White Velvet site with defensive browser headers", async () =>
   assert.match(html, /WHITE VELVET/);
   assert.match(html, /Omsorg som/);
   assert.doesNotMatch(html, /codex-preview|SkeletonPreview|react-loading-skeleton/i);
+});
+
+test("uses the verified White Velvet address for an opt-in map", async () => {
+  const response = await render();
+  const html = await response.text();
+  assert.match(html, /Ankargatan 27/);
+  assert.match(html, /723 48 Västerås/);
+  assert.match(html, /Visa interaktiv karta/);
+  assert.match(html, /59\.5978565/);
+  assert.match(html, /16\.5860643/);
+  assert.match(html, /maps\/dir\/\?api=1&amp;destination=Ankargatan%2027/);
 });
 
 test("renders every public HTML route and a branded 404", async () => {
