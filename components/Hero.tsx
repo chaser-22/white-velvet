@@ -2,29 +2,34 @@ import { ArrowDown, ArrowUpRight } from "lucide-react";
 
 export default function Hero() {
   return (
-    <section className="lab-hero lab-stage" id="top" data-lab-stage="0">
-      <div className="lab-hero-copy">
-        <p className="eyebrow">WHITE VELVET · MATERIAL LAB</p>
-        <h1>Vi rengör<br />material.<br /><em>Inte bara ytor.</em></h1>
+    <section className="purity-hero purity-stage" id="top" data-purity="0.08">
+      <div className="purity-hero-copy">
+        <p className="eyebrow">WHITE VELVET / PURITY MATRIX</p>
+        <h1>Rent är när<br />allt faller<br /><em>på plats.</em></h1>
         <p className="hero-lead">
-          Mattor, möbler, golv och interiörer behandlas utifrån hur materialet
-          faktiskt är uppbyggt — så att det blir rent utan att förlora sin karaktär.
+          Professionell rengöring i Västerås för mattor, möbler, golv och interiörer.
+          Vi reducerar det som stör materialet — smuts, matthet, fläckar och visuellt brus.
         </p>
         <div className="hero-actions">
-          <a className="button button-dark" href="#tjanster">Öppna materialarkivet <ArrowDown size={16} /></a>
-          <a className="text-link" href="#boka">Boka rengöring <ArrowUpRight size={16} /></a>
+          <a className="button button-ivory" href="#tjanster">
+            Följ transformationen <ArrowDown size={16} />
+          </a>
+          <a className="text-link text-link-light" href="#boka">
+            Boka rengöring <ArrowUpRight size={16} />
+          </a>
         </div>
       </div>
 
-      <div className="lab-hero-meta" aria-label="Materialinformation">
-        <div><span>SPECIMEN</span><strong>WV / 001</strong></div>
-        <div><span>STATUS</span><strong>UNTREATED → RESTORED</strong></div>
-        <div><span>LOCATION</span><strong>VÄSTERÅS · SE</strong></div>
+      <div className="hero-system">
+        <div><span>STATE</span><strong>UNRESOLVED</strong></div>
+        <div><span>FIELD</span><strong>01 / VÄSTERÅS</strong></div>
+        <div><span>PROCESS</span><strong>DIRTY → PURE</strong></div>
       </div>
 
-      <div className="lab-scroll-note">
-        <span>Scrolla för att behandla provet</span>
-        <span>↓</span>
+      <div className="hero-axis">
+        <span>DENSITY</span>
+        <i />
+        <span>CLARITY</span>
       </div>
     </section>
   );

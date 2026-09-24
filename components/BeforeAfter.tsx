@@ -9,14 +9,14 @@ const comparisons = [
 ];
 
 function Compare({ item, index }: { item: (typeof comparisons)[number]; index: number }) {
-  const [value, setValue] = useState(52);
+  const [value, setValue] = useState(50);
 
   return (
-    <article className="proof-case">
-      <div className="proof-meta">
+    <article className="purity-proof">
+      <div className="proof-label">
         <span>CASE 0{index + 1}</span>
         <h3>{item.title}</h3>
-        <p>Verkligt kundarbete · White Velvet</p>
+        <p>Verkligt kundarbete</p>
       </div>
       <div className="compare-stage">
         <Image src={item.before} alt={`${item.title} före rengöring`} fill sizes="100vw" />
@@ -41,11 +41,14 @@ function Compare({ item, index }: { item: (typeof comparisons)[number]; index: n
 
 export default function BeforeAfter() {
   return (
-    <section className="results lab-stage" id="resultat" data-lab-stage="5">
+    <section className="results purity-stage" id="resultat" data-purity="0.86">
       <div className="proof-heading">
-        <p className="eyebrow">FIELD PROOF / RIKTIGA ARBETEN</p>
-        <h2>Laboratoriet är idén.<br />Det här är beviset.</h2>
-        <p>Dra över bilderna för att jämföra verkliga jobb från White Velvet.</p>
+        <p className="eyebrow">VERKLIGT RESULTAT / 86% PURE</p>
+        <h2>Abstraktionen slutar här.</h2>
+        <p>
+          Resten av upplevelsen berättar om ordning och renhet. Här visar vi vad
+          White Velvet faktiskt har gjort.
+        </p>
       </div>
       <div className="proof-stack">
         {comparisons.map((item, index) => <Compare key={item.title} item={item} index={index} />)}

@@ -4,7 +4,7 @@ import Reveal from "./Reveal";
 
 export default function FAQ() {
   return (
-    <section className="faq lab-stage" id="faq" data-lab-stage="9">
+    <section className="faq purity-stage" id="faq" data-purity="1">
       <Reveal className="section-heading split-heading">
         <div><p className="eyebrow">VANLIGA FRÅGOR</p><h2>Innan vi kommer.</h2></div>
         <p>Saknar du något? Ring eller skicka ett mejl — vi hjälper gärna till att bedöma vad som passar din yta.</p>

@@ -3,69 +3,69 @@ import { services } from "@/lib/content";
 
 const chapters = [
   {
-    code: "MATERIAL 01 / TEXTILE PILE",
-    statement: "Det rena börjar mellan fibrerna.",
-    detail: "Smuts och damm sitter inte bara ovanpå mattan. Därför arbetar vi med konstruktionen, luggen och materialets tolerans innan vi väljer behandling.",
-    tags: ["PILE RECOVERY", "DEEP CLEAN", "FIBRE CARE"],
+    purity: "0.28",
+    code: "01 / TEXTILE",
+    title: "Lyft det som sitter mellan fibrerna.",
+    note: "DENSITY ↓ / PILE ↑",
+    body: "Mattvätt handlar om mer än ytan. Vi arbetar med materialets konstruktion, lugg och skick för att få bort smuts utan att platta till känslan.",
   },
   {
-    code: "MATERIAL 02 / UPHOLSTERY WEAVE",
-    statement: "Fläcken ska bort. Väven ska stanna.",
-    detail: "Möbeltextil kräver kontroll. Behandlingen anpassas efter väv, stoppning, färgäkthet och fläcktyp för att återställa helheten utan att överbehandla.",
-    tags: ["STAIN LIFT", "WEAVE SAFE", "CONTROLLED MOISTURE"],
+    purity: "0.46",
+    code: "02 / UPHOLSTERY",
+    title: "Ta bort fläcken. Behåll materialet.",
+    note: "STAIN ↓ / STRUCTURE =",
+    body: "Möbeltextil kräver kontroll. Vi anpassar behandling efter väv, stoppning, färgäkthet och fläcktyp för ett renare uttryck utan onödig belastning.",
   },
   {
-    code: "MATERIAL 03 / HARD SURFACE",
-    statement: "Lyster är en materialegenskap.",
-    detail: "Vid golvpolering handlar resultatet om hur ytan möter ljuset. Vi reducerar matthet och ojämnhet för ett jämnare, mer välskött uttryck.",
-    tags: ["ROUGHNESS ↓", "REFLECTION ↑", "SURFACE CONTROL"],
+    purity: "0.64",
+    code: "03 / HARD SURFACE",
+    title: "När ytan blir lugn blir ljuset skarpare.",
+    note: "ROUGHNESS ↓ / REFLECTION ↑",
+    body: "Vid golvpolering reduceras matthet och ojämnhet. Resultatet är inte överglans — det är en jämnare, mer kontrollerad yta.",
   },
   {
-    code: "MATERIAL 04 / INTERIOR SKIN",
-    statement: "Kurvor, sömmar och små ytor kräver mer precision.",
-    detail: "Båt- och husbilsinteriörer kombinerar flera material på liten yta. Vi rengör dynor, säten och interiöra detaljer med samma materialfokus.",
-    tags: ["INTERIOR CARE", "CURVED SURFACE", "DETAIL WORK"],
+    purity: "0.78",
+    code: "04 / INTERIOR",
+    title: "Precision märks mest där utrymmet är litet.",
+    note: "NOISE ↓ / DETAIL ↑",
+    body: "Båt- och husbilsinteriörer kombinerar flera material på liten yta. Dynor, säten och detaljer behandlas med samma materialfokus.",
   },
 ];
 
 export default function Services() {
   return (
-    <section className="lab-services" id="tjanster">
-      <div className="lab-index">
-        <p className="eyebrow">MATERIALARKIV / 01–04</p>
-        <p>Ett enda prov förändras genom fyra materialfamiljer. Scrollen styr behandlingen.</p>
+    <section className="purity-services" id="tjanster">
+      <div className="services-manifesto purity-stage" data-purity="0.18">
+        <p className="eyebrow">FYRA TJÄNSTER / EN RIKTNING</p>
+        <h2>Mindre brus.<br />Mer material.</h2>
+        <p>
+          Samma fält följer hela sidan. Varje tjänst tar bort en annan typ av oordning
+          tills scenen och gränssnittet når sitt renaste tillstånd.
+        </p>
       </div>
 
       {services.slice(0, 4).map((service, index) => {
         const chapter = chapters[index];
         return (
           <article
-            className={`lab-chapter lab-stage lab-chapter-${index + 1}`}
-            data-lab-stage={index + 1}
+            className="purity-chapter purity-stage"
+            data-purity={chapter.purity}
             key={service.id}
           >
-            <div className="lab-chapter-copy">
-              <div className="chapter-topline">
-                <span>0{index + 1}</span>
-                <span>{chapter.code}</span>
-              </div>
+            <div className="chapter-index">{chapter.code}</div>
+            <div className="chapter-copy">
               <p className="eyebrow">{service.eyebrow}</p>
-              <h2>{chapter.statement}</h2>
-              <p className="chapter-body">{chapter.detail}</p>
-              <div className="material-tags">
-                {chapter.tags.map((tag) => <span key={tag}>{tag}</span>)}
-              </div>
-              <a className="chapter-cta" href="#boka">
+              <h3>{chapter.title}</h3>
+              <p className="chapter-body">{chapter.body}</p>
+              <a href="#boka">
                 Boka {service.title.toLowerCase()} <ArrowUpRight size={15} />
               </a>
             </div>
-
-            <aside className="lab-readout" aria-hidden="true">
-              <span>WHITE VELVET</span>
-              <span>SPECIMEN 0{index + 1}</span>
-              <span>TREATMENT PROGRESS</span>
-              <div className="readout-line" />
-            </aside>
+            <div className="chapter-state">
+              <span>{chapter.note}</span>
+              <div className="state-rule" />
+              <strong>{service.title}</strong>
+            </div>
           </article>
         );
       })}

@@ -1,17 +1,17 @@
 export default function About() {
   return (
-    <section className="about lab-stage" data-lab-stage="7">
-      <div className="about-code">WV / MATERIAL CARE / VÄSTERÅS</div>
-      <h2>Precision känns<br />i materialet.</h2>
+    <section className="about purity-stage" data-purity="0.97">
+      <div className="about-kicker">WHITE VELVET / 97% PURE</div>
+      <h2>När allt onödigt<br />är borta återstår<br />materialet.</h2>
       <p className="about-lead">
         White Velvet kombinerar modern utrustning med ett materialmedvetet arbetssätt.
-        Målet är ett tydligt resultat utan onödigt hård behandling.
+        Resultatet ska vara tydligt, lugnt och välskött — inte överbehandlat.
       </p>
       <div className="about-notes">
-        <p><span>01</span> Materialanpassade metoder</p>
-        <p><span>02</span> Miljömedvetna produkter</p>
-        <p><span>03</span> Flexibla tider</p>
-        <p><span>04</span> Omsorg om detaljer</p>
+        <p><span>01</span> Materialanpassat</p>
+        <p><span>02</span> Miljömedvetet</p>
+        <p><span>03</span> Flexibelt</p>
+        <p><span>04</span> Detaljfokuserat</p>
       </div>
     </section>
   );
