@@ -346,3 +346,221 @@ h1, h2, .footer-brand h2 { font-family: var(--display); font-weight: 400; letter
   .three-layer { display: none; }
   .three-fallback { display: block; }
 }
+
+
+/* Experience polish — flow, clarity and tactile feedback */
+#top, #tjanster, #resultat, #om, #boka, #faq, #kontakt {
+  scroll-margin-top: 104px;
+}
+
+.site-header {
+  border-color: rgba(255,255,255,.52);
+  background: rgba(248,245,238,.70);
+  box-shadow: 0 10px 34px rgba(18,24,26,.045);
+}
+.site-header.is-scrolled {
+  background: rgba(248,245,238,.94);
+  border-color: rgba(255,255,255,.72);
+  box-shadow: 0 18px 52px rgba(18,24,26,.12);
+}
+.desktop-nav a,
+.phone-link {
+  transition: opacity .24s ease, transform .24s ease;
+}
+.desktop-nav a:hover,
+.phone-link:hover {
+  transform: translateY(-1px);
+}
+
+.hero-copy {
+  position: relative;
+  isolation: isolate;
+}
+.hero-copy::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -8% -12% -10% -8%;
+  border-radius: 46%;
+  background: radial-gradient(ellipse at 38% 50%, rgba(248,245,238,.92) 0%, rgba(248,245,238,.70) 42%, rgba(248,245,238,0) 76%);
+  filter: blur(14px);
+  pointer-events: none;
+}
+.hero h1 {
+  text-shadow: 0 2px 28px rgba(251,249,243,.42);
+}
+.hero-lead {
+  color: rgba(16,20,23,.82);
+}
+.hero-orbit {
+  perspective: 900px;
+}
+.orbit-card {
+  animation: velvetFloatA 7.8s ease-in-out infinite;
+  box-shadow: 0 18px 48px rgba(16,22,24,.08);
+}
+.orbit-card-right {
+  animation: velvetFloatB 9.2s ease-in-out infinite;
+}
+@keyframes velvetFloatA {
+  0%,100% { transform: translate3d(0,0,0) rotate(-1.2deg); }
+  50% { transform: translate3d(0,-12px,0) rotate(1.4deg); }
+}
+@keyframes velvetFloatB {
+  0%,100% { transform: translate3d(0,0,0) rotate(1deg); }
+  50% { transform: translate3d(8px,-9px,0) rotate(-1.3deg); }
+}
+
+.trust-strip {
+  background: rgba(248,245,238,.58);
+  backdrop-filter: blur(14px) saturate(112%);
+}
+.trust-strip span {
+  color: rgba(16,20,23,.78);
+  transition: background .25s ease, color .25s ease;
+}
+.trust-strip span:hover {
+  background: rgba(255,255,255,.30);
+  color: var(--ink);
+}
+
+.split-heading > p,
+.centered-heading p:last-child,
+.about-top > p:last-child {
+  color: rgba(16,20,23,.78);
+}
+.section-heading h2,
+.about-top h2 {
+  text-shadow: 0 1px 24px rgba(251,249,243,.36);
+}
+
+.service-card,
+.compare-card {
+  background: rgba(249,247,241,.91);
+  border-color: rgba(255,255,255,.72);
+  box-shadow: 0 18px 54px rgba(17,23,25,.055);
+  transition: box-shadow .42s cubic-bezier(.22,1,.36,1), border-color .42s ease;
+}
+.service-card:hover,
+.compare-card:hover {
+  border-color: rgba(255,255,255,.96);
+  box-shadow: 0 28px 76px rgba(17,23,25,.10);
+}
+.service-media img {
+  transition: transform 1.15s cubic-bezier(.22,1,.36,1), filter .8s ease;
+}
+.service-card:hover .service-media img {
+  transform: scale(1.045);
+  filter: saturate(1.02) contrast(1.015);
+}
+.service-copy > p,
+.service-copy details p {
+  color: rgba(16,20,23,.76);
+}
+.service-copy summary {
+  transition: color .22s ease;
+}
+.service-copy summary:hover {
+  color: rgba(16,20,23,.68);
+}
+.service-copy summary svg {
+  transition: transform .35s cubic-bezier(.22,1,.36,1);
+}
+.service-copy details[open] summary svg {
+  transform: rotate(45deg);
+}
+
+.compare-line span {
+  box-shadow: 0 8px 24px rgba(8,12,13,.14);
+  transition: transform .22s ease, background .22s ease;
+}
+.compare-stage:hover .compare-line span {
+  transform: translate(-50%,-50%) scale(1.07);
+  background: rgba(255,255,255,.28);
+}
+
+.process-panel,
+.booking-shell {
+  background: rgba(12,16,19,.965);
+  backdrop-filter: blur(15px) saturate(96%);
+}
+.process-intro > p:last-child,
+.step-row p,
+.booking-heading > p:last-child,
+.step-note {
+  color: rgba(255,255,255,.68);
+}
+.booking-card {
+  background: rgba(255,255,255,.068);
+  border-color: rgba(255,255,255,.15);
+}
+.choice {
+  transition: background .28s ease, border-color .28s ease, transform .28s cubic-bezier(.22,1,.36,1);
+}
+.choice:hover {
+  transform: translateY(-2px);
+}
+.booking-step input:not([type="checkbox"]),
+.booking-step textarea,
+.booking-step select {
+  background: rgba(255,255,255,.07);
+}
+.booking-step input:focus,
+.booking-step textarea:focus,
+.booking-step select:focus {
+  background: rgba(255,255,255,.115);
+  box-shadow: 0 0 0 3px rgba(255,255,255,.045);
+}
+
+.value-card {
+  transition: background .30s ease;
+}
+.value-card:hover {
+  background: rgba(255,255,255,.16);
+}
+.value-card p,
+.faq-item > p {
+  color: rgba(16,20,23,.74);
+}
+.faq-item summary {
+  transition: padding-left .28s cubic-bezier(.22,1,.36,1), background .28s ease;
+}
+.faq-item summary:hover {
+  padding-left: 8px;
+  background: rgba(255,255,255,.14);
+}
+
+.button {
+  box-shadow: 0 8px 22px rgba(15,20,22,.06);
+}
+.button-dark:hover {
+  box-shadow: 0 14px 34px rgba(15,20,22,.16);
+}
+.text-link {
+  transition: opacity .22s ease, gap .22s ease;
+}
+.text-link:hover {
+  opacity: .72;
+  gap: 12px;
+}
+
+.three-atmosphere {
+  opacity: .64;
+  transition: opacity .45s ease;
+}
+
+@media (max-width: 760px) {
+  .hero-copy::before {
+    inset: -4% -7% -7%;
+    background: radial-gradient(ellipse at 40% 46%, rgba(248,245,238,.94) 0%, rgba(248,245,238,.76) 48%, rgba(248,245,238,0) 82%);
+    filter: blur(10px);
+  }
+  .hero-lead { color: rgba(16,20,23,.86); }
+  .service-card, .compare-card { background: rgba(249,247,241,.95); }
+  .three-atmosphere { opacity: .72; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbit-card, .orbit-card-right { animation: none !important; }
+  .service-card, .compare-card, .choice, .faq-item summary { transition: none !important; }
+}

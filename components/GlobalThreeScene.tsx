@@ -23,6 +23,7 @@ const vertexShader = /* glsl */ `
   uniform float uLocal;
   uniform vec2 uPointer;
   uniform float uPointerStrength;
+  uniform float uFlow;
 
   varying vec2 vUv;
   varying vec3 vWorld;
@@ -108,14 +109,19 @@ const vertexShader = /* glsl */ `
     float pointerDistance = distance(uv, uPointer);
     float pointerLift = exp(-pointerDistance * 7.5) * 0.13 * uPointerStrength;
 
-    p.z += displacement + pointerLift;
+    float flowStrength = min(abs(uFlow), 1.0);
+    float flowWave =
+      sin(p.y * 0.72 + slowTime * 2.2 + uFlow * 0.7) * 0.10 * flowStrength +
+      sin((p.x - p.y) * 0.38 - slowTime * 1.5) * 0.045 * flowStrength;
+
+    p.z += displacement + pointerLift + flowWave;
 
     float lateral =
       sin(p.y * 0.58 + uPhase * 0.72) * 0.055 +
       sin(p.x * 0.31 - uPhase * 0.38) * 0.025;
 
-    p.x += lateral * (0.75 + wAbout * 0.35);
-    p.y += cos(p.x * 0.42 + uPhase * 0.44) * 0.035;
+    p.x += lateral * (0.75 + wAbout * 0.35) + uFlow * 0.028 * cos(p.y * 0.55 + slowTime);
+    p.y += cos(p.x * 0.42 + uPhase * 0.44) * 0.035 + uFlow * 0.012;
 
     vHeight = p.z;
     vCleanMask = cleanMask;
@@ -264,6 +270,9 @@ function Fabric({ quality }: { quality: QualityTier }) {
   const pointer = useRef(new THREE.Vector2(0.5, 0.5));
   const phaseTarget = useRef(0);
   const localTarget = useRef(0);
+  const flowTarget = useRef(0);
+  const lastScrollY = useRef(0);
+  const lastScrollTime = useRef(0);
   const measuredSections = useRef<Array<{ top: number; bottom: number; center: number }>>([]);
 
   const material = useMemo(
@@ -274,7 +283,8 @@ function Fabric({ quality }: { quality: QualityTier }) {
           uPhase: { value: 0 },
           uLocal: { value: 0 },
           uPointer: { value: new THREE.Vector2(0.5, 0.5) },
-          uPointerStrength: { value: quality === "low" ? 0 : 1 },
+          uPointerStrength: { value: quality === "low" ? 0 : 0.72 },
+          uFlow: { value: 0 },
         },
         vertexShader,
         fragmentShader,
@@ -303,6 +313,16 @@ function Fabric({ quality }: { quality: QualityTier }) {
     };
 
     const updateScrollState = () => {
+      const now = performance.now();
+      const y = window.scrollY;
+      if (lastScrollTime.current > 0) {
+        const dt = Math.max(now - lastScrollTime.current, 8);
+        const velocity = ((y - lastScrollY.current) / dt) * 0.12;
+        flowTarget.current = THREE.MathUtils.clamp(velocity, -1.15, 1.15);
+      }
+      lastScrollY.current = y;
+      lastScrollTime.current = now;
+
       const sections = measuredSections.current;
       if (sections.length !== SECTION_SELECTORS.length) return;
 
@@ -386,30 +406,50 @@ function Fabric({ quality }: { quality: QualityTier }) {
     };
   }, [material]);
 
-  useFrame(({ clock, camera }) => {
+  useFrame(({ clock, camera }, delta) => {
     if (!mesh.current || document.hidden) return;
 
     const phase = material.uniforms.uPhase.value;
     const local = material.uniforms.uLocal.value;
+    const flow = material.uniforms.uFlow.value;
+    const phaseAlpha = 1 - Math.exp(-3.0 * delta);
+    const localAlpha = 1 - Math.exp(-4.0 * delta);
+    const pointerAlpha = 1 - Math.exp(-2.4 * delta);
 
     material.uniforms.uTime.value = clock.elapsedTime;
-    material.uniforms.uPhase.value = THREE.MathUtils.lerp(phase, phaseTarget.current, 0.045);
-    material.uniforms.uLocal.value = THREE.MathUtils.lerp(local, localTarget.current, 0.055);
-    material.uniforms.uPointer.value.lerp(pointer.current, 0.035);
+    material.uniforms.uPhase.value = THREE.MathUtils.lerp(phase, phaseTarget.current, phaseAlpha);
+    material.uniforms.uLocal.value = THREE.MathUtils.lerp(local, localTarget.current, localAlpha);
+    material.uniforms.uPointer.value.lerp(pointer.current, pointerAlpha);
+    material.uniforms.uFlow.value = THREE.MathUtils.lerp(flow, flowTarget.current, 1 - Math.exp(-5.2 * delta));
+    flowTarget.current *= Math.pow(0.18, delta);
 
     const p = material.uniforms.uPhase.value;
 
-    mesh.current.position.x = interpolateKeyframe([0.45, 0.15, -0.25, 0.28, -0.18, 0.10, 0.32, 0.05], p);
-    mesh.current.position.y = interpolateKeyframe([0.12, -0.12, 0.04, 0.15, -0.20, 0.08, -0.04, 0.16], p);
-    mesh.current.position.z = interpolateKeyframe([-0.58, -0.62, -0.50, -0.64, -0.50, -0.70, -0.56, -0.62], p);
-    mesh.current.rotation.x = interpolateKeyframe([-0.30, -0.19, -0.14, -0.20, -0.28, -0.10, -0.16, -0.28], p);
-    mesh.current.rotation.z = interpolateKeyframe([-0.13, 0.05, -0.035, 0.025, -0.07, 0.018, 0.045, 0.11], p);
+    const idleX = Math.sin(clock.elapsedTime * 0.16) * 0.018;
+    const idleY = Math.cos(clock.elapsedTime * 0.13) * 0.012;
+    const flowValue = material.uniforms.uFlow.value;
+
+    const targetX = interpolateKeyframe([0.45, 0.15, -0.25, 0.28, -0.18, 0.10, 0.32, 0.05], p) + idleX;
+    const targetY = interpolateKeyframe([0.12, -0.12, 0.04, 0.15, -0.20, 0.08, -0.04, 0.16], p) + idleY;
+    const targetZ = interpolateKeyframe([-0.58, -0.62, -0.50, -0.64, -0.50, -0.70, -0.56, -0.62], p) + Math.abs(flowValue) * 0.025;
+    const targetRX = interpolateKeyframe([-0.30, -0.19, -0.14, -0.20, -0.28, -0.10, -0.16, -0.28], p) - flowValue * 0.018;
+    const targetRZ = interpolateKeyframe([-0.13, 0.05, -0.035, 0.025, -0.07, 0.018, 0.045, 0.11], p) + flowValue * 0.025;
+
+    mesh.current.position.x = THREE.MathUtils.damp(mesh.current.position.x, targetX, 4.0, delta);
+    mesh.current.position.y = THREE.MathUtils.damp(mesh.current.position.y, targetY, 4.0, delta);
+    mesh.current.position.z = THREE.MathUtils.damp(mesh.current.position.z, targetZ, 4.0, delta);
+    mesh.current.rotation.x = THREE.MathUtils.damp(mesh.current.rotation.x, targetRX, 4.0, delta);
+    mesh.current.rotation.z = THREE.MathUtils.damp(mesh.current.rotation.z, targetRZ, 4.0, delta);
 
     const scale = interpolateKeyframe([1.42, 1.34, 1.40, 1.36, 1.44, 1.40, 1.38, 1.46], p);
-    mesh.current.scale.set(scale, scale * 0.92, 1);
+    const sx = THREE.MathUtils.damp(mesh.current.scale.x, scale, 4.0, delta);
+    const sy = THREE.MathUtils.damp(mesh.current.scale.y, scale * 0.92, 4.0, delta);
+    mesh.current.scale.set(sx, sy, 1);
 
-    camera.position.x = interpolateKeyframe([0.04, 0.0, -0.05, 0.04, -0.03, 0.0, 0.03, 0.0], p);
-    camera.position.y = interpolateKeyframe([0.03, -0.02, 0.0, 0.03, -0.02, 0.0, 0.02, 0.0], p);
+    const cameraX = interpolateKeyframe([0.04, 0.0, -0.05, 0.04, -0.03, 0.0, 0.03, 0.0], p) + flowValue * 0.012;
+    const cameraY = interpolateKeyframe([0.03, -0.02, 0.0, 0.03, -0.02, 0.0, 0.02, 0.0], p);
+    camera.position.x = THREE.MathUtils.damp(camera.position.x, cameraX, 3.2, delta);
+    camera.position.y = THREE.MathUtils.damp(camera.position.y, cameraY, 3.2, delta);
     camera.lookAt(0, 0, 0);
   });
 
@@ -459,7 +499,7 @@ export default function GlobalThreeScene() {
   }
 
   const dpr: [number, number] =
-    quality === "high" ? [1, 1.6] : quality === "medium" ? [1, 1.35] : [1, 1.05];
+    quality === "high" ? [1, 1.5] : quality === "medium" ? [1, 1.25] : [1, 1.0];
 
   return (
     <div className={`three-layer three-quality-${quality}`} aria-hidden="true">
