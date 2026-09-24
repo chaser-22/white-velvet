@@ -9,11 +9,17 @@ export default function ExperienceLoader() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    const sessionKey = "wv:intro-seen-v2";
+    const sessionKey = "wv:intro-seen-v3";
+    const root = document.documentElement;
+
     if (window.sessionStorage.getItem(sessionKey) === "1") {
+      root.classList.remove("wv-intro-pending", "wv-intro-entering");
       setState("gone");
       return;
     }
+
+    root.classList.remove("wv-intro-entering");
+    root.classList.add("wv-intro-pending");
 
     const startedAt = performance.now();
     let sceneReady = Boolean((window as Window & { __wvSceneReady?: boolean }).__wvSceneReady);
@@ -21,6 +27,7 @@ export default function ExperienceLoader() {
     let minimumElapsed = false;
     let leaveTimer = 0;
     let goneTimer = 0;
+    let entryTimer = 0;
 
     const progressTimer = window.setInterval(() => {
       const elapsed = performance.now() - startedAt;
@@ -37,7 +44,21 @@ export default function ExperienceLoader() {
       leaveTimer = window.setTimeout(() => {
         window.sessionStorage.setItem(sessionKey, "1");
         setState("leaving");
-        goneTimer = window.setTimeout(() => setState("gone"), 760);
+        goneTimer = window.setTimeout(() => {
+          setState("gone");
+
+          window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => {
+              root.classList.remove("wv-intro-pending");
+              root.classList.add("wv-intro-entering");
+              window.dispatchEvent(new CustomEvent("wv:intro-enter"));
+
+              entryTimer = window.setTimeout(() => {
+                root.classList.remove("wv-intro-entering");
+              }, 1900);
+            });
+          });
+        }, 760);
       }, 160);
     };
 
@@ -74,6 +95,8 @@ export default function ExperienceLoader() {
       window.clearTimeout(safetyTimer);
       window.clearTimeout(leaveTimer);
       window.clearTimeout(goneTimer);
+      window.clearTimeout(entryTimer);
+      root.classList.remove("wv-intro-pending", "wv-intro-entering");
     };
   }, []);
 
