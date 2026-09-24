@@ -1,15 +1,15 @@
 const steps = [
-  ["01", "Se materialet", "Vi bedömer yta, konstruktion, skick och vad som faktiskt behöver behandlas."],
-  ["02", "Välj metod", "Rengöringen anpassas efter materialet i stället för att pressa allt genom samma process."],
-  ["03", "Återställ", "Smutsen ska bort. Materialets naturliga uttryck ska stanna kvar."],
+  ["01", "INSPECTION", "Material, konstruktion, skick och fläcktyp bedöms innan behandling."],
+  ["02", "METHOD", "Metod och intensitet väljs utifrån vad ytan faktiskt tål och behöver."],
+  ["03", "RESTORATION", "Smutsen reduceras samtidigt som materialets naturliga uttryck bevaras."],
 ];
 
 export default function Process() {
   return (
-    <section className="process lens-stage" id="om" data-lens-stage="6">
+    <section className="process lab-stage" id="om" data-lab-stage="6">
       <div className="process-title">
-        <p className="eyebrow">HUR VI ARBETAR</p>
-        <h2>Rent är<br />inte en metod.</h2>
+        <p className="eyebrow">PROTOCOL / 03 STEG</p>
+        <h2>Först förstå.<br />Sedan behandla.</h2>
       </div>
       <div className="process-list">
         {steps.map(([num, title, body]) => (

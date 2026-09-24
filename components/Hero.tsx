@@ -1,47 +1,30 @@
-import Image from "next/image";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 
 export default function Hero() {
   return (
-    <section className="lens-hero lens-stage" id="top" data-lens-stage="0">
-      <div className="lens-hero-copy">
-        <p className="eyebrow">WHITE VELVET · VÄSTERÅS</p>
-        <h1>Se<br />skillnaden.</h1>
+    <section className="lab-hero lab-stage" id="top" data-lab-stage="0">
+      <div className="lab-hero-copy">
+        <p className="eyebrow">WHITE VELVET · MATERIAL LAB</p>
+        <h1>Vi rengör<br />material.<br /><em>Inte bara ytor.</em></h1>
         <p className="hero-lead">
-          Professionell rengöring av mattor, möbler, golv och interiörer —
-          med fokus på materialet, inte bara smutsen.
+          Mattor, möbler, golv och interiörer behandlas utifrån hur materialet
+          faktiskt är uppbyggt — så att det blir rent utan att förlora sin karaktär.
         </p>
         <div className="hero-actions">
-          <a className="button button-dark" href="#tjanster">Utforska tjänster <ArrowDown size={16} /></a>
+          <a className="button button-dark" href="#tjanster">Öppna materialarkivet <ArrowDown size={16} /></a>
           <a className="text-link" href="#boka">Boka rengöring <ArrowUpRight size={16} /></a>
         </div>
       </div>
 
-      <div className="lens-hero-media lens-surface">
-        <Image
-          src="/media/before-mobeltvatt.webp"
-          alt="Möbel före rengöring"
-          fill
-          priority
-          sizes="(max-width: 900px) 100vw, 58vw"
-          className="lens-dirty-image"
-        />
-        <div className="lens-clean-layer" aria-hidden="true">
-          <Image
-            src="/media/after-mobeltvatt.webp"
-            alt=""
-            fill
-            priority
-            sizes="(max-width: 900px) 100vw, 58vw"
-          />
-        </div>
-        <div className="media-caption"><span>Före</span><span>Efter — genom linsen</span></div>
+      <div className="lab-hero-meta" aria-label="Materialinformation">
+        <div><span>SPECIMEN</span><strong>WV / 001</strong></div>
+        <div><span>STATUS</span><strong>UNTREATED → RESTORED</strong></div>
+        <div><span>LOCATION</span><strong>VÄSTERÅS · SE</strong></div>
       </div>
 
-      <div className="hero-footerline">
-        <span>Materialanpassad rengöring</span>
-        <span>Miljömedvetna metoder</span>
-        <span>Flexibla tider</span>
+      <div className="lab-scroll-note">
+        <span>Scrolla för att behandla provet</span>
+        <span>↓</span>
       </div>
     </section>
   );

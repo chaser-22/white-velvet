@@ -83,7 +83,7 @@ export default function BookingWizard() {
   }
 
   return (
-    <section className="booking lens-stage" id="boka" data-lens-stage="8">
+    <section className="booking lab-stage" id="boka" data-lab-stage="8">
       <div className="booking-shell">
         <div className="booking-heading">
           <p className="eyebrow light">BOKNINGSFÖRFRÅGAN</p>
