@@ -51,33 +51,34 @@ const vertexShader = /* glsl */ `
     float wFaq = phaseWeight(6.0);
     float wFooter = phaseWeight(7.0);
 
-    float idleFast = uTime * 0.74;
-    float idleMid = uTime * 0.48;
-    float idleSlow = uTime * 0.30;
-    float slowTime = uTime * 0.16;
+    float idleFast = uTime * 0.48;
+    float idleMid = uTime * 0.30;
+    float idleSlow = uTime * 0.18;
+    float slowTime = uTime * 0.10;
 
     float idleBreath =
-      sin(idleFast + p.y * 0.44) * 0.070 +
-      cos(idleMid - p.x * 0.29) * 0.050 +
-      sin(idleSlow + (p.x + p.y) * 0.18) * 0.032;
+      sin(idleMid + p.y * 0.30) * 0.042 +
+      cos(idleSlow - p.x * 0.22) * 0.030;
 
     float idleDrift =
-      sin(p.x * 0.31 + idleMid * 0.84) * 0.040 +
-      cos(p.y * 0.27 - idleSlow * 1.12) * 0.030;
+      sin(p.x * 0.22 + idleSlow * 0.78) * 0.024 +
+      cos(p.y * 0.20 - idleSlow * 0.92) * 0.018;
 
     float idleSwell =
-      sin(length(p.xy) * 0.55 - idleSlow * 0.92) * 0.040 +
-      sin((p.x - p.y) * 0.20 + idleMid * 0.76) * 0.026 +
-      cos((p.x + p.y) * 0.13 + idleFast * 0.42) * 0.018;
+      sin(length(p.xy) * 0.42 - idleSlow * 0.72) * 0.022 +
+      sin((p.x - p.y) * 0.15 + idleMid * 0.56) * 0.016;
+
+    float diagonal = p.x * 0.78 + p.y * 0.34;
+    float crossDiagonal = p.y * 0.62 - p.x * 0.20;
 
     float heroFold =
-      sin(p.x * 1.05 + slowTime) * 0.25 +
-      sin(p.y * 0.92 - slowTime * 0.8) * 0.10 +
-      sin((p.x + p.y) * 0.44) * 0.06;
+      sin(diagonal * 1.02 + slowTime * 0.82) * 0.185 +
+      sin(crossDiagonal * 0.78 - slowTime * 0.58) * 0.082 +
+      sin((p.x + p.y) * 0.26 + slowTime * 0.34) * 0.038;
 
     float serviceFold =
-      sin(p.x * 2.55 + p.y * 0.22 + slowTime * 0.7) * 0.17 +
-      sin(p.y * 1.30 - slowTime * 0.55) * 0.07;
+      sin(diagonal * 1.72 + slowTime * 0.62) * 0.115 +
+      sin(crossDiagonal * 1.22 - slowTime * 0.44) * 0.050;
 
     float cleanFront = clamp(uLocal, 0.04, 0.96);
     float cleanMask = 1.0 - smoothstep(cleanFront - 0.12, cleanFront + 0.12, uv.x);
@@ -226,31 +227,46 @@ const fragmentShader = /* glsl */ `
       midnight * wFooter
     ) / weightSum;
 
-    float brushA = 0.5 + 0.5 * sin(vUv.y * 138.0 + sin(vUv.x * 15.0) * 1.35);
-    float brushB = 0.5 + 0.5 * sin((vUv.x * 0.34 + vUv.y) * 92.0 + sin(vUv.y * 8.0));
-    float brushC = 0.5 + 0.5 * sin((vUv.x - vUv.y * 0.22) * 54.0);
+    vec2 velvetUv = vec2(
+      vUv.x * 0.86 + vUv.y * 0.22,
+      vUv.y * 1.06 - vUv.x * 0.08
+    );
+
+    float fiberFine =
+      0.5 + 0.5 * sin(velvetUv.y * 520.0 + sin(velvetUv.x * 34.0) * 0.72);
+    float fiberMid =
+      0.5 + 0.5 * sin(velvetUv.y * 168.0 + velvetUv.x * 19.0);
+    float fiberCross =
+      0.5 + 0.5 * sin((velvetUv.x * 0.20 + velvetUv.y) * 92.0);
+
     float suedeGrain =
-      (brushA * 0.52 + brushB * 0.31 + brushC * 0.17 - 0.5) * 0.030;
+      (fiberFine - 0.5) * 0.014 +
+      (fiberMid - 0.5) * 0.020 +
+      (fiberCross - 0.5) * 0.010;
 
     float broadNap =
-      sin(vUv.y * 18.0 + sin(vUv.x * 5.0) * 0.8) * 0.010 +
-      sin((vUv.x + vUv.y) * 11.0) * 0.006;
+      sin(velvetUv.y * 15.0 + sin(velvetUv.x * 4.0) * 0.58) * 0.010 +
+      sin((velvetUv.x + velvetUv.y) * 7.0) * 0.004;
 
     float serviceGrain =
-      (0.5 + 0.5 * sin(vUv.x * 47.0 + vUv.y * 12.0)) *
-      (0.5 + 0.5 * sin(vUv.y * 39.0));
-    suedeGrain += (serviceGrain - 0.5) * 0.012 * wServices;
+      (0.5 + 0.5 * sin(velvetUv.x * 38.0 + velvetUv.y * 9.0)) *
+      (0.5 + 0.5 * sin(velvetUv.y * 34.0));
+    suedeGrain += (serviceGrain - 0.5) * 0.009 * wServices;
 
     float cleanFront = clamp(uLocal, 0.04, 0.96);
     float restorationLine = exp(-pow((vUv.x - cleanFront) * 18.0, 2.0)) * wResults;
 
     float napDirection =
-      0.5 + 0.5 * sin((vUv.x * 0.34 + vUv.y) * 390.0 + sin(uTime * 0.12) * 0.42);
-    float nap = (napDirection - 0.5) * 0.020;
+      0.5 + 0.5 * sin(velvetUv.y * 470.0 + sin(uTime * 0.055) * 0.30);
+    float nap = (napDirection - 0.5) * 0.016;
 
-    float sheenTravel = 0.5 + 0.5 * sin(uTime * 0.68);
-    float sheenAxis = vUv.x * 0.82 + vUv.y * 0.22;
-    float travelingSheen = exp(-pow((sheenAxis - mix(0.10, 0.92, sheenTravel)) * 4.1, 2.0));
+    float sheenTravel = 0.5 + 0.5 * sin(uTime * 0.24);
+    float sheenAxis = velvetUv.x * 0.64 + velvetUv.y * 0.30;
+    float travelingSheen = exp(-pow((sheenAxis - mix(0.04, 1.02, sheenTravel)) * 3.35, 2.0));
+
+    float napBand =
+      0.5 + 0.5 * sin(velvetUv.y * 25.0 - uTime * 0.10 + sin(velvetUv.x * 5.0) * 0.45);
+    float brushedLift = pow(max(0.0, velvetSheen), 1.15) * napBand;
 
     float cleanSheen = mix(0.58, 1.18, vCleanMask);
     float sheenStrength =
@@ -266,9 +282,10 @@ const fragmentShader = /* glsl */ `
     float lighting = 0.47 + diffuse * 0.63 + reverseDiffuse * 0.08;
     vec3 color = base * lighting;
     color += velvetSheen * sheenStrength;
-    color += travelingSheen * velvetSheen * (0.035 + 0.025 * wHero + 0.020 * wAbout);
-    color += rim * (0.09 + 0.08 * wAbout);
-    color += suedeGrain + broadNap + nap * 0.55;
+    color += travelingSheen * velvetSheen * (0.026 + 0.036 * wHero + 0.018 * wAbout);
+    color += brushedLift * (0.018 + 0.030 * wHero + 0.012 * wServices);
+    color += rim * (0.075 + 0.065 * wAbout);
+    color += suedeGrain + broadNap + nap * 0.48;
     color += restorationLine * vec3(0.22, 0.21, 0.18);
 
     float pointerGlow = exp(-distance(vUv, uPointer) * 9.0);
@@ -474,7 +491,7 @@ function Fabric({ quality }: { quality: QualityTier }) {
     // Keep the material visibly alive even when scroll input is completely idle.
     // A slightly accelerated time base makes the velvet deformation readable
     // without making the scene feel nervous or tied to scroll velocity.
-    const idleTime = clock.elapsedTime * 1.9;
+    const idleTime = clock.elapsedTime * 1.16;
     material.uniforms.uTime.value = idleTime;
     material.uniforms.uPhase.value = THREE.MathUtils.lerp(phase, phaseTarget.current, phaseAlpha);
     material.uniforms.uLocal.value = THREE.MathUtils.lerp(local, localTarget.current, localAlpha);
@@ -493,14 +510,14 @@ function Fabric({ quality }: { quality: QualityTier }) {
     const motionIntensity = material.uniforms.uIntensity.value;
 
     const idleX =
-      Math.sin(idleTime * 0.62) * 0.092 +
-      Math.sin(idleTime * 0.31) * 0.046;
+      Math.sin(idleTime * 0.42) * 0.060 +
+      Math.sin(idleTime * 0.19) * 0.026;
     const idleY =
-      Math.cos(idleTime * 0.51) * 0.070 +
-      Math.sin(idleTime * 0.29) * 0.036;
+      Math.cos(idleTime * 0.34) * 0.044 +
+      Math.sin(idleTime * 0.17) * 0.020;
     const idleZ =
-      Math.sin(idleTime * 0.43) * 0.070 +
-      Math.cos(idleTime * 0.24) * 0.034;
+      Math.sin(idleTime * 0.30) * 0.046 +
+      Math.cos(idleTime * 0.15) * 0.022;
     const flowValue = material.uniforms.uFlow.value;
 
     const targetX = interpolateKeyframe([0.45, 0.15, -0.25, 0.28, -0.18, 0.10, 0.32, 0.05], p) + idleX * motionIntensity;
@@ -510,14 +527,14 @@ function Fabric({ quality }: { quality: QualityTier }) {
       idleZ * motionIntensity +
       Math.abs(flowValue) * 0.020 * motionIntensity;
     const idleRX =
-      Math.sin(idleTime * 0.48) * 0.034 +
-      Math.cos(idleTime * 0.27) * 0.017;
+      Math.sin(idleTime * 0.32) * 0.022 +
+      Math.cos(idleTime * 0.17) * 0.010;
     const idleRY =
-      Math.sin(idleTime * 0.36) * 0.036 +
-      Math.cos(idleTime * 0.21) * 0.015;
+      Math.sin(idleTime * 0.24) * 0.024 +
+      Math.cos(idleTime * 0.14) * 0.010;
     const idleRZ =
-      Math.cos(idleTime * 0.44) * 0.044 +
-      Math.sin(idleTime * 0.30) * 0.022;
+      Math.cos(idleTime * 0.29) * 0.028 +
+      Math.sin(idleTime * 0.18) * 0.014;
     const targetRX =
       interpolateKeyframe([-0.30, -0.19, -0.14, -0.20, -0.28, -0.10, -0.16, -0.28], p) +
       idleRX * motionIntensity -
@@ -538,8 +555,8 @@ function Fabric({ quality }: { quality: QualityTier }) {
     const baseScale = interpolateKeyframe([1.42, 1.34, 1.40, 1.36, 1.44, 1.40, 1.38, 1.46], p);
     const idleBreathingScale =
       1 +
-      (Math.sin(idleTime * 0.39) * 0.024 +
-      Math.sin(idleTime * 0.19) * 0.012) * motionIntensity;
+      (Math.sin(idleTime * 0.26) * 0.015 +
+      Math.sin(idleTime * 0.13) * 0.008) * motionIntensity;
     const scale = baseScale * idleBreathingScale;
     const sx = THREE.MathUtils.damp(mesh.current.scale.x, scale, 3.1, delta);
     const sy = THREE.MathUtils.damp(mesh.current.scale.y, scale * 0.92, 3.1, delta);
