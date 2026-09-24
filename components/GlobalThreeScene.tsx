@@ -63,7 +63,8 @@ function Room({ quality }: { quality: QualityTier }) {
 
   const sofaGroup = useRef<THREE.Group>(null);
   const travelGroup = useRef<THREE.Group>(null);
-  const cleanLight = useRef<THREE.PointLight>(null);\n  const dustPoints = useRef<THREE.Points>(null);
+  const cleanLight = useRef<THREE.PointLight>(null);
+  const dustPoints = useRef<THREE.Points>(null);
 
   const sofaMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: "#8f8a81", roughness: 0.95 }), []);
   const sofaStainMaterial = useMemo(() => new THREE.MeshBasicMaterial({ color: "#5c5145", transparent: true, opacity: 0.34, depthWrite: false }), []);
