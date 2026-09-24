@@ -1,49 +1,39 @@
-import Image from "next/image";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import Reveal from "./Reveal";
 
 export default function Hero() {
   return (
-    <section className="studio-hero" id="top">
-      <div className="studio-hero-copy">
-        <p className="eyebrow">PROFESSIONELL RENGÖRING · VÄSTERÅS</p>
-        <h1>Rent, på riktigt.<br /><em>Med känsla för materialet.</em></h1>
-        <p className="hero-lead">
-          White Velvet rengör mattor, möbler, golv och interiörer med metoder
-          anpassade efter materialet — för ett resultat som både syns och känns.
-        </p>
-        <div className="hero-actions">
-          <a className="button button-dark" href="#boka">
-            Boka rengöring <ArrowUpRight size={15} />
-          </a>
-          <a className="text-link" href="#resultat">
-            Se före & efter <ArrowDownRight size={15} />
-          </a>
-        </div>
-      </div>
-
-      <div className="studio-hero-visual">
-        <div className="material-window" aria-hidden="true">
-          <span className="material-window-label">WHITE VELVET / SIGNATURE MATERIAL</span>
-          <span className="material-window-index">01</span>
-        </div>
-        <figure className="hero-proof-card">
-          <div className="hero-proof-image">
-            <Image
-              src="/media/service-mobeltvatt.webp"
-              alt="Professionellt rengjord möbel"
-              fill
-              priority
-              sizes="(max-width: 800px) 76vw, 28vw"
-            />
+    <section className="hero section-shell" id="top">
+      <div className="hero-grid">
+        <Reveal className="hero-copy">
+          <p className="eyebrow">PROFESSIONELL RENGÖRING · VÄSTERÅS</p>
+          <h1>
+            Rent, på riktigt.
+            <span>Med känsla för materialet.</span>
+          </h1>
+          <p className="hero-lead">
+            White Velvet rengör mattor, möbler, golv och interiörer med precision,
+            moderna metoder och ett lugn som märks i resultatet.
+          </p>
+          <div className="hero-actions">
+            <a className="button button-dark" href="#boka">Boka rengöring <ArrowUpRight size={17} /></a>
+            <a className="text-link" href="#resultat">Se före & efter <ArrowDownRight size={17} /></a>
           </div>
-          <figcaption>
-            <span>Möbeltvätt</span>
-            <span>Materialanpassad behandling</span>
-          </figcaption>
-        </figure>
+        </Reveal>
+
+        <div className="hero-orbit" aria-hidden="true">
+          <div className="orbit-card">
+            <span>01</span>
+            <strong>Textil</strong>
+          </div>
+          <div className="orbit-card orbit-card-right">
+            <span>02</span>
+            <strong>Yta</strong>
+          </div>
+        </div>
       </div>
 
-      <div className="hero-trust">
+      <div className="trust-strip" aria-label="Viktiga fördelar">
         <span>Miljömedvetna metoder</span>
         <span>Materialanpassad rengöring</span>
         <span>Flexibla tider</span>

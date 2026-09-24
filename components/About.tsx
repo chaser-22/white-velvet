@@ -1,33 +1,34 @@
-import Image from "next/image";
+import { Leaf, ScanLine, Clock3, Sparkles } from "lucide-react";
 import Reveal from "./Reveal";
+
+const values = [
+  { icon: ScanLine, title: "Precision", text: "Varje uppdrag bedöms efter material, skick och behov." },
+  { icon: Leaf, title: "Miljömedvetet", text: "Skonsamma och noggrant utvalda rengöringsprodukter." },
+  { icon: Clock3, title: "Flexibelt", text: "Tider och upplägg anpassas efter uppdragets praktiska förutsättningar." },
+  { icon: Sparkles, title: "Omsorg", text: "Fokus på ett välskött resultat utan onödigt hårda metoder." },
+];
 
 export default function About() {
   return (
-    <section className="studio-about">
-      <Reveal className="about-image">
-        <Image
-          src="/media/service-golvpolering.webp"
-          alt="Professionell golvpolering hos White Velvet"
-          fill
-          sizes="(max-width: 800px) 100vw, 45vw"
-        />
-      </Reveal>
-
-      <Reveal className="about-copy">
-        <p className="eyebrow">WHITE VELVET · VÄSTERÅS</p>
-        <h2>Rent ska kännas lugnt.</h2>
-        <p className="about-lead">
-          Vi kombinerar modern utrustning med ett materialmedvetet arbetssätt.
-          Målet är inte att göra mest — utan att göra rätt.
+    <section className="section-shell about">
+      <Reveal className="about-top">
+        <p className="eyebrow">WHITE VELVET</p>
+        <h2>Renare ytor. Lugnare helhet.</h2>
+        <p>
+          White Velvet arbetar med professionell rengöring i Västerås och kombinerar modern
+          utrustning med ett materialmedvetet arbetssätt. Målet är enkelt: ett resultat som känns
+          lika genomtänkt som det ser ut.
         </p>
-
-        <div className="about-values">
-          <div><span>01</span><strong>Precision</strong><p>Rätt behandling för rätt material.</p></div>
-          <div><span>02</span><strong>Miljömedvetet</strong><p>Skonsammare produkter och metoder.</p></div>
-          <div><span>03</span><strong>Flexibelt</strong><p>Tider och upplägg som fungerar i vardagen.</p></div>
-          <div><span>04</span><strong>Omsorg</strong><p>Detaljerna är en del av resultatet.</p></div>
-        </div>
       </Reveal>
+      <div className="value-grid">
+        {values.map(({ icon: Icon, title, text }) => (
+          <Reveal className="value-card" key={title}>
+            <Icon size={22} strokeWidth={1.5} />
+            <h3>{title}</h3>
+            <p>{text}</p>
+          </Reveal>
+        ))}
+      </div>
     </section>
   );
 }
