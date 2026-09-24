@@ -1,4 +1,4 @@
-import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Clock3, Leaf, MapPin, ScanLine } from "lucide-react";
 import Reveal from "./Reveal";
 
 export default function Hero() {
@@ -34,10 +34,44 @@ export default function Hero() {
       </div>
 
       <div className="trust-strip" aria-label="Viktiga fördelar">
-        <span>Miljömedvetna metoder</span>
-        <span>Materialanpassad rengöring</span>
-        <span>Flexibla tider</span>
-        <span>Västerås</span>
+        <div className="trust-strip-intro">
+          <p>DETALJER SOM GÖR SKILLNAD</p>
+          <strong>Genomtänkt från metod till tid.</strong>
+        </div>
+
+        <div className="trust-feature-grid">
+          <div className="trust-item">
+            <div className="trust-icon" aria-hidden="true"><Leaf size={24} strokeWidth={1.45} /></div>
+            <div>
+              <p>ANSVARSFULLT</p>
+              <strong>Miljömedvetna metoder</strong>
+            </div>
+          </div>
+
+          <div className="trust-item">
+            <div className="trust-icon" aria-hidden="true"><ScanLine size={24} strokeWidth={1.45} /></div>
+            <div>
+              <p>PRECISION</p>
+              <strong>Materialanpassad rengöring</strong>
+            </div>
+          </div>
+
+          <div className="trust-item">
+            <div className="trust-icon" aria-hidden="true"><Clock3 size={24} strokeWidth={1.45} /></div>
+            <div>
+              <p>ANPASSAT</p>
+              <strong>Flexibla tider</strong>
+            </div>
+          </div>
+
+          <div className="trust-item">
+            <div className="trust-icon" aria-hidden="true"><MapPin size={24} strokeWidth={1.45} /></div>
+            <div>
+              <p>LOKALT</p>
+              <strong>Västerås</strong>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
