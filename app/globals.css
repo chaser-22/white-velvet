@@ -1507,7 +1507,7 @@ body {
 
 .trust-strip-intro {
   display: flex;
-  align-items: end;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 28px;
   padding: 24px 28px 22px;
