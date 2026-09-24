@@ -32,7 +32,7 @@ const vertexShader = /* glsl */ `
   varying float vPhase;
 
   float phaseWeight(float target) {
-    return 1.0 - smoothstep(0.0, 1.20, abs(uPhase - target));
+    return 1.0 - smoothstep(0.0, 1.36, abs(uPhase - target));
   }
 
   void main() {
@@ -50,19 +50,24 @@ const vertexShader = /* glsl */ `
     float wFaq = phaseWeight(6.0);
     float wFooter = phaseWeight(7.0);
 
-    float slowTime = uTime * 0.19;
+    float idleFast = uTime * 0.36;
+    float idleMid = uTime * 0.245;
+    float idleSlow = uTime * 0.143;
+    float slowTime = uTime * 0.16;
+
     float idleBreath =
-      sin(slowTime * 0.92 + p.y * 0.46) * 0.050 +
-      cos(slowTime * 0.68 - p.x * 0.31) * 0.030 +
-      sin(slowTime * 0.41 + (p.x + p.y) * 0.21) * 0.018;
+      sin(idleFast + p.y * 0.44) * 0.048 +
+      cos(idleMid - p.x * 0.29) * 0.034 +
+      sin(idleSlow + (p.x + p.y) * 0.18) * 0.024;
 
     float idleDrift =
-      sin(p.x * 0.34 + slowTime * 0.62) * 0.027 +
-      cos(p.y * 0.28 - slowTime * 0.50) * 0.020;
+      sin(p.x * 0.31 + idleMid * 0.84) * 0.030 +
+      cos(p.y * 0.27 - idleSlow * 1.12) * 0.022;
 
     float idleSwell =
-      sin(length(p.xy) * 0.58 - slowTime * 0.48) * 0.020 +
-      sin((p.x - p.y) * 0.22 + slowTime * 0.39) * 0.014;
+      sin(length(p.xy) * 0.55 - idleSlow * 0.92) * 0.025 +
+      sin((p.x - p.y) * 0.20 + idleMid * 0.76) * 0.017 +
+      cos((p.x + p.y) * 0.13 + idleFast * 0.42) * 0.010;
 
     float heroFold =
       sin(p.x * 1.05 + slowTime) * 0.25 +
@@ -119,7 +124,7 @@ const vertexShader = /* glsl */ `
     ) / weightSum;
 
     float pointerDistance = distance(uv, uPointer);
-    float pointerLift = exp(-pointerDistance * 7.5) * 0.13 * uPointerStrength;
+    float pointerLift = exp(-pointerDistance * 7.2) * 0.105 * uPointerStrength;
 
     float flowStrength = min(abs(uFlow), 1.0);
     float flowWave =
@@ -163,7 +168,7 @@ const fragmentShader = /* glsl */ `
   varying float vPhase;
 
   float phaseWeight(float target) {
-    return 1.0 - smoothstep(0.0, 1.20, abs(uPhase - target));
+    return 1.0 - smoothstep(0.0, 1.36, abs(uPhase - target));
   }
 
   void main() {
@@ -236,8 +241,13 @@ const fragmentShader = /* glsl */ `
     float cleanFront = clamp(uLocal, 0.04, 0.96);
     float restorationLine = exp(-pow((vUv.x - cleanFront) * 18.0, 2.0)) * wResults;
 
-    float napDirection = 0.5 + 0.5 * sin((vUv.x * 0.34 + vUv.y) * 390.0);
-    float nap = (napDirection - 0.5) * 0.022;
+    float napDirection =
+      0.5 + 0.5 * sin((vUv.x * 0.34 + vUv.y) * 390.0 + sin(uTime * 0.12) * 0.42);
+    float nap = (napDirection - 0.5) * 0.020;
+
+    float sheenTravel = 0.5 + 0.5 * sin(uTime * 0.19);
+    float sheenAxis = vUv.x * 0.82 + vUv.y * 0.22;
+    float travelingSheen = exp(-pow((sheenAxis - mix(0.10, 0.92, sheenTravel)) * 4.1, 2.0));
 
     float cleanSheen = mix(0.58, 1.18, vCleanMask);
     float sheenStrength =
@@ -253,6 +263,7 @@ const fragmentShader = /* glsl */ `
     float lighting = 0.47 + diffuse * 0.63 + reverseDiffuse * 0.08;
     vec3 color = base * lighting;
     color += velvetSheen * sheenStrength;
+    color += travelingSheen * velvetSheen * (0.035 + 0.025 * wHero + 0.020 * wAbout);
     color += rim * (0.09 + 0.08 * wAbout);
     color += suedeGrain + broadNap + nap * 0.55;
     color += restorationLine * vec3(0.22, 0.21, 0.18);
@@ -310,7 +321,7 @@ function Fabric({ quality }: { quality: QualityTier }) {
           uPhase: { value: 0 },
           uLocal: { value: 0 },
           uPointer: { value: new THREE.Vector2(0.5, 0.5) },
-          uPointerStrength: { value: quality === "low" ? 0 : 0.72 },
+          uPointerStrength: { value: quality === "low" ? 0 : 0.58 },
           uFlow: { value: 0 },
         },
         vertexShader,
@@ -345,9 +356,9 @@ function Fabric({ quality }: { quality: QualityTier }) {
       const y = window.scrollY;
       if (lastScrollTime.current > 0) {
         const dt = Math.max(now - lastScrollTime.current, 8);
-        const velocity = ((y - lastScrollY.current) / dt) * 0.080;
-        const nextFlow = THREE.MathUtils.clamp(velocity, -0.64, 0.64);
-        flowTarget.current = THREE.MathUtils.lerp(flowTarget.current, nextFlow, 0.24);
+        const velocity = ((y - lastScrollY.current) / dt) * 0.070;
+        const nextFlow = THREE.MathUtils.clamp(velocity, -0.54, 0.54);
+        flowTarget.current = THREE.MathUtils.lerp(flowTarget.current, nextFlow, 0.20);
       }
       lastScrollY.current = y;
       lastScrollTime.current = now;
@@ -372,7 +383,7 @@ function Fabric({ quality }: { quality: QualityTier }) {
               0,
               1,
             );
-            const t = raw * raw * (3 - 2 * raw);
+            const t = raw * raw * raw * (raw * (raw * 6 - 15) + 10);
             phase = i + t;
             break;
           }
@@ -452,26 +463,28 @@ function Fabric({ quality }: { quality: QualityTier }) {
     const phase = material.uniforms.uPhase.value;
     const local = material.uniforms.uLocal.value;
     const flow = material.uniforms.uFlow.value;
-    const phaseAlpha = 1 - Math.exp(-2.35 * delta);
-    const localAlpha = 1 - Math.exp(-2.85 * delta);
-    const pointerAlpha = 1 - Math.exp(-1.35 * delta);
+    const phaseAlpha = 1 - Math.exp(-1.95 * delta);
+    const localAlpha = 1 - Math.exp(-2.35 * delta);
+    const pointerAlpha = 1 - Math.exp(-1.08 * delta);
 
     material.uniforms.uTime.value = clock.elapsedTime;
     material.uniforms.uPhase.value = THREE.MathUtils.lerp(phase, phaseTarget.current, phaseAlpha);
     material.uniforms.uLocal.value = THREE.MathUtils.lerp(local, localTarget.current, localAlpha);
     material.uniforms.uPointer.value.lerp(pointer.current, pointerAlpha);
-    material.uniforms.uFlow.value = THREE.MathUtils.lerp(flow, flowTarget.current, 1 - Math.exp(-3.4 * delta));
-    flowTarget.current *= Math.pow(0.045, delta);
+    material.uniforms.uFlow.value = THREE.MathUtils.lerp(flow, flowTarget.current, 1 - Math.exp(-2.9 * delta));
+    flowTarget.current *= Math.pow(0.022, delta);
 
     const p = material.uniforms.uPhase.value;
 
     const idleX =
-      Math.sin(clock.elapsedTime * 0.145) * 0.034 +
-      Math.sin(clock.elapsedTime * 0.067) * 0.014;
+      Math.sin(clock.elapsedTime * 0.36) * 0.027 +
+      Math.sin(clock.elapsedTime * 0.143) * 0.018;
     const idleY =
-      Math.cos(clock.elapsedTime * 0.118) * 0.026 +
-      Math.sin(clock.elapsedTime * 0.052) * 0.011;
-    const idleZ = Math.sin(clock.elapsedTime * 0.091) * 0.016;
+      Math.cos(clock.elapsedTime * 0.245) * 0.023 +
+      Math.sin(clock.elapsedTime * 0.118) * 0.012;
+    const idleZ =
+      Math.sin(clock.elapsedTime * 0.19) * 0.018 +
+      Math.cos(clock.elapsedTime * 0.109) * 0.008;
     const flowValue = material.uniforms.uFlow.value;
 
     const targetX = interpolateKeyframe([0.45, 0.15, -0.25, 0.28, -0.18, 0.10, 0.32, 0.05], p) + idleX;
@@ -480,8 +493,12 @@ function Fabric({ quality }: { quality: QualityTier }) {
       interpolateKeyframe([-0.58, -0.62, -0.50, -0.64, -0.50, -0.70, -0.56, -0.62], p) +
       idleZ +
       Math.abs(flowValue) * 0.020;
-    const idleRX = Math.sin(clock.elapsedTime * 0.096) * 0.012;
-    const idleRZ = Math.cos(clock.elapsedTime * 0.078) * 0.015;
+    const idleRX =
+      Math.sin(clock.elapsedTime * 0.245) * 0.010 +
+      Math.cos(clock.elapsedTime * 0.118) * 0.005;
+    const idleRZ =
+      Math.cos(clock.elapsedTime * 0.19) * 0.013 +
+      Math.sin(clock.elapsedTime * 0.143) * 0.006;
     const targetRX =
       interpolateKeyframe([-0.30, -0.19, -0.14, -0.20, -0.28, -0.10, -0.16, -0.28], p) +
       idleRX -
@@ -504,22 +521,25 @@ function Fabric({ quality }: { quality: QualityTier }) {
 
     const cameraX =
       interpolateKeyframe([0.04, 0.0, -0.05, 0.04, -0.03, 0.0, 0.03, 0.0], p) +
-      Math.sin(clock.elapsedTime * 0.082) * 0.014 +
-      flowValue * 0.012;
+      Math.sin(clock.elapsedTime * 0.19) * 0.012 +
+      Math.sin(clock.elapsedTime * 0.109) * 0.006 +
+      flowValue * 0.010;
     const cameraY =
       interpolateKeyframe([0.03, -0.02, 0.0, 0.03, -0.02, 0.0, 0.02, 0.0], p) +
-      Math.cos(clock.elapsedTime * 0.071) * 0.010;
-    camera.position.x = THREE.MathUtils.damp(camera.position.x, cameraX, 2.45, delta);
-    camera.position.y = THREE.MathUtils.damp(camera.position.y, cameraY, 2.45, delta);
+      Math.cos(clock.elapsedTime * 0.143) * 0.009;
+    const cameraZ = 5.45 + Math.sin(clock.elapsedTime * 0.118) * 0.025;
+    camera.position.x = THREE.MathUtils.damp(camera.position.x, cameraX, 2.15, delta);
+    camera.position.y = THREE.MathUtils.damp(camera.position.y, cameraY, 2.15, delta);
+    camera.position.z = THREE.MathUtils.damp(camera.position.z, cameraZ, 1.8, delta);
     camera.lookAt(0, 0, 0);
   });
 
   const segments =
     quality === "high"
-      ? ([128, 96] as const)
+      ? ([116, 88] as const)
       : quality === "medium"
-        ? ([88, 66] as const)
-        : ([50, 38] as const);
+        ? ([80, 60] as const)
+        : ([44, 34] as const);
 
   return (
     <mesh ref={mesh}>

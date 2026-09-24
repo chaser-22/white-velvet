@@ -18,7 +18,7 @@ export default function ExperienceLoader() {
       if (!sceneReady || !fontsReady || !minimumElapsed || leaveTimer) return;
       leaveTimer = window.setTimeout(() => {
         setState("leaving");
-        goneTimer = window.setTimeout(() => setState("gone"), 760);
+        goneTimer = window.setTimeout(() => setState("gone"), 980);
       }, 90);
     };
 
@@ -70,6 +70,13 @@ export default function ExperienceLoader() {
         <span className="loader-fold loader-fold-a" />
         <span className="loader-fold loader-fold-b" />
         <span className="loader-fold loader-fold-c" />
+        <span className="loader-light-sweep" />
+      </div>
+
+      <div className="loader-material-window" aria-hidden="true">
+        <span className="loader-material loader-material-matte" />
+        <span className="loader-material loader-material-restored" />
+        <span className="loader-restoration-line" />
       </div>
 
       <div className="experience-loader-inner">
@@ -78,11 +85,11 @@ export default function ExperienceLoader() {
           <span className="loader-orbit loader-orbit-b" />
           <span className="experience-loader-mark">WV</span>
         </div>
-        <p className="experience-loader-kicker">MATERIAL CARE · VÄSTERÅS</p>
+        <p className="experience-loader-kicker">MATERIALVÅRD · VÄSTERÅS</p>
         <div className="experience-loader-rule" aria-hidden="true"><span /></div>
         <div className="experience-loader-status">
           <span>WHITE VELVET</span>
-          <span className="loader-status-word">PREPARING SURFACE</span>
+          <span className="loader-status-word">FÖRBEREDER YTAN</span>
         </div>
       </div>
     </div>
