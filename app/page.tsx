@@ -31,7 +31,7 @@ export default function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <GlobalThreeScene />
       <Header />
-      <main className="site-content">
+      <main className="site-content" id="main-content">
         <Hero />
         <Services />
         <BeforeAfter />
