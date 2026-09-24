@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import Reveal from "./Reveal";
 
 const comparisons = [
   {
@@ -17,27 +16,26 @@ const comparisons = [
   },
 ];
 
-function Compare({ item }: { item: (typeof comparisons)[number] }) {
+function Compare({ item, index }: { item: (typeof comparisons)[number]; index: number }) {
   const [value, setValue] = useState(52);
 
-  const updateValue = (nextValue: number) => {
-    setValue(nextValue);
-    window.dispatchEvent(
-      new CustomEvent("whitevelvet:compare", {
-        detail: { value: nextValue / 100 },
-      }),
-    );
+  const updateValue = (next: number) => {
+    setValue(next);
+    window.dispatchEvent(new CustomEvent("whitevelvet:compare", { detail: { value: next / 100 } }));
   };
 
   return (
-    <div className="compare-card">
+    <article className="compare-case">
+      <div className="compare-case-heading">
+        <span>0{index + 1}</span>
+        <h3>{item.title}</h3>
+        <p>Verkligt kundarbete</p>
+      </div>
       <div className="compare-stage">
-        <Image src={item.before} alt={`${item.title} före rengöring`} fill sizes="(max-width: 900px) 100vw, 50vw" />
+        <Image src={item.before} alt={`${item.title} före rengöring`} fill sizes="100vw" />
         <div className="compare-after" style={{ clipPath: `inset(0 ${100 - value}% 0 0)` }}>
-          <Image src={item.after} alt={`${item.title} efter rengöring`} fill sizes="(max-width: 900px) 100vw, 50vw" />
+          <Image src={item.after} alt={`${item.title} efter rengöring`} fill sizes="100vw" />
         </div>
-        <span className="compare-label before-label">Före</span>
-        <span className="compare-label after-label">Efter</span>
         <div className="compare-line" style={{ left: `${value}%` }} aria-hidden="true"><span /></div>
         <input
           type="range"
@@ -47,25 +45,23 @@ function Compare({ item }: { item: (typeof comparisons)[number] }) {
           onChange={(event) => updateValue(Number(event.target.value))}
           aria-label={`Jämför före och efter för ${item.title}`}
         />
+        <span className="compare-label compare-before">Före</span>
+        <span className="compare-label compare-after-label">Efter</span>
       </div>
-      <div className="compare-meta">
-        <span>Verkligt kundarbete</span>
-        <strong>{item.title}</strong>
-      </div>
-    </div>
+    </article>
   );
 }
 
 export default function BeforeAfter() {
   return (
-    <section className="results room-stage" id="resultat" data-room-stage="5">
-      <Reveal className="section-heading centered-heading">
-        <p className="eyebrow">FÖRE & EFTER</p>
-        <h2>Dra gränsen mellan före och efter.</h2>
-        <p>Samma idé som i rummet ovan — fast här med verkliga arbeten från White Velvet.</p>
-      </Reveal>
-      <div className="compare-grid">
-        {comparisons.map((item) => <Reveal key={item.title}><Compare item={item} /></Reveal>)}
+    <section className="results lens-stage" id="resultat" data-lens-stage="5">
+      <div className="results-heading">
+        <p className="eyebrow">FÖRE / EFTER</p>
+        <h2>Inga renderingar.<br />Bara resultat.</h2>
+        <p>Dra själv. Här använder vi White Velvets riktiga kundbilder.</p>
+      </div>
+      <div className="compare-stack">
+        {comparisons.map((item, index) => <Compare key={item.title} item={item} index={index} />)}
       </div>
     </section>
   );

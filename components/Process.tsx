@@ -1,28 +1,24 @@
-import Reveal from "./Reveal";
-
 const steps = [
-  ["01", "Bedöm materialet", "Vi utgår från material, skick och hur ytan används innan vi väljer metod."],
-  ["02", "Behandla kontrollerat", "Rengöringen anpassas för att lösa smuts och fläckar utan onödigt hård behandling."],
-  ["03", "Återställ helheten", "Målet är inte bara rent — ytan ska kännas välskött och naturlig igen."],
+  ["01", "Se materialet", "Vi bedömer yta, konstruktion, skick och vad som faktiskt behöver behandlas."],
+  ["02", "Välj metod", "Rengöringen anpassas efter materialet i stället för att pressa allt genom samma process."],
+  ["03", "Återställ", "Smutsen ska bort. Materialets naturliga uttryck ska stanna kvar."],
 ];
 
 export default function Process() {
   return (
-    <section className="process room-stage" id="om" data-room-stage="6">
-      <div className="process-editorial">
-        <Reveal className="process-intro">
-          <p className="eyebrow">METODEN</p>
-          <h2>Vi rengör inte allt på samma sätt.</h2>
-          <p>White Velvet arbetar materialmedvetet. Det är skillnaden mellan att bara göra rent och att faktiskt ta hand om en yta.</p>
-        </Reveal>
-        <div className="steps">
-          {steps.map(([num, title, body]) => (
-            <Reveal key={num} className="step-row">
-              <span>{num}</span>
-              <div><h3>{title}</h3><p>{body}</p></div>
-            </Reveal>
-          ))}
-        </div>
+    <section className="process lens-stage" id="om" data-lens-stage="6">
+      <div className="process-title">
+        <p className="eyebrow">HUR VI ARBETAR</p>
+        <h2>Rent är<br />inte en metod.</h2>
+      </div>
+      <div className="process-list">
+        {steps.map(([num, title, body]) => (
+          <div className="process-row" key={num}>
+            <span>{num}</span>
+            <h3>{title}</h3>
+            <p>{body}</p>
+          </div>
+        ))}
       </div>
     </section>
   );

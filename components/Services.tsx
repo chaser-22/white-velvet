@@ -1,58 +1,51 @@
-import { ArrowDownRight } from "lucide-react";
+import Image from "next/image";
+import { ArrowUpRight } from "lucide-react";
 import { services } from "@/lib/content";
 
-const chapterCopy = [
-  {
-    micro: "MÖBELTVÄTT",
-    statement: "Fläckar försvinner. Texturen stannar.",
-    detail: "Vi rengör soffor, fåtöljer och andra textilier utifrån materialets förutsättningar — inte med en standardbehandling.",
-  },
-  {
-    micro: "MATTVÄTT",
-    statement: "Fibrerna får resa sig igen.",
-    detail: "Smuts, damm och fläckar arbetas ur mattan med en metod anpassad efter konstruktion, material och skick.",
-  },
-  {
-    micro: "GOLVPOLERING",
-    statement: "Från matt yta till kontrollerad lyster.",
-    detail: "Rengöring och polering återger golvet ett välskött uttryck utan att göra ytan visuellt överbehandlad.",
-  },
-  {
-    micro: "BÅT & HUSBIL",
-    statement: "Mindre utrymmen. Samma precision.",
-    detail: "Säten, dynor, madrasser och interiöra ytor rengörs metodiskt där varje detalj påverkar helhetsintrycket.",
-  },
+const lines = [
+  "Textil på djupet, utan att tappa känslan.",
+  "Fläckar bort. Strukturen kvar.",
+  "Lyster utan överbehandling.",
+  "Precision där varje centimeter räknas.",
 ];
 
 export default function Services() {
   return (
-    <section className="services-room" id="tjanster" aria-label="White Velvets tjänster">
-      <div className="services-intro">
-        <p className="eyebrow">ETT RUM · FYRA BEHANDLINGAR</p>
-        <p>Scrolla genom rummet. Varje material återställs på sitt eget sätt.</p>
+    <section className="lens-services" id="tjanster">
+      <div className="lens-services-intro">
+        <p className="eyebrow">TJÄNSTER</p>
+        <h2>Fyra ytor.<br />Fyra sätt att göra rent.</h2>
       </div>
 
-      {services.slice(0, 4).map((service, index) => {
-        const copy = chapterCopy[index];
-        return (
-          <article
-            className={"room-chapter room-chapter-" + (index + 1)}
-            data-room-stage={index + 1}
-            data-room-service={index}
-            key={service.id}
-          >
-            <div className="chapter-copy">
-              <div className="chapter-number">0{index + 1}</div>
-              <p className="eyebrow">{copy.micro}</p>
-              <h2>{copy.statement}</h2>
-              <p>{copy.detail}</p>
-              <a href="#boka" className="chapter-link">
-                Boka {service.title.toLowerCase()} <ArrowDownRight size={16} />
-              </a>
+      {services.slice(0, 4).map((service, index) => (
+        <article
+          className={`lens-service lens-stage ${index % 2 ? "is-reverse" : ""}`}
+          data-lens-stage={index + 1}
+          key={service.id}
+        >
+          <div className="lens-service-media lens-surface">
+            <Image
+              src={service.image}
+              alt={`${service.title} hos White Velvet`}
+              fill
+              sizes="(max-width: 900px) 100vw, 55vw"
+              className="lens-dirty-image"
+            />
+            <div className="lens-clean-layer" aria-hidden="true">
+              <Image src={service.image} alt="" fill sizes="(max-width: 900px) 100vw, 55vw" />
             </div>
-          </article>
-        );
-      })}
+            <span className="service-figure">0{index + 1}</span>
+          </div>
+
+          <div className="lens-service-copy">
+            <p className="eyebrow">{service.eyebrow}</p>
+            <h3>{service.title}</h3>
+            <p className="service-line">{lines[index]}</p>
+            <p>{service.body}</p>
+            <a href="#boka">Boka {service.title.toLowerCase()} <ArrowUpRight size={15} /></a>
+          </div>
+        </article>
+      ))}
     </section>
   );
 }
