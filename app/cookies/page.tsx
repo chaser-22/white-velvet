@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Cookieinformation" };
+export const metadata: Metadata = {
+  title: "Cookieinformation",
+  alternates: { canonical: "/cookies" },
+  openGraph: { url: "/cookies" },
+};
 
 export default function CookiesPage() {
   return (
