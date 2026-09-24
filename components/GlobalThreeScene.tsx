@@ -57,8 +57,12 @@ const vertexShader = /* glsl */ `
       sin(slowTime * 0.28 + (p.x + p.y) * 0.21) * 0.014;
 
     float idleDrift =
-      sin(p.x * 0.34 + slowTime * 0.46) * 0.014 +
-      cos(p.y * 0.28 - slowTime * 0.38) * 0.010;
+      sin(p.x * 0.34 + slowTime * 0.46) * 0.020 +
+      cos(p.y * 0.28 - slowTime * 0.38) * 0.014;
+
+    float idleSwell =
+      sin(length(p.xy) * 0.58 - slowTime * 0.34) * 0.013 +
+      sin((p.x - p.y) * 0.22 + slowTime * 0.27) * 0.009;
 
     float heroFold =
       sin(p.x * 1.05 + slowTime) * 0.25 +
@@ -122,14 +126,20 @@ const vertexShader = /* glsl */ `
       sin(p.y * 0.72 + slowTime * 2.2 + uFlow * 0.7) * 0.10 * flowStrength +
       sin((p.x - p.y) * 0.38 - slowTime * 1.5) * 0.045 * flowStrength;
 
-    p.z += displacement + idleBreath + idleDrift + pointerLift + flowWave;
+    p.z += displacement + idleBreath + idleDrift + idleSwell + pointerLift + flowWave;
 
     float lateral =
       sin(p.y * 0.58 + uPhase * 0.72) * 0.055 +
       sin(p.x * 0.31 - uPhase * 0.38) * 0.025;
 
-    p.x += lateral * (0.75 + wAbout * 0.35) + uFlow * 0.028 * cos(p.y * 0.55 + slowTime);
-    p.y += cos(p.x * 0.42 + uPhase * 0.44) * 0.035 + uFlow * 0.012;
+    p.x +=
+      lateral * (0.75 + wAbout * 0.35) +
+      sin(slowTime * 0.41 + p.y * 0.18) * 0.012 +
+      uFlow * 0.028 * cos(p.y * 0.55 + slowTime);
+    p.y +=
+      cos(p.x * 0.42 + uPhase * 0.44) * 0.035 +
+      cos(slowTime * 0.33 + p.x * 0.16) * 0.009 +
+      uFlow * 0.012;
 
     vHeight = p.z;
     vCleanMask = cleanMask;
@@ -163,8 +173,10 @@ const fragmentShader = /* glsl */ `
     if (!gl_FrontFacing) normal = -normal;
 
     vec3 viewDir = normalize(cameraPosition - vWorld);
-    vec3 lightA = normalize(vec3(-0.52, 0.70, 0.84));
-    vec3 lightB = normalize(vec3(0.62, -0.24, 0.74));
+    float lightDriftX = sin(uTime * 0.055) * 0.045;
+    float lightDriftY = cos(uTime * 0.043) * 0.028;
+    vec3 lightA = normalize(vec3(-0.52 + lightDriftX, 0.70 + lightDriftY, 0.84));
+    vec3 lightB = normalize(vec3(0.62 - lightDriftX * 0.62, -0.24 + lightDriftY * 0.42, 0.74));
     vec3 lightDir = normalize(mix(lightA, lightB, smoothstep(3.8, 6.3, uPhase)));
 
     float diffuse = max(dot(normal, lightDir), 0.0);
@@ -468,8 +480,16 @@ function Fabric({ quality }: { quality: QualityTier }) {
       interpolateKeyframe([-0.58, -0.62, -0.50, -0.64, -0.50, -0.70, -0.56, -0.62], p) +
       idleZ +
       Math.abs(flowValue) * 0.020;
-    const targetRX = interpolateKeyframe([-0.30, -0.19, -0.14, -0.20, -0.28, -0.10, -0.16, -0.28], p) - flowValue * 0.018;
-    const targetRZ = interpolateKeyframe([-0.13, 0.05, -0.035, 0.025, -0.07, 0.018, 0.045, 0.11], p) + flowValue * 0.025;
+    const idleRX = Math.sin(clock.elapsedTime * 0.061) * 0.009;
+    const idleRZ = Math.cos(clock.elapsedTime * 0.049) * 0.011;
+    const targetRX =
+      interpolateKeyframe([-0.30, -0.19, -0.14, -0.20, -0.28, -0.10, -0.16, -0.28], p) +
+      idleRX -
+      flowValue * 0.018;
+    const targetRZ =
+      interpolateKeyframe([-0.13, 0.05, -0.035, 0.025, -0.07, 0.018, 0.045, 0.11], p) +
+      idleRZ +
+      flowValue * 0.025;
 
     mesh.current.position.x = THREE.MathUtils.damp(mesh.current.position.x, targetX, 3.2, delta);
     mesh.current.position.y = THREE.MathUtils.damp(mesh.current.position.y, targetY, 3.2, delta);
@@ -482,8 +502,13 @@ function Fabric({ quality }: { quality: QualityTier }) {
     const sy = THREE.MathUtils.damp(mesh.current.scale.y, scale * 0.92, 3.1, delta);
     mesh.current.scale.set(sx, sy, 1);
 
-    const cameraX = interpolateKeyframe([0.04, 0.0, -0.05, 0.04, -0.03, 0.0, 0.03, 0.0], p) + flowValue * 0.012;
-    const cameraY = interpolateKeyframe([0.03, -0.02, 0.0, 0.03, -0.02, 0.0, 0.02, 0.0], p);
+    const cameraX =
+      interpolateKeyframe([0.04, 0.0, -0.05, 0.04, -0.03, 0.0, 0.03, 0.0], p) +
+      Math.sin(clock.elapsedTime * 0.046) * 0.010 +
+      flowValue * 0.012;
+    const cameraY =
+      interpolateKeyframe([0.03, -0.02, 0.0, 0.03, -0.02, 0.0, 0.02, 0.0], p) +
+      Math.cos(clock.elapsedTime * 0.039) * 0.007;
     camera.position.x = THREE.MathUtils.damp(camera.position.x, cameraX, 2.45, delta);
     camera.position.y = THREE.MathUtils.damp(camera.position.y, cameraY, 2.45, delta);
     camera.lookAt(0, 0, 0);
