@@ -21,8 +21,8 @@ export default function About() {
         </p>
       </Reveal>
       <div className="value-grid">
-        {values.map(({ icon: Icon, title, text }) => (
-          <Reveal className="value-card" key={title}>
+        {values.map(({ icon: Icon, title, text }, index) => (
+          <Reveal className="value-card" key={title} delay={index * 0.055}>
             <Icon size={22} strokeWidth={1.5} />
             <h3>{title}</h3>
             <p>{text}</p>

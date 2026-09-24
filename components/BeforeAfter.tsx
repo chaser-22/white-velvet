@@ -56,7 +56,11 @@ export default function BeforeAfter() {
         <p>Dra reglaget över bilderna för att jämföra verkliga arbeten från White Velvet.</p>
       </Reveal>
       <div className="compare-grid">
-        {comparisons.map((item) => <Reveal key={item.title}><Compare item={item} /></Reveal>)}
+        {comparisons.map((item, index) => (
+          <Reveal key={item.title} delay={index * 0.07}>
+            <Compare item={item} />
+          </Reveal>
+        ))}
       </div>
     </section>
   );

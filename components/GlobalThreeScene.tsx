@@ -32,7 +32,7 @@ const vertexShader = /* glsl */ `
   varying float vPhase;
 
   float phaseWeight(float target) {
-    return 1.0 - smoothstep(0.0, 0.92, abs(uPhase - target));
+    return 1.0 - smoothstep(0.0, 1.20, abs(uPhase - target));
   }
 
   void main() {
@@ -50,7 +50,11 @@ const vertexShader = /* glsl */ `
     float wFaq = phaseWeight(6.0);
     float wFooter = phaseWeight(7.0);
 
-    float slowTime = uTime * 0.12;
+    float slowTime = uTime * 0.085;
+    float idleBreath =
+      sin(slowTime * 0.72 + p.y * 0.46) * 0.030 +
+      cos(slowTime * 0.51 - p.x * 0.31) * 0.018 +
+      sin(slowTime * 0.28 + (p.x + p.y) * 0.21) * 0.012;
 
     float heroFold =
       sin(p.x * 1.05 + slowTime) * 0.25 +
@@ -114,7 +118,7 @@ const vertexShader = /* glsl */ `
       sin(p.y * 0.72 + slowTime * 2.2 + uFlow * 0.7) * 0.10 * flowStrength +
       sin((p.x - p.y) * 0.38 - slowTime * 1.5) * 0.045 * flowStrength;
 
-    p.z += displacement + pointerLift + flowWave;
+    p.z += displacement + idleBreath + pointerLift + flowWave;
 
     float lateral =
       sin(p.y * 0.58 + uPhase * 0.72) * 0.055 +
@@ -145,7 +149,7 @@ const fragmentShader = /* glsl */ `
   varying float vPhase;
 
   float phaseWeight(float target) {
-    return 1.0 - smoothstep(0.0, 0.92, abs(uPhase - target));
+    return 1.0 - smoothstep(0.0, 1.20, abs(uPhase - target));
   }
 
   void main() {
@@ -317,8 +321,9 @@ function Fabric({ quality }: { quality: QualityTier }) {
       const y = window.scrollY;
       if (lastScrollTime.current > 0) {
         const dt = Math.max(now - lastScrollTime.current, 8);
-        const velocity = ((y - lastScrollY.current) / dt) * 0.12;
-        flowTarget.current = THREE.MathUtils.clamp(velocity, -1.15, 1.15);
+        const velocity = ((y - lastScrollY.current) / dt) * 0.095;
+        const nextFlow = THREE.MathUtils.clamp(velocity, -0.82, 0.82);
+        flowTarget.current = THREE.MathUtils.lerp(flowTarget.current, nextFlow, 0.34);
       }
       lastScrollY.current = y;
       lastScrollTime.current = now;
@@ -338,8 +343,13 @@ function Fabric({ quality }: { quality: QualityTier }) {
           const current = sections[i];
           const next = sections[i + 1];
           if (viewportCenter >= current.center && viewportCenter <= next.center) {
-            const t = (viewportCenter - current.center) / Math.max(next.center - current.center, 1);
-            phase = i + THREE.MathUtils.clamp(t, 0, 1);
+            const raw = THREE.MathUtils.clamp(
+              (viewportCenter - current.center) / Math.max(next.center - current.center, 1),
+              0,
+              1,
+            );
+            const t = raw * raw * (3 - 2 * raw);
+            phase = i + t;
             break;
           }
         }
@@ -414,19 +424,23 @@ function Fabric({ quality }: { quality: QualityTier }) {
     const flow = material.uniforms.uFlow.value;
     const phaseAlpha = 1 - Math.exp(-3.0 * delta);
     const localAlpha = 1 - Math.exp(-4.0 * delta);
-    const pointerAlpha = 1 - Math.exp(-2.4 * delta);
+    const pointerAlpha = 1 - Math.exp(-1.65 * delta);
 
     material.uniforms.uTime.value = clock.elapsedTime;
     material.uniforms.uPhase.value = THREE.MathUtils.lerp(phase, phaseTarget.current, phaseAlpha);
     material.uniforms.uLocal.value = THREE.MathUtils.lerp(local, localTarget.current, localAlpha);
     material.uniforms.uPointer.value.lerp(pointer.current, pointerAlpha);
-    material.uniforms.uFlow.value = THREE.MathUtils.lerp(flow, flowTarget.current, 1 - Math.exp(-5.2 * delta));
-    flowTarget.current *= Math.pow(0.18, delta);
+    material.uniforms.uFlow.value = THREE.MathUtils.lerp(flow, flowTarget.current, 1 - Math.exp(-4.25 * delta));
+    flowTarget.current *= Math.pow(0.075, delta);
 
     const p = material.uniforms.uPhase.value;
 
-    const idleX = Math.sin(clock.elapsedTime * 0.16) * 0.018;
-    const idleY = Math.cos(clock.elapsedTime * 0.13) * 0.012;
+    const idleX =
+      Math.sin(clock.elapsedTime * 0.115) * 0.022 +
+      Math.sin(clock.elapsedTime * 0.047) * 0.009;
+    const idleY =
+      Math.cos(clock.elapsedTime * 0.092) * 0.015 +
+      Math.sin(clock.elapsedTime * 0.036) * 0.007;
     const flowValue = material.uniforms.uFlow.value;
 
     const targetX = interpolateKeyframe([0.45, 0.15, -0.25, 0.28, -0.18, 0.10, 0.32, 0.05], p) + idleX;
@@ -455,10 +469,10 @@ function Fabric({ quality }: { quality: QualityTier }) {
 
   const segments =
     quality === "high"
-      ? ([154, 118] as const)
+      ? ([128, 96] as const)
       : quality === "medium"
-        ? ([112, 86] as const)
-        : ([68, 52] as const);
+        ? ([88, 66] as const)
+        : ([50, 38] as const);
 
   return (
     <mesh ref={mesh}>
@@ -475,6 +489,7 @@ function Scene({ quality }: { quality: QualityTier }) {
 export default function GlobalThreeScene() {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [quality, setQuality] = useState<QualityTier>("medium");
+  const [sceneReady, setSceneReady] = useState(false);
 
   useEffect(() => {
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -494,16 +509,34 @@ export default function GlobalThreeScene() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!reducedMotion) return;
+    const win = window as Window & { __wvSceneReady?: boolean };
+    win.__wvSceneReady = true;
+    window.dispatchEvent(new Event("wv:scene-ready"));
+    setSceneReady(true);
+  }, [reducedMotion]);
+
+  const signalSceneReady = () => {
+    const win = window as Window & { __wvSceneReady?: boolean };
+    win.__wvSceneReady = true;
+    window.requestAnimationFrame(() => {
+      setSceneReady(true);
+      window.dispatchEvent(new Event("wv:scene-ready"));
+    });
+  };
+
   if (reducedMotion) {
-    return <div className="three-fallback" aria-hidden="true" />;
+    return <div className="three-fallback three-scene-ready" aria-hidden="true" />;
   }
 
   const dpr: [number, number] =
-    quality === "high" ? [1, 1.5] : quality === "medium" ? [1, 1.25] : [1, 1.0];
+    quality === "high" ? [1, 1.4] : quality === "medium" ? [1, 1.18] : [1, 1.0];
 
   return (
-    <div className={`three-layer three-quality-${quality}`} aria-hidden="true">
+    <div className={`three-layer three-quality-${quality} ${sceneReady ? "three-scene-ready" : ""}`} aria-hidden="true">
       <Canvas
+        onCreated={signalSceneReady}
         camera={{ position: [0, 0, 5.35], fov: 43 }}
         dpr={dpr}
         gl={{

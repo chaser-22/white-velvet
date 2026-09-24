@@ -19,7 +19,7 @@ export default function Services() {
 
       <div className="service-grid">
         {services.map((service, index) => (
-          <Reveal key={service.id} className="service-card">
+          <Reveal key={service.id} className="service-card" delay={index * 0.055}>
             <div className="service-media">
               <Image
                 src={service.image}

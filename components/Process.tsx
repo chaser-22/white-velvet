@@ -19,8 +19,8 @@ export default function Process() {
           </p>
         </Reveal>
         <div className="steps">
-          {steps.map(([num, title, body]) => (
-            <Reveal key={num} className="step-row">
+          {steps.map(([num, title, body], index) => (
+            <Reveal key={num} className="step-row" delay={index * 0.065}>
               <span>{num}</span>
               <div><h3>{title}</h3><p>{body}</p></div>
             </Reveal>

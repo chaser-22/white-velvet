@@ -1,4 +1,4 @@
-import GlobalThreeScene from "@/components/GlobalThreeScene";
+import ExperienceLoader from "@/components/ExperienceLoader";\nimport GlobalThreeScene from "@/components/GlobalThreeScene";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Services from "@/components/Services";
@@ -29,7 +29,7 @@ export default function Home() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <GlobalThreeScene />
+      <ExperienceLoader />\n      <GlobalThreeScene />
       <Header />
       <main className="site-content" id="main-content">
         <Hero />
