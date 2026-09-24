@@ -2993,3 +2993,73 @@ body {
     font-size: 17px;
   }
 }
+
+
+/* WHITE VELVET — visually center the trust feature columns */
+.trust-feature-grid {
+  align-items: stretch;
+}
+
+.trust-item {
+  min-height: 146px;
+  padding: 24px 18px 26px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+  text-align: center;
+}
+
+.trust-item > div:last-child {
+  width: 100%;
+  max-width: 230px;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.trust-item p {
+  margin: 0 0 9px;
+  text-align: center;
+}
+
+.trust-item strong {
+  max-width: 230px;
+  margin-inline: auto;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.trust-icon {
+  margin-inline: auto;
+}
+
+@media (max-width: 900px) {
+  .trust-item {
+    min-height: 138px;
+    padding-inline: 20px;
+    text-align: center;
+  }
+
+  .trust-item > div:last-child,
+  .trust-item p,
+  .trust-item strong {
+    text-align: center;
+  }
+}
+
+@media (max-width: 560px) {
+  .trust-item {
+    min-height: 128px;
+    padding: 22px 20px 24px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .trust-item > div:last-child {
+    max-width: 280px;
+  }
+
+  .trust-item strong {
+    max-width: 280px;
+  }
+}
