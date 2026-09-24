@@ -15,7 +15,7 @@ export const services = [
     title: "Mattvätt",
     short: "Anpassad djuprengöring för moderna, orientaliska och känsliga mattor.",
     body: "Behandlingen anpassas efter material, konstruktion och skick. För större eller heltäckande mattor kan rengöringen utföras direkt på plats.",
-    image: "https://white-velvet.se/ws/media-library/189a21dd2e0b61c86be29683f07d8b57/01.png",
+    image: "/media/service-mattvatt.webp",
   },
   {
     id: "mobler",
@@ -23,7 +23,7 @@ export const services = [
     title: "Möbeltvätt",
     short: "Noggrann rengöring av soffor, fåtöljer, dynor och andra textilier.",
     body: "Vi arbetar metodiskt med fläckar, damm, lukt och smuts och anpassar behandlingen efter textilens egenskaper.",
-    image: "https://white-velvet.se/ws/media-library/3494052537f835fa2ddea9552148472d/02.png",
+    image: "/media/service-mobeltvatt.webp",
   },
   {
     id: "golv",
@@ -31,7 +31,7 @@ export const services = [
     title: "Golvpolering",
     short: "Återställ glans och ett välskött uttryck på trä, sten, klinker och andra lämpliga golv.",
     body: "En kontrollerad process för rengöring och polering som anpassas efter golvets material och skick.",
-    image: "https://white-velvet.se/ws/media-library/843bcefaec399b2c318936e2c78fd91e/03.png",
+    image: "/media/service-golvpolering.webp",
   },
   {
     id: "fordon",
@@ -39,7 +39,7 @@ export const services = [
     title: "Båt & husbil",
     short: "Invändig rengöring av säten, dynor, madrasser, golv och interiöra ytor.",
     body: "För ytor som kräver precision i mindre utrymmen, med fokus på textilier, fläckar, lukt och en fräsch helhet.",
-    image: "https://white-velvet.se/ws/media-library/d5b4cd2bbdc5371c60adbd2ce7dceae6/chatgpt-image-feb-28-2026-06_04_09-pm.png",
+    image: "/media/service-bat-husbil.webp",
   },
 ];
 

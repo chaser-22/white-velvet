@@ -12,13 +12,6 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 86400,
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "white-velvet.se",
-        pathname: "/ws/media-library/**",
-      },
-    ],
   },
   async headers() {
     return [

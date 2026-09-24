@@ -7,13 +7,13 @@ import Reveal from "./Reveal";
 const comparisons = [
   {
     title: "Möbeltvätt",
-    before: "https://white-velvet.se/ws/media-library/e0a496681c1b96d1629830f40c8c8721/4583cf81-f999-46a0-9b33-d3bb6f320448.jpg",
-    after: "https://white-velvet.se/ws/media-library/053b36f293a5d04a6c0f72c0d5082f30/c0db9d54-2c9d-4bb2-a578-31a6dde334ca.jpg",
+    before: "/media/before-mobeltvatt.webp",
+    after: "/media/after-mobeltvatt.webp",
   },
   {
     title: "Mattvätt",
-    before: "https://white-velvet.se/ws/media-library/6889b4813acdb895f17e4d693afedeeb/e5df2470-fd68-4f9e-9f56-70d51525dac5.jpg",
-    after: "https://white-velvet.se/ws/media-library/8ac1fb3e91d798cef756bd5f83985c2a/4ba1e5ea-910b-4d2f-83e9-42d2127ae9de.jpg",
+    before: "/media/before-mattvatt.webp",
+    after: "/media/after-mattvatt.webp",
   },
 ];
 
