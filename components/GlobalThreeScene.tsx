@@ -309,7 +309,7 @@ function getQualityTier(): QualityTier {
   const cores = navigator.hardwareConcurrency ?? 8;
   const width = window.innerWidth;
 
-  if (width < 700 || memory <= 4 || cores <= 4) return "low";
+  if (width < 820 || memory <= 4 || cores <= 4) return "low";
   if (width >= 1280 && memory >= 8 && cores >= 8) return "high";
   return "medium";
 }
