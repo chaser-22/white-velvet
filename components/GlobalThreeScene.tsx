@@ -24,6 +24,7 @@ const vertexShader = /* glsl */ `
   uniform vec2 uPointer;
   uniform float uPointerStrength;
   uniform float uFlow;
+  uniform float uIntensity;
 
   varying vec2 vUv;
   varying vec3 vWorld;
@@ -131,20 +132,22 @@ const vertexShader = /* glsl */ `
       sin(p.y * 0.72 + slowTime * 2.2 + uFlow * 0.7) * 0.10 * flowStrength +
       sin((p.x - p.y) * 0.38 - slowTime * 1.5) * 0.045 * flowStrength;
 
-    p.z += displacement + idleBreath + idleDrift + idleSwell + pointerLift + flowWave;
+    p.z += (displacement + idleBreath + idleDrift + idleSwell + pointerLift + flowWave) * uIntensity;
 
     float lateral =
       sin(p.y * 0.58 + uPhase * 0.72) * 0.055 +
       sin(p.x * 0.31 - uPhase * 0.38) * 0.025;
 
-    p.x +=
+    p.x += (
       lateral * (0.75 + wAbout * 0.35) +
       sin(slowTime * 0.41 + p.y * 0.18) * 0.012 +
-      uFlow * 0.028 * cos(p.y * 0.55 + slowTime);
-    p.y +=
+      uFlow * 0.028 * cos(p.y * 0.55 + slowTime)
+    ) * uIntensity;
+    p.y += (
       cos(p.x * 0.42 + uPhase * 0.44) * 0.035 +
       cos(slowTime * 0.33 + p.x * 0.16) * 0.009 +
-      uFlow * 0.012;
+      uFlow * 0.012
+    ) * uIntensity;
 
     vHeight = p.z;
     vCleanMask = cleanMask;
@@ -323,6 +326,7 @@ function Fabric({ quality }: { quality: QualityTier }) {
           uPointer: { value: new THREE.Vector2(0.5, 0.5) },
           uPointerStrength: { value: quality === "low" ? 0 : 0.58 },
           uFlow: { value: 0 },
+          uIntensity: { value: 1 },
         },
         vertexShader,
         fragmentShader,
@@ -444,18 +448,18 @@ function Fabric({ quality }: { quality: QualityTier }) {
     resizeObserver.observe(document.documentElement);
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("pointermove", onPointer, { passive: true });
+    if (quality !== "low") window.addEventListener("pointermove", onPointer, { passive: true });
     window.addEventListener("resize", onResize, { passive: true });
 
     return () => {
       resizeObserver.disconnect();
       if (scrollRaf.current !== null) window.cancelAnimationFrame(scrollRaf.current);
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("pointermove", onPointer);
+      if (quality !== "low") window.removeEventListener("pointermove", onPointer);
       window.removeEventListener("resize", onResize);
       material.dispose();
     };
-  }, [material]);
+  }, [material, quality]);
 
   useFrame(({ clock, camera }, delta) => {
     if (!mesh.current || document.hidden) return;
@@ -479,6 +483,14 @@ function Fabric({ quality }: { quality: QualityTier }) {
     flowTarget.current *= Math.pow(0.022, delta);
 
     const p = material.uniforms.uPhase.value;
+    const targetIntensity = interpolateKeyframe([1.0, 0.86, 0.78, 0.68, 0.64, 0.56, 0.48, 0.42], p);
+    material.uniforms.uIntensity.value = THREE.MathUtils.damp(
+      material.uniforms.uIntensity.value,
+      targetIntensity,
+      2.4,
+      delta,
+    );
+    const motionIntensity = material.uniforms.uIntensity.value;
 
     const idleX =
       Math.sin(idleTime * 0.62) * 0.092 +
@@ -491,12 +503,12 @@ function Fabric({ quality }: { quality: QualityTier }) {
       Math.cos(idleTime * 0.24) * 0.034;
     const flowValue = material.uniforms.uFlow.value;
 
-    const targetX = interpolateKeyframe([0.45, 0.15, -0.25, 0.28, -0.18, 0.10, 0.32, 0.05], p) + idleX;
-    const targetY = interpolateKeyframe([0.12, -0.12, 0.04, 0.15, -0.20, 0.08, -0.04, 0.16], p) + idleY;
+    const targetX = interpolateKeyframe([0.45, 0.15, -0.25, 0.28, -0.18, 0.10, 0.32, 0.05], p) + idleX * motionIntensity;
+    const targetY = interpolateKeyframe([0.12, -0.12, 0.04, 0.15, -0.20, 0.08, -0.04, 0.16], p) + idleY * motionIntensity;
     const targetZ =
       interpolateKeyframe([-0.58, -0.62, -0.50, -0.64, -0.50, -0.70, -0.56, -0.62], p) +
-      idleZ +
-      Math.abs(flowValue) * 0.020;
+      idleZ * motionIntensity +
+      Math.abs(flowValue) * 0.020 * motionIntensity;
     const idleRX =
       Math.sin(idleTime * 0.48) * 0.034 +
       Math.cos(idleTime * 0.27) * 0.017;
@@ -508,13 +520,13 @@ function Fabric({ quality }: { quality: QualityTier }) {
       Math.sin(idleTime * 0.30) * 0.022;
     const targetRX =
       interpolateKeyframe([-0.30, -0.19, -0.14, -0.20, -0.28, -0.10, -0.16, -0.28], p) +
-      idleRX -
-      flowValue * 0.018;
-    const targetRY = idleRY + flowValue * 0.010;
+      idleRX * motionIntensity -
+      flowValue * 0.018 * motionIntensity;
+    const targetRY = idleRY * motionIntensity + flowValue * 0.010 * motionIntensity;
     const targetRZ =
       interpolateKeyframe([-0.13, 0.05, -0.035, 0.025, -0.07, 0.018, 0.045, 0.11], p) +
-      idleRZ +
-      flowValue * 0.025;
+      idleRZ * motionIntensity +
+      flowValue * 0.025 * motionIntensity;
 
     mesh.current.position.x = THREE.MathUtils.damp(mesh.current.position.x, targetX, 3.2, delta);
     mesh.current.position.y = THREE.MathUtils.damp(mesh.current.position.y, targetY, 3.2, delta);
@@ -526,8 +538,8 @@ function Fabric({ quality }: { quality: QualityTier }) {
     const baseScale = interpolateKeyframe([1.42, 1.34, 1.40, 1.36, 1.44, 1.40, 1.38, 1.46], p);
     const idleBreathingScale =
       1 +
-      Math.sin(idleTime * 0.39) * 0.024 +
-      Math.sin(idleTime * 0.19) * 0.012;
+      (Math.sin(idleTime * 0.39) * 0.024 +
+      Math.sin(idleTime * 0.19) * 0.012) * motionIntensity;
     const scale = baseScale * idleBreathingScale;
     const sx = THREE.MathUtils.damp(mesh.current.scale.x, scale, 3.1, delta);
     const sy = THREE.MathUtils.damp(mesh.current.scale.y, scale * 0.92, 3.1, delta);
@@ -535,16 +547,16 @@ function Fabric({ quality }: { quality: QualityTier }) {
 
     const cameraX =
       interpolateKeyframe([0.04, 0.0, -0.05, 0.04, -0.03, 0.0, 0.03, 0.0], p) +
-      Math.sin(idleTime * 0.40) * 0.044 +
-      Math.sin(idleTime * 0.23) * 0.022 +
-      flowValue * 0.010;
+      Math.sin(idleTime * 0.40) * 0.044 * motionIntensity +
+      Math.sin(idleTime * 0.23) * 0.022 * motionIntensity +
+      flowValue * 0.010 * motionIntensity;
     const cameraY =
       interpolateKeyframe([0.03, -0.02, 0.0, 0.03, -0.02, 0.0, 0.02, 0.0], p) +
-      Math.cos(idleTime * 0.32) * 0.034;
+      Math.cos(idleTime * 0.32) * 0.034 * motionIntensity;
     const cameraZ =
       5.45 +
-      Math.sin(idleTime * 0.30) * 0.082 +
-      Math.cos(idleTime * 0.16) * 0.036;
+      Math.sin(idleTime * 0.30) * 0.082 * motionIntensity +
+      Math.cos(idleTime * 0.16) * 0.036 * motionIntensity;
     camera.position.x = THREE.MathUtils.damp(camera.position.x, cameraX, 2.15, delta);
     camera.position.y = THREE.MathUtils.damp(camera.position.y, cameraY, 2.15, delta);
     camera.position.z = THREE.MathUtils.damp(camera.position.z, cameraZ, 1.8, delta);
@@ -553,10 +565,10 @@ function Fabric({ quality }: { quality: QualityTier }) {
 
   const segments =
     quality === "high"
-      ? ([116, 88] as const)
+      ? ([104, 78] as const)
       : quality === "medium"
-        ? ([80, 60] as const)
-        : ([44, 34] as const);
+        ? ([72, 54] as const)
+        : ([34, 26] as const);
 
   return (
     <mesh ref={mesh}>
@@ -615,7 +627,7 @@ export default function GlobalThreeScene() {
   }
 
   const dpr: [number, number] =
-    quality === "high" ? [1, 1.4] : quality === "medium" ? [1, 1.18] : [1, 1.0];
+    quality === "high" ? [1, 1.3] : quality === "medium" ? [1, 1.1] : [1, 1.0];
 
   return (
     <div className={`three-layer three-quality-${quality} ${sceneReady ? "three-scene-ready" : ""}`} aria-hidden="true">
