@@ -2264,3 +2264,325 @@ body {
     opacity: .20;
   }
 }
+
+
+/* WHITE VELVET — architectural glass header redesign */
+.site-header {
+  top: 16px;
+  width: min(1220px, calc(100% - 40px));
+  min-height: 72px;
+  padding: 10px 12px 10px 16px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 28px;
+  border: 1px solid rgba(255,255,255,.50);
+  border-radius: 24px;
+  background: rgba(247,244,237,.34);
+  backdrop-filter: blur(30px) saturate(132%);
+  -webkit-backdrop-filter: blur(30px) saturate(132%);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.52) inset,
+    0 16px 44px rgba(18,24,26,.05);
+}
+
+.site-header::before {
+  inset: 1px;
+  border-radius: 22px;
+  background:
+    linear-gradient(100deg, rgba(255,255,255,.17), transparent 34%, transparent 72%, rgba(255,255,255,.07));
+  opacity: .62;
+}
+
+.site-header.is-scrolled {
+  top: 12px;
+  width: min(1188px, calc(100% - 44px));
+  background: rgba(247,244,237,.56);
+  border-color: rgba(255,255,255,.68);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.66) inset,
+    0 20px 52px rgba(18,24,26,.075);
+}
+
+.site-header .brand {
+  min-width: 210px;
+  gap: 11px;
+  letter-spacing: 0;
+}
+
+.site-header .brand-mark {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 50%;
+  border-color: rgba(16,20,23,.14);
+  background: rgba(255,255,255,.10);
+  font-size: 12px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.42) inset,
+    0 8px 20px rgba(18,24,26,.04);
+}
+
+.brand-copy {
+  display: grid;
+  gap: 4px;
+  line-height: 1;
+}
+
+.brand-name {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .18em;
+}
+
+.brand-note {
+  font-size: 8px;
+  font-weight: 650;
+  letter-spacing: .16em;
+  color: rgba(16,20,23,.42);
+}
+
+.site-header .desktop-nav {
+  justify-self: center;
+  gap: 7px;
+  padding: 4px;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 16px;
+  background: rgba(255,255,255,.055);
+}
+
+.site-header .desktop-nav a {
+  position: relative;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  opacity: .62;
+  transition:
+    opacity .25s ease,
+    background .28s ease,
+    transform .28s cubic-bezier(.16,1,.3,1);
+}
+
+.site-header .desktop-nav a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  width: 14px;
+  height: 1px;
+  background: rgba(16,20,23,.38);
+  transform: translateX(-50%) scaleX(0);
+  transform-origin: center;
+  transition: transform .28s cubic-bezier(.16,1,.3,1);
+}
+
+.site-header .desktop-nav a:hover {
+  opacity: 1;
+  background: rgba(255,255,255,.13);
+  transform: translateY(0);
+}
+
+.site-header .desktop-nav a:hover::after {
+  transform: translateX(-50%) scaleX(1);
+}
+
+.site-header .header-actions {
+  justify-self: end;
+  gap: 7px;
+}
+
+.site-header .phone-link {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  border-left: 1px solid rgba(16,20,23,.10);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  opacity: .62;
+}
+
+.site-header .header-book {
+  min-height: 46px;
+  padding-inline: 17px 15px;
+  border-radius: 15px;
+  gap: 10px;
+  font-size: 12px;
+  box-shadow: none;
+}
+
+.site-header .header-book svg {
+  transition: transform .3s cubic-bezier(.16,1,.3,1);
+}
+
+.site-header .header-book:hover svg {
+  transform: translate(2px, -2px);
+}
+
+.site-header .mobile-menu {
+  top: calc(100% + 10px);
+  border: 1px solid rgba(255,255,255,.62);
+  background: rgba(247,244,237,.88);
+  backdrop-filter: blur(26px) saturate(126%);
+  -webkit-backdrop-filter: blur(26px) saturate(126%);
+  box-shadow: 0 24px 64px rgba(18,24,26,.12);
+}
+
+/* Brushed-velvet atmosphere: directional textile grain rather than generic glow. */
+.three-atmosphere {
+  inset: -5%;
+  background:
+    repeating-linear-gradient(
+      102deg,
+      rgba(255,255,255,.028) 0 1px,
+      rgba(255,255,255,0) 1px 5px
+    ),
+    repeating-linear-gradient(
+      98deg,
+      rgba(26,32,33,.018) 0 1px,
+      transparent 1px 9px
+    ),
+    radial-gradient(ellipse at 58% 34%, rgba(255,255,255,.16), transparent 48%);
+  mix-blend-mode: soft-light;
+  animation: velvetAtmosphereDrift 22s ease-in-out infinite alternate !important;
+  opacity: .48;
+}
+
+.ambient-sheen {
+  inset: -24%;
+  border-radius: 46%;
+}
+
+.ambient-sheen-a {
+  background:
+    linear-gradient(
+      102deg,
+      transparent 20%,
+      rgba(255,255,255,.045) 37%,
+      rgba(255,255,255,.28) 49%,
+      rgba(255,255,255,.055) 60%,
+      transparent 78%
+    );
+  opacity: .34;
+  animation: velvetNapSweepA 18s cubic-bezier(.45,.05,.35,1) infinite alternate;
+}
+
+.ambient-sheen-b {
+  background:
+    radial-gradient(
+      ellipse at 50% 50%,
+      rgba(255,255,255,.19) 0%,
+      rgba(255,255,255,.055) 31%,
+      transparent 65%
+    );
+  opacity: .26;
+  animation: velvetNapSweepB 26s cubic-bezier(.45,.05,.35,1) infinite alternate;
+}
+
+@keyframes velvetAtmosphereDrift {
+  0% {
+    transform: translate3d(-.7%, -.45%, 0) scale(1.035) rotate(-.08deg);
+    opacity: .42;
+  }
+  50% {
+    transform: translate3d(.45%, .35%, 0) scale(1.052) rotate(.05deg);
+    opacity: .52;
+  }
+  100% {
+    transform: translate3d(.75%, -.2%, 0) scale(1.042) rotate(.09deg);
+    opacity: .46;
+  }
+}
+
+@keyframes velvetNapSweepA {
+  0% {
+    transform: translate3d(-30%, 4%, 0) rotate(-4deg) scale(1.02);
+  }
+  100% {
+    transform: translate3d(30%, -4%, 0) rotate(4deg) scale(1.10);
+  }
+}
+
+@keyframes velvetNapSweepB {
+  0% {
+    transform: translate3d(-10%, -6%, 0) scale(.94);
+  }
+  100% {
+    transform: translate3d(12%, 7%, 0) scale(1.08);
+  }
+}
+
+@media (max-width: 1020px) {
+  .site-header {
+    grid-template-columns: 1fr auto;
+  }
+
+  .site-header .brand {
+    min-width: 0;
+  }
+
+  .site-header .desktop-nav {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .site-header,
+  .site-header.is-scrolled {
+    width: calc(100% - 20px);
+    min-height: 62px;
+    padding: 9px 9px 9px 12px;
+    border-radius: 20px;
+    background: rgba(247,244,237,.44);
+  }
+
+  .site-header::before {
+    border-radius: 18px;
+  }
+
+  .site-header .brand-mark {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+  }
+
+  .brand-name {
+    font-size: 9.5px;
+    letter-spacing: .15em;
+  }
+
+  .brand-note {
+    display: none;
+  }
+
+  .site-header .menu-button {
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgba(255,255,255,.28);
+    background: rgba(255,255,255,.08);
+  }
+
+  .three-atmosphere {
+    opacity: .40;
+    animation-duration: 28s !important;
+  }
+
+  .ambient-sheen-a {
+    opacity: .25;
+    animation-duration: 22s;
+  }
+
+  .ambient-sheen-b {
+    opacity: .18;
+    animation-duration: 30s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .three-atmosphere,
+  .ambient-sheen-a,
+  .ambient-sheen-b {
+    animation: none !important;
+  }
+}
