@@ -6,27 +6,39 @@ type LoaderState = "visible" | "leaving" | "gone";
 
 export default function ExperienceLoader() {
   const [state, setState] = useState<LoaderState>("visible");
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    const sessionKey = "wv:intro-seen";
+    const sessionKey = "wv:intro-seen-v2";
     if (window.sessionStorage.getItem(sessionKey) === "1") {
       setState("gone");
       return;
     }
 
+    const startedAt = performance.now();
     let sceneReady = Boolean((window as Window & { __wvSceneReady?: boolean }).__wvSceneReady);
     let fontsReady = !document.fonts;
     let minimumElapsed = false;
     let leaveTimer = 0;
     let goneTimer = 0;
 
+    const progressTimer = window.setInterval(() => {
+      const elapsed = performance.now() - startedAt;
+      const next = Math.min(99, Math.floor((elapsed / 5000) * 100));
+      setProgress(next);
+    }, 50);
+
     const beginExit = () => {
       if (!sceneReady || !fontsReady || !minimumElapsed || leaveTimer) return;
+
+      window.clearInterval(progressTimer);
+      setProgress(100);
+
       leaveTimer = window.setTimeout(() => {
         window.sessionStorage.setItem(sessionKey, "1");
         setState("leaving");
         goneTimer = window.setTimeout(() => setState("gone"), 760);
-      }, 80);
+      }, 160);
     };
 
     const onSceneReady = () => {
@@ -57,6 +69,7 @@ export default function ExperienceLoader() {
 
     return () => {
       window.removeEventListener("wv:scene-ready", onSceneReady);
+      window.clearInterval(progressTimer);
       window.clearTimeout(minimumTimer);
       window.clearTimeout(safetyTimer);
       window.clearTimeout(leaveTimer);
@@ -71,7 +84,7 @@ export default function ExperienceLoader() {
       className={`experience-loader experience-loader-minimal ${state === "leaving" ? "is-leaving" : ""}`}
       role="status"
       aria-live="polite"
-      aria-label="White Velvet laddar"
+      aria-label={`White Velvet laddar ${progress} procent`}
     >
       <div className="loader-velvet-field" aria-hidden="true">
         <span className="loader-velvet-fold loader-velvet-fold-a" />
@@ -82,8 +95,13 @@ export default function ExperienceLoader() {
       <div className="loader-minimal-brand">
         <div className="loader-minimal-mark" aria-hidden="true">WV</div>
         <div className="loader-minimal-name">WHITE VELVET</div>
+
         <div className="loader-minimal-progress" aria-hidden="true">
-          <span />
+          <span style={{ transform: `scaleX(${progress / 100})` }} />
+        </div>
+
+        <div className="loader-minimal-percent" aria-hidden="true">
+          {progress}%
         </div>
       </div>
     </div>
