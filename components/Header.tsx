@@ -84,6 +84,9 @@ export default function Header() {
           </div>
         )}
       </header>
+      <a className={`mobile-book ${scrolled ? "is-visible" : ""}`} href="#boka">
+        Boka
+      </a>
     </>
   );
 }
