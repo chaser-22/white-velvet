@@ -2,35 +2,25 @@ import { ArrowDown, ArrowUpRight } from "lucide-react";
 
 export default function Hero() {
   return (
-    <section className="purity-hero purity-stage" id="top" data-purity="0.08">
-      <div className="purity-hero-copy">
-        <p className="eyebrow">WHITE VELVET / PURITY MATRIX</p>
-        <h1>Rent är när<br />allt faller<br /><em>på plats.</em></h1>
+    <section className="treatment-hero treatment-stage" id="top" data-treatment-stage="0">
+      <div className="treatment-hero-copy">
+        <p className="eyebrow">WHITE VELVET / TREATMENT LINE</p>
+        <h1>Se vad<br />behandlingen<br /><em>lämnar efter sig.</em></h1>
         <p className="hero-lead">
-          Professionell rengöring i Västerås för mattor, möbler, golv och interiörer.
-          Vi reducerar det som stör materialet — smuts, matthet, fläckar och visuellt brus.
+          Fyra tjänster. Fyra material. En sak gemensamt: ytan ska kännas bättre efteråt,
+          inte bara se renare ut.
         </p>
         <div className="hero-actions">
-          <a className="button button-ivory" href="#tjanster">
-            Följ transformationen <ArrowDown size={16} />
-          </a>
-          <a className="text-link text-link-light" href="#boka">
-            Boka rengöring <ArrowUpRight size={16} />
-          </a>
+          <a className="button button-ivory" href="#tjanster">Starta behandlingslinjen <ArrowDown size={16} /></a>
+          <a className="text-link text-link-light" href="#boka">Boka rengöring <ArrowUpRight size={16} /></a>
         </div>
       </div>
-
-      <div className="hero-system">
-        <div><span>STATE</span><strong>UNRESOLVED</strong></div>
-        <div><span>FIELD</span><strong>01 / VÄSTERÅS</strong></div>
-        <div><span>PROCESS</span><strong>DIRTY → PURE</strong></div>
+      <div className="hero-machine-readout">
+        <div><span>TOOL</span><strong>WV / PRECISION HEAD</strong></div>
+        <div><span>MODE</span><strong>STANDBY</strong></div>
+        <div><span>OUTPUT</span><strong>RESTORED SURFACE</strong></div>
       </div>
-
-      <div className="hero-axis">
-        <span>DENSITY</span>
-        <i />
-        <span>CLARITY</span>
-      </div>
+      <div className="hero-track"><span>UNTREATED</span><i /><span>RESTORED</span></div>
     </section>
   );
 }
