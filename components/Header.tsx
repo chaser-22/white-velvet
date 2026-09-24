@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, X } from "lucide-react";
+import { ArrowUpRight, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { contact } from "@/lib/content";
 
@@ -49,7 +49,10 @@ export default function Header() {
       <header className={`site-header ${scrolled ? "is-scrolled" : ""}`}>
         <a href="#top" className="brand" aria-label="White Velvet startsida">
           <span className="brand-mark">WV</span>
-          <span>WHITE VELVET</span>
+          <span className="brand-copy">
+            <span className="brand-name">WHITE VELVET</span>
+            <span className="brand-note">MATERIALVÅRD · VÄSTERÅS</span>
+          </span>
         </a>
 
         <nav className="desktop-nav" aria-label="Huvudnavigation">
@@ -60,7 +63,10 @@ export default function Header() {
 
         <div className="header-actions">
           <a className="phone-link" href={`tel:${contact.phoneHref}`}>Ring oss</a>
-          <a className="button button-dark button-small" href="#boka">Boka nu</a>
+          <a className="button button-dark button-small header-book" href="#boka">
+            <span>Boka</span>
+            <ArrowUpRight size={15} strokeWidth={1.7} />
+          </a>
           <button
             type="button"
             className="menu-button"
