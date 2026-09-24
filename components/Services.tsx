@@ -1,40 +1,54 @@
+import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { services } from "@/lib/content";
+import Reveal from "./Reveal";
 
-const stations = [
-  ["1","STATION 01 / EXTRACTION","Fibrerna reser sig bakom verktyget.","När behandlingshuvudet passerar mattan förändras inte bara färgen. Luggen lyfts, riktningen stabiliseras och smuts mellan fibrerna reduceras.","PILE RECOVERY"],
-  ["2","STATION 02 / UPHOLSTERY","Fläcken stannar på fel sida av linjen.","På möbeltextil jobbar verktyget mjukare. Fläckzoner och färgskiftningar försvinner bakom passagen medan vävens struktur ligger kvar.","STAIN LIFT"],
-  ["3","STATION 03 / POLISH","Före verktyget: matt. Efter: kontrollerad lyster.","Här byter huvudet karaktär. En roterande poleringsyta reducerar visuellt slitage och gör reflektionen renare utan att ytan känns överbehandlad.","ROUGHNESS ↓"],
-  ["4","STATION 04 / DETAIL","Små ytor kräver den mest precisa passagen.","Interiören böjs och komprimeras runt verktyget. Haze, smuts och ojämn ton rensas upp i ett tätare detaljläge.","DETAIL ↑"],
-] as const;
+const serviceNotes = [
+  "Djup rengöring med respekt för lugg, konstruktion och färg.",
+  "Skonsam behandling av soffor, fåtöljer och andra möbeltextilier.",
+  "Rengöring och polering för ett jämnare, mer välskött golv.",
+  "Noggrann rengöring av dynor, säten och interiörer i mindre utrymmen.",
+];
 
 export default function Services() {
   return (
-    <section className="treatment-services" id="tjanster">
-      <div className="treatment-intro treatment-stage" data-treatment-stage="0">
-        <p className="eyebrow">FYRA STATIONER / EN MASKIN</p>
-        <h2>Verktyget ändras.<br />Resultatet gör det också.</h2>
-        <p>Scrollen driver själva behandlingen. Du ser var verktyget är, vad som ligger framför det — och vad som blir kvar bakom.</p>
-      </div>
-      {stations.map(([stage, code, headline, body, metric], index) => {
-        const service = services[index];
-        return (
-          <article className="treatment-station treatment-stage" data-treatment-stage={stage} key={code}>
-            <div className="station-number">0{index + 1}</div>
-            <div className="station-copy">
-              <p className="eyebrow">{code}</p>
-              <h3>{headline}</h3>
-              <p>{body}</p>
-              <a href="#boka">Boka {service.title.toLowerCase()} <ArrowUpRight size={15} /></a>
+    <section className="studio-services" id="tjanster">
+      <Reveal className="studio-section-intro">
+        <p className="eyebrow">TJÄNSTER</p>
+        <h2>Rätt metod för varje yta.</h2>
+        <p>
+          Vi utgår från material, skick och användning. Inte från en standardlösning.
+        </p>
+      </Reveal>
+
+      <div className="service-editorial-list">
+        {services.slice(0, 4).map((service, index) => (
+          <Reveal
+            key={service.id}
+            className={`service-editorial ${index % 2 ? "service-editorial-reverse" : ""}`}
+          >
+            <div className="service-editorial-media">
+              <Image
+                src={service.image}
+                alt={`${service.title} hos White Velvet`}
+                fill
+                sizes="(max-width: 800px) 100vw, 58vw"
+              />
+              <span className="service-number">0{index + 1}</span>
             </div>
-            <aside className="station-readout">
-              <span>{metric}</span>
-              <strong>{service.title}</strong>
-              <div className="station-meter"><i /></div>
-            </aside>
-          </article>
-        );
-      })}
+
+            <div className="service-editorial-copy">
+              <p className="eyebrow">{service.eyebrow}</p>
+              <h3>{service.title}</h3>
+              <p className="service-note">{serviceNotes[index]}</p>
+              <p>{service.body}</p>
+              <a href="#boka">
+                Boka {service.title.toLowerCase()} <ArrowUpRight size={15} />
+              </a>
+            </div>
+          </Reveal>
+        ))}
+      </div>
     </section>
   );
 }
