@@ -63,7 +63,7 @@ function Room({ quality }: { quality: QualityTier }) {
 
   const sofaGroup = useRef<THREE.Group>(null);
   const travelGroup = useRef<THREE.Group>(null);
-  const cleanLight = useRef<THREE.PointLight>(null);
+  const cleanLight = useRef<THREE.PointLight>(null);\n  const dustPoints = useRef<THREE.Points>(null);
 
   const sofaMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: "#8f8a81", roughness: 0.95 }), []);
   const sofaStainMaterial = useMemo(() => new THREE.MeshBasicMaterial({ color: "#5c5145", transparent: true, opacity: 0.34, depthWrite: false }), []);
@@ -205,12 +205,9 @@ function Room({ quality }: { quality: QualityTier }) {
     currentTarget.lerp(lookTarget, 0.055);
     camera.lookAt(currentTarget);
 
-    if (dustGeometry.attributes.position) {
-      const points = dustGeometry.attributes.position as THREE.BufferAttribute;
-      const arr = points.array as Float32Array;
-      const drift = Math.sin(clock.elapsedTime * 0.18) * 0.0006;
-      for (let i = 1; i < arr.length; i += 3) arr[i] += drift;
-      points.needsUpdate = quality !== "low";
+    if (dustPoints.current) {
+      dustPoints.current.position.y = Math.sin(clock.elapsedTime * 0.18) * 0.10;
+      dustPoints.current.rotation.y = Math.sin(clock.elapsedTime * 0.08) * 0.025;
     }
   });
 
@@ -327,7 +324,7 @@ function Room({ quality }: { quality: QualityTier }) {
           <planeGeometry args={[6.8, 3.7]} />
         </mesh>
 
-        <points geometry={dustGeometry} material={dustMaterial} />
+        <points ref={dustPoints} geometry={dustGeometry} material={dustMaterial} />
       </group>
     </>
   );
