@@ -22,10 +22,6 @@ export default function Hero() {
         </Reveal>
 
         <div className="hero-orbit" aria-hidden="true">
-          <div className="orbit-card">
-            <span>01</span>
-            <strong>Textil</strong>
-          </div>
           <div className="orbit-card orbit-card-right">
             <span>02</span>
             <strong>Yta</strong>
