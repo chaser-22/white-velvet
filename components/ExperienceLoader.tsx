@@ -25,8 +25,8 @@ export default function ExperienceLoader() {
       leaveTimer = window.setTimeout(() => {
         window.sessionStorage.setItem(sessionKey, "1");
         setState("leaving");
-        goneTimer = window.setTimeout(() => setState("gone"), 980);
-      }, 90);
+        goneTimer = window.setTimeout(() => setState("gone"), 760);
+      }, 80);
     };
 
     const onSceneReady = () => {
@@ -39,14 +39,14 @@ export default function ExperienceLoader() {
     const minimumTimer = window.setTimeout(() => {
       minimumElapsed = true;
       beginExit();
-    }, 3000);
+    }, 5000);
 
     const safetyTimer = window.setTimeout(() => {
       sceneReady = true;
       fontsReady = true;
       minimumElapsed = true;
       beginExit();
-    }, 5600);
+    }, 6800);
 
     if (document.fonts) {
       document.fonts.ready.then(() => {
@@ -68,35 +68,22 @@ export default function ExperienceLoader() {
 
   return (
     <div
-      className={`experience-loader ${state === "leaving" ? "is-leaving" : ""}`}
+      className={`experience-loader experience-loader-minimal ${state === "leaving" ? "is-leaving" : ""}`}
       role="status"
       aria-live="polite"
       aria-label="White Velvet laddar"
     >
-      <div className="experience-loader-fabric" aria-hidden="true">
-        <span className="loader-fold loader-fold-a" />
-        <span className="loader-fold loader-fold-b" />
-        <span className="loader-fold loader-fold-c" />
-        <span className="loader-light-sweep" />
+      <div className="loader-velvet-field" aria-hidden="true">
+        <span className="loader-velvet-fold loader-velvet-fold-a" />
+        <span className="loader-velvet-fold loader-velvet-fold-b" />
+        <span className="loader-velvet-glow" />
       </div>
 
-      <div className="loader-material-window" aria-hidden="true">
-        <span className="loader-material loader-material-matte" />
-        <span className="loader-material loader-material-restored" />
-        <span className="loader-restoration-line" />
-      </div>
-
-      <div className="experience-loader-inner">
-        <div className="experience-loader-emblem" aria-hidden="true">
-          <span className="loader-orbit loader-orbit-a" />
-          <span className="loader-orbit loader-orbit-b" />
-          <span className="experience-loader-mark">WV</span>
-        </div>
-        <p className="experience-loader-kicker">MATERIALVÅRD · VÄSTERÅS</p>
-        <div className="experience-loader-rule" aria-hidden="true"><span /></div>
-        <div className="experience-loader-status">
-          <span>WHITE VELVET</span>
-          <span className="loader-status-word">FÖRBEREDER YTAN</span>
+      <div className="loader-minimal-brand">
+        <div className="loader-minimal-mark" aria-hidden="true">WV</div>
+        <div className="loader-minimal-name">WHITE VELVET</div>
+        <div className="loader-minimal-progress" aria-hidden="true">
+          <span />
         </div>
       </div>
     </div>
