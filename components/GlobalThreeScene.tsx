@@ -467,7 +467,11 @@ function Fabric({ quality }: { quality: QualityTier }) {
     const localAlpha = 1 - Math.exp(-2.35 * delta);
     const pointerAlpha = 1 - Math.exp(-1.08 * delta);
 
-    material.uniforms.uTime.value = clock.elapsedTime;
+    // Keep the material visibly alive even when scroll input is completely idle.
+    // A slightly accelerated time base makes the velvet deformation readable
+    // without making the scene feel nervous or tied to scroll velocity.
+    const idleTime = clock.elapsedTime * 1.32;
+    material.uniforms.uTime.value = idleTime;
     material.uniforms.uPhase.value = THREE.MathUtils.lerp(phase, phaseTarget.current, phaseAlpha);
     material.uniforms.uLocal.value = THREE.MathUtils.lerp(local, localTarget.current, localAlpha);
     material.uniforms.uPointer.value.lerp(pointer.current, pointerAlpha);
@@ -477,14 +481,14 @@ function Fabric({ quality }: { quality: QualityTier }) {
     const p = material.uniforms.uPhase.value;
 
     const idleX =
-      Math.sin(clock.elapsedTime * 0.58) * 0.040 +
-      Math.sin(clock.elapsedTime * 0.27) * 0.022;
+      Math.sin(idleTime * 0.46) * 0.082 +
+      Math.sin(idleTime * 0.21) * 0.040;
     const idleY =
-      Math.cos(clock.elapsedTime * 0.43) * 0.032 +
-      Math.sin(clock.elapsedTime * 0.23) * 0.016;
+      Math.cos(idleTime * 0.37) * 0.062 +
+      Math.sin(idleTime * 0.19) * 0.030;
     const idleZ =
-      Math.sin(clock.elapsedTime * 0.34) * 0.030 +
-      Math.cos(clock.elapsedTime * 0.19) * 0.014;
+      Math.sin(idleTime * 0.29) * 0.060 +
+      Math.cos(idleTime * 0.16) * 0.028;
     const flowValue = material.uniforms.uFlow.value;
 
     const targetX = interpolateKeyframe([0.45, 0.15, -0.25, 0.28, -0.18, 0.10, 0.32, 0.05], p) + idleX;
@@ -494,15 +498,19 @@ function Fabric({ quality }: { quality: QualityTier }) {
       idleZ +
       Math.abs(flowValue) * 0.020;
     const idleRX =
-      Math.sin(clock.elapsedTime * 0.41) * 0.016 +
-      Math.cos(clock.elapsedTime * 0.21) * 0.008;
+      Math.sin(idleTime * 0.34) * 0.030 +
+      Math.cos(idleTime * 0.17) * 0.014;
+    const idleRY =
+      Math.sin(idleTime * 0.24) * 0.030 +
+      Math.cos(idleTime * 0.13) * 0.012;
     const idleRZ =
-      Math.cos(clock.elapsedTime * 0.35) * 0.020 +
-      Math.sin(clock.elapsedTime * 0.24) * 0.010;
+      Math.cos(idleTime * 0.30) * 0.038 +
+      Math.sin(idleTime * 0.20) * 0.018;
     const targetRX =
       interpolateKeyframe([-0.30, -0.19, -0.14, -0.20, -0.28, -0.10, -0.16, -0.28], p) +
       idleRX -
       flowValue * 0.018;
+    const targetRY = idleRY + flowValue * 0.010;
     const targetRZ =
       interpolateKeyframe([-0.13, 0.05, -0.035, 0.025, -0.07, 0.018, 0.045, 0.11], p) +
       idleRZ +
@@ -512,22 +520,31 @@ function Fabric({ quality }: { quality: QualityTier }) {
     mesh.current.position.y = THREE.MathUtils.damp(mesh.current.position.y, targetY, 3.2, delta);
     mesh.current.position.z = THREE.MathUtils.damp(mesh.current.position.z, targetZ, 3.2, delta);
     mesh.current.rotation.x = THREE.MathUtils.damp(mesh.current.rotation.x, targetRX, 3.0, delta);
+    mesh.current.rotation.y = THREE.MathUtils.damp(mesh.current.rotation.y, targetRY, 2.7, delta);
     mesh.current.rotation.z = THREE.MathUtils.damp(mesh.current.rotation.z, targetRZ, 3.0, delta);
 
-    const scale = interpolateKeyframe([1.42, 1.34, 1.40, 1.36, 1.44, 1.40, 1.38, 1.46], p);
+    const baseScale = interpolateKeyframe([1.42, 1.34, 1.40, 1.36, 1.44, 1.40, 1.38, 1.46], p);
+    const idleBreathingScale =
+      1 +
+      Math.sin(idleTime * 0.25) * 0.020 +
+      Math.sin(idleTime * 0.11) * 0.010;
+    const scale = baseScale * idleBreathingScale;
     const sx = THREE.MathUtils.damp(mesh.current.scale.x, scale, 3.1, delta);
     const sy = THREE.MathUtils.damp(mesh.current.scale.y, scale * 0.92, 3.1, delta);
     mesh.current.scale.set(sx, sy, 1);
 
     const cameraX =
       interpolateKeyframe([0.04, 0.0, -0.05, 0.04, -0.03, 0.0, 0.03, 0.0], p) +
-      Math.sin(clock.elapsedTime * 0.31) * 0.020 +
-      Math.sin(clock.elapsedTime * 0.17) * 0.010 +
+      Math.sin(idleTime * 0.26) * 0.038 +
+      Math.sin(idleTime * 0.14) * 0.018 +
       flowValue * 0.010;
     const cameraY =
       interpolateKeyframe([0.03, -0.02, 0.0, 0.03, -0.02, 0.0, 0.02, 0.0], p) +
-      Math.cos(clock.elapsedTime * 0.24) * 0.014;
-    const cameraZ = 5.45 + Math.sin(clock.elapsedTime * 0.21) * 0.045;
+      Math.cos(idleTime * 0.20) * 0.028;
+    const cameraZ =
+      5.45 +
+      Math.sin(idleTime * 0.18) * 0.075 +
+      Math.cos(idleTime * 0.09) * 0.030;
     camera.position.x = THREE.MathUtils.damp(camera.position.x, cameraX, 2.15, delta);
     camera.position.y = THREE.MathUtils.damp(camera.position.y, cameraY, 2.15, delta);
     camera.position.z = THREE.MathUtils.damp(camera.position.z, cameraZ, 1.8, delta);
