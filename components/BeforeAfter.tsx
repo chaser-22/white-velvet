@@ -20,6 +20,15 @@ const comparisons = [
 function Compare({ item }: { item: (typeof comparisons)[number] }) {
   const [value, setValue] = useState(52);
 
+  const updateValue = (nextValue: number) => {
+    setValue(nextValue);
+    window.dispatchEvent(
+      new CustomEvent("whitevelvet:compare", {
+        detail: { value: nextValue / 100 },
+      }),
+    );
+  };
+
   return (
     <div className="compare-card">
       <div className="compare-stage">
@@ -35,7 +44,7 @@ function Compare({ item }: { item: (typeof comparisons)[number] }) {
           min="0"
           max="100"
           value={value}
-          onChange={(e) => setValue(Number(e.target.value))}
+          onChange={(event) => updateValue(Number(event.target.value))}
           aria-label={`Jämför före och efter för ${item.title}`}
         />
       </div>

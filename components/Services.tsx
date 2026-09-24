@@ -20,23 +20,25 @@ export default function Services() {
       <div className="service-grid">
         {services.map((service, index) => (
           <Reveal key={service.id} className="service-card">
-            <div className="service-media">
-              <Image
-                src={service.image}
-                alt={`${service.title} hos White Velvet`}
-                fill
-                sizes="(max-width: 800px) 100vw, 50vw"
-              />
-              <span className="service-index">0{index + 1}</span>
-            </div>
-            <div className="service-copy">
-              <p className="mini-label">{service.eyebrow}</p>
-              <h3>{service.title}</h3>
-              <p>{service.short}</p>
-              <details>
-                <summary>Mer om tjänsten <ArrowUpRight size={15} /></summary>
-                <p>{service.body}</p>
-              </details>
+            <div className="service-cleaning-target" data-cleaning-mode={index}>
+              <div className="service-media">
+                <Image
+                  src={service.image}
+                  alt={`${service.title} hos White Velvet`}
+                  fill
+                  sizes="(max-width: 800px) 100vw, 50vw"
+                />
+                <span className="service-index">0{index + 1}</span>
+              </div>
+              <div className="service-copy">
+                <p className="mini-label">{service.eyebrow}</p>
+                <h3>{service.title}</h3>
+                <p>{service.short}</p>
+                <details>
+                  <summary>Mer om tjänsten <ArrowUpRight size={15} /></summary>
+                  <p>{service.body}</p>
+                </details>
+              </div>
             </div>
           </Reveal>
         ))}

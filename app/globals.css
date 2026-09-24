@@ -346,3 +346,9 @@ h1, h2, .footer-brand h2 { font-family: var(--display); font-weight: 400; letter
   .three-layer { display: none; }
   .three-fallback { display: block; }
 }
+
+
+/* Service cards also drive the WebGL cleaning material. */
+.service-cleaning-target {
+  height: 100%;
+}
