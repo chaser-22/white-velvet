@@ -89,6 +89,11 @@ export default function BookingWizard() {
           <p className="eyebrow light">BOKNINGSFÖRFRÅGAN</p>
           <h2>Börja med det du behöver hjälp med.</h2>
           <p>Det tar ungefär två minuter. Din önskade tid bekräftas av White Velvet efteråt.</p>
+          <div className="booking-assurances" aria-label="Så fungerar bokningsförfrågan">
+            <div><strong>Önskad tid</strong><span>Du väljer ett tidsfönster</span></div>
+            <div><strong>Personlig bekräftelse</strong><span>White Velvet bekräftar efteråt</span></div>
+            <div><strong>Ca 2 minuter</strong><span>Kort och tydlig förfrågan</span></div>
+          </div>
         </div>
 
         <form onSubmit={submit} className="booking-card" noValidate>
