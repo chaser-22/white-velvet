@@ -285,3 +285,64 @@ h1, h2, .footer-brand h2 { font-family: var(--display); font-weight: 400; letter
   text-transform: uppercase;
   opacity: .55;
 }
+
+
+/* White Velvet — continuous material restoration field */
+.three-layer {
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 70% 18%, rgba(255,255,255,.72), transparent 31%),
+    linear-gradient(145deg, #eee9df 0%, #d5d7d3 48%, #969d9e 100%);
+}
+.three-layer canvas {
+  position: absolute !important;
+  inset: 0;
+}
+.three-atmosphere {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 16% 24%, rgba(255,255,255,.24), transparent 29%),
+    radial-gradient(circle at 83% 72%, rgba(12,18,20,.10), transparent 34%),
+    linear-gradient(90deg, rgba(244,240,231,.11), transparent 42%, rgba(255,255,255,.05));
+  opacity: .72;
+}
+.three-fallback {
+  background:
+    radial-gradient(ellipse at 72% 18%, rgba(255,255,255,.92), transparent 28%),
+    radial-gradient(ellipse at 33% 48%, rgba(244,239,228,.74), transparent 42%),
+    linear-gradient(142deg, #ece7dd 0%, #c9cdca 56%, #626b6e 128%);
+}
+.three-fallback::after,
+.three-fallback-inline::after {
+  content: "";
+  position: absolute;
+  inset: -12%;
+  background:
+    repeating-linear-gradient(178deg, rgba(255,255,255,.035) 0 1px, transparent 1px 4px),
+    radial-gradient(ellipse at 58% 52%, transparent 30%, rgba(25,31,33,.10) 72%, transparent 82%);
+  transform: rotate(-4deg);
+}
+.process-panel {
+  background: rgba(14,18,21,.925);
+  backdrop-filter: blur(11px) saturate(92%);
+}
+.booking-shell {
+  background: rgba(13,18,21,.945);
+  backdrop-filter: blur(12px) saturate(90%);
+}
+
+@media (max-width: 760px) {
+  .three-atmosphere {
+    opacity: .84;
+    background:
+      radial-gradient(circle at 50% 16%, rgba(255,255,255,.30), transparent 34%),
+      linear-gradient(90deg, rgba(244,240,231,.15), transparent 52%, rgba(25,31,33,.06));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .three-layer { display: none; }
+  .three-fallback { display: block; }
+}

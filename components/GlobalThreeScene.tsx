@@ -4,28 +4,121 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+type QualityTier = "high" | "medium" | "low";
+
+const SECTION_SELECTORS = [
+  "#top",
+  "#tjanster",
+  "#resultat",
+  ".process",
+  ".about",
+  "#boka",
+  "#faq",
+  "#kontakt",
+];
+
 const vertexShader = /* glsl */ `
   uniform float uTime;
-  uniform float uScroll;
+  uniform float uPhase;
+  uniform float uLocal;
   uniform vec2 uPointer;
+  uniform float uPointerStrength;
+
   varying vec2 vUv;
   varying vec3 vWorld;
-  varying float vFold;
+  varying float vHeight;
+  varying float vCleanMask;
+  varying float vPhase;
+
+  float phaseWeight(float target) {
+    return 1.0 - smoothstep(0.0, 0.92, abs(uPhase - target));
+  }
 
   void main() {
     vUv = uv;
+    vPhase = uPhase;
+
     vec3 p = position;
 
-    float scrollWave = uScroll * 7.5;
-    float waveA = sin(p.x * 1.35 + uTime * 0.28 + scrollWave) * 0.22;
-    float waveB = sin(p.y * 1.7 - uTime * 0.18 - scrollWave * 0.45) * 0.12;
-    float waveC = sin((p.x + p.y) * 1.1 + uTime * 0.12) * 0.08;
-    float pointerLift = exp(-distance(uv, uPointer) * 5.0) * 0.16;
+    float wHero = phaseWeight(0.0);
+    float wServices = phaseWeight(1.0);
+    float wResults = phaseWeight(2.0);
+    float wProcess = phaseWeight(3.0);
+    float wAbout = phaseWeight(4.0);
+    float wBooking = phaseWeight(5.0);
+    float wFaq = phaseWeight(6.0);
+    float wFooter = phaseWeight(7.0);
 
-    p.z += waveA + waveB + waveC + pointerLift;
-    p.x += sin(p.y * 0.72 + uScroll * 4.0) * 0.08;
-    p.y += cos(p.x * 0.56 - uScroll * 3.0) * 0.06;
-    vFold = p.z;
+    float slowTime = uTime * 0.12;
+
+    float heroFold =
+      sin(p.x * 1.05 + slowTime) * 0.25 +
+      sin(p.y * 0.92 - slowTime * 0.8) * 0.10 +
+      sin((p.x + p.y) * 0.44) * 0.06;
+
+    float serviceFold =
+      sin(p.x * 2.55 + p.y * 0.22 + slowTime * 0.7) * 0.17 +
+      sin(p.y * 1.30 - slowTime * 0.55) * 0.07;
+
+    float cleanFront = clamp(uLocal, 0.04, 0.96);
+    float cleanMask = 1.0 - smoothstep(cleanFront - 0.12, cleanFront + 0.12, uv.x);
+    float dirtyTexture =
+      sin(p.x * 3.4 + p.y * 1.8) * 0.08 +
+      sin(p.y * 4.8 - p.x * 0.6) * 0.045;
+    float cleanTexture =
+      sin(p.x * 1.10 + slowTime * 0.45) * 0.08 +
+      sin(p.y * 0.95) * 0.035;
+    float resultFold = mix(dirtyTexture, cleanTexture, cleanMask);
+
+    float processFold =
+      sin(p.y * 2.05 + p.x * 0.18 + slowTime * 0.32) * 0.075 +
+      sin(p.x * 0.78) * 0.035;
+
+    float aboutFold =
+      sin(p.x * 0.78 + p.y * 0.42 + slowTime * 0.42) * 0.19 +
+      sin(p.y * 0.72 - slowTime * 0.38) * 0.08;
+
+    float bookingFold =
+      sin(p.x * 0.92 + slowTime * 0.22) * 0.055 +
+      sin(p.y * 0.72) * 0.025;
+
+    float faqFold =
+      sin(p.x * 1.30 + slowTime * 0.30) * 0.085 +
+      sin(p.y * 1.12 - slowTime * 0.25) * 0.038;
+
+    float footerFold =
+      sin(p.x * 0.72 + slowTime * 0.32) * 0.19 +
+      sin(p.y * 0.62 + p.x * 0.20) * 0.095;
+
+    float weightSum =
+      wHero + wServices + wResults + wProcess +
+      wAbout + wBooking + wFaq + wFooter + 0.0001;
+
+    float displacement = (
+      heroFold * wHero +
+      serviceFold * wServices +
+      resultFold * wResults +
+      processFold * wProcess +
+      aboutFold * wAbout +
+      bookingFold * wBooking +
+      faqFold * wFaq +
+      footerFold * wFooter
+    ) / weightSum;
+
+    float pointerDistance = distance(uv, uPointer);
+    float pointerLift = exp(-pointerDistance * 7.5) * 0.13 * uPointerStrength;
+
+    p.z += displacement + pointerLift;
+
+    float lateral =
+      sin(p.y * 0.58 + uPhase * 0.72) * 0.055 +
+      sin(p.x * 0.31 - uPhase * 0.38) * 0.025;
+
+    p.x += lateral * (0.75 + wAbout * 0.35);
+    p.y += cos(p.x * 0.42 + uPhase * 0.44) * 0.035;
+
+    vHeight = p.z;
+    vCleanMask = cleanMask;
 
     vec4 world = modelMatrix * vec4(p, 1.0);
     vWorld = world.xyz;
@@ -34,10 +127,20 @@ const vertexShader = /* glsl */ `
 `;
 
 const fragmentShader = /* glsl */ `
-  uniform float uScroll;
+  uniform float uTime;
+  uniform float uPhase;
+  uniform float uLocal;
+  uniform vec2 uPointer;
+
   varying vec2 vUv;
   varying vec3 vWorld;
-  varying float vFold;
+  varying float vHeight;
+  varying float vCleanMask;
+  varying float vPhase;
+
+  float phaseWeight(float target) {
+    return 1.0 - smoothstep(0.0, 0.92, abs(uPhase - target));
+  }
 
   void main() {
     vec3 dx = dFdx(vWorld);
@@ -45,158 +148,334 @@ const fragmentShader = /* glsl */ `
     vec3 normal = normalize(cross(dx, dy));
     if (!gl_FrontFacing) normal = -normal;
 
-    vec3 lightDir = normalize(vec3(-0.55, 0.72, 0.85));
+    vec3 viewDir = normalize(cameraPosition - vWorld);
+    vec3 lightA = normalize(vec3(-0.52, 0.70, 0.84));
+    vec3 lightB = normalize(vec3(0.62, -0.24, 0.74));
+    vec3 lightDir = normalize(mix(lightA, lightB, smoothstep(3.8, 6.3, uPhase)));
+
     float diffuse = max(dot(normal, lightDir), 0.0);
-    float velvet = pow(1.0 - abs(dot(normal, normalize(vec3(0.0, 0.0, 1.0)))), 2.2);
-    float thread = sin(vUv.y * 620.0) * 0.012 + sin(vUv.x * 330.0) * 0.006;
+    float reverseDiffuse = max(dot(normal, -lightDir), 0.0);
+    float rim = pow(1.0 - abs(dot(normal, viewDir)), 2.35);
+    float velvetSheen = pow(max(0.0, 1.0 - abs(dot(normal, viewDir))), 1.55);
 
-    vec3 ivory = vec3(0.93, 0.91, 0.86);
-    vec3 silver = vec3(0.73, 0.75, 0.76);
-    vec3 midnight = vec3(0.055, 0.075, 0.085);
+    float wHero = phaseWeight(0.0);
+    float wServices = phaseWeight(1.0);
+    float wResults = phaseWeight(2.0);
+    float wProcess = phaseWeight(3.0);
+    float wAbout = phaseWeight(4.0);
+    float wBooking = phaseWeight(5.0);
+    float wFaq = phaseWeight(6.0);
+    float wFooter = phaseWeight(7.0);
 
-    float sectionMix = smoothstep(0.36, 0.88, uScroll);
-    vec3 base = mix(ivory, silver, smoothstep(-0.18, 0.35, vFold));
-    base = mix(base, midnight, sectionMix * 0.34);
+    vec3 ivory = vec3(0.935, 0.915, 0.875);
+    vec3 pearl = vec3(0.79, 0.80, 0.785);
+    vec3 warmIvory = vec3(0.955, 0.935, 0.895);
+    vec3 softSilver = vec3(0.70, 0.725, 0.72);
+    vec3 charcoal = vec3(0.075, 0.092, 0.098);
+    vec3 midnight = vec3(0.038, 0.052, 0.058);
+    vec3 dusty = vec3(0.54, 0.565, 0.56);
 
-    float vignette = smoothstep(0.95, 0.28, distance(vUv, vec2(0.5)));
-    vec3 color = base * (0.48 + diffuse * 0.7) + velvet * 0.28 + thread;
-    color += vignette * 0.035;
+    vec3 resultColor = mix(dusty, warmIvory, vCleanMask);
 
-    float alpha = 0.82;
-    gl_FragColor = vec4(color, alpha);
+    float weightSum =
+      wHero + wServices + wResults + wProcess +
+      wAbout + wBooking + wFaq + wFooter + 0.0001;
+
+    vec3 base = (
+      ivory * wHero +
+      pearl * wServices +
+      resultColor * wResults +
+      charcoal * wProcess +
+      warmIvory * wAbout +
+      midnight * wBooking +
+      softSilver * wFaq +
+      midnight * wFooter
+    ) / weightSum;
+
+    float threadY = 0.5 + 0.5 * sin(vUv.y * 520.0 + sin(vUv.x * 24.0) * 0.35);
+    float threadX = 0.5 + 0.5 * sin(vUv.x * 230.0 + vUv.y * 4.0);
+    float weave = (threadY * 0.72 + threadX * 0.28 - 0.5) * 0.032;
+
+    float serviceGrain =
+      (0.5 + 0.5 * sin(vUv.x * 84.0 + vUv.y * 16.0)) *
+      (0.5 + 0.5 * sin(vUv.y * 71.0));
+    weave += (serviceGrain - 0.5) * 0.018 * wServices;
+
+    float cleanFront = clamp(uLocal, 0.04, 0.96);
+    float restorationLine = exp(-pow((vUv.x - cleanFront) * 18.0, 2.0)) * wResults;
+
+    float napDirection = 0.5 + 0.5 * sin((vUv.x * 0.34 + vUv.y) * 390.0);
+    float nap = (napDirection - 0.5) * 0.022;
+
+    float cleanSheen = mix(0.58, 1.18, vCleanMask);
+    float sheenStrength =
+      0.22 * wHero +
+      0.18 * wServices +
+      0.25 * wResults * cleanSheen +
+      0.14 * wProcess +
+      0.33 * wAbout +
+      0.16 * wBooking +
+      0.20 * wFaq +
+      0.18 * wFooter;
+
+    float lighting = 0.47 + diffuse * 0.63 + reverseDiffuse * 0.08;
+    vec3 color = base * lighting;
+    color += velvetSheen * sheenStrength;
+    color += rim * (0.09 + 0.08 * wAbout);
+    color += weave + nap;
+    color += restorationLine * vec3(0.22, 0.21, 0.18);
+
+    float pointerGlow = exp(-distance(vUv, uPointer) * 9.0);
+    color += pointerGlow * 0.018 * (1.0 - wBooking);
+
+    float centerVeil = smoothstep(0.82, 0.24, distance(vUv, vec2(0.5)));
+    color += centerVeil * 0.018;
+
+    float darkPhase = clamp(wProcess * 0.70 + wBooking + wFooter, 0.0, 1.0);
+    color = mix(color, color * 0.88, darkPhase * 0.42);
+
+    gl_FragColor = vec4(color, 0.92);
   }
 `;
 
-function Fabric({ lowPower = false }: { lowPower?: boolean }) {
+function getQualityTier(): QualityTier {
+  if (typeof window === "undefined") return "medium";
+
+  const nav = navigator as Navigator & { deviceMemory?: number };
+  const memory = nav.deviceMemory ?? 8;
+  const cores = navigator.hardwareConcurrency ?? 8;
+  const width = window.innerWidth;
+
+  if (width < 700 || memory <= 4 || cores <= 4) return "low";
+  if (width >= 1280 && memory >= 8 && cores >= 8) return "high";
+  return "medium";
+}
+
+function interpolateKeyframe(values: number[], phase: number) {
+  const clamped = THREE.MathUtils.clamp(phase, 0, values.length - 1);
+  const index = Math.floor(clamped);
+  const next = Math.min(index + 1, values.length - 1);
+  const t = THREE.MathUtils.smoothstep(clamped - index, 0, 1);
+  return THREE.MathUtils.lerp(values[index], values[next], t);
+}
+
+function Fabric({ quality }: { quality: QualityTier }) {
   const mesh = useRef<THREE.Mesh>(null);
   const pointer = useRef(new THREE.Vector2(0.5, 0.5));
-  const scroll = useRef(0);
+  const phaseTarget = useRef(0);
+  const localTarget = useRef(0);
+  const measuredSections = useRef<Array<{ top: number; bottom: number; center: number }>>([]);
 
   const material = useMemo(
     () =>
       new THREE.ShaderMaterial({
         uniforms: {
           uTime: { value: 0 },
-          uScroll: { value: 0 },
+          uPhase: { value: 0 },
+          uLocal: { value: 0 },
           uPointer: { value: new THREE.Vector2(0.5, 0.5) },
+          uPointerStrength: { value: quality === "low" ? 0 : 1 },
         },
         vertexShader,
         fragmentShader,
         transparent: true,
         side: THREE.DoubleSide,
+        depthWrite: false,
       }),
-    [],
+    [quality],
   );
 
   useEffect(() => {
+    const measure = () => {
+      const sections = SECTION_SELECTORS
+        .map((selector) => document.querySelector<HTMLElement>(selector))
+        .filter((element): element is HTMLElement => Boolean(element))
+        .map((element) => {
+          const rect = element.getBoundingClientRect();
+          const top = rect.top + window.scrollY;
+          const bottom = top + rect.height;
+          return { top, bottom, center: top + rect.height * 0.5 };
+        });
+
+      if (sections.length === SECTION_SELECTORS.length) {
+        measuredSections.current = sections;
+      }
+    };
+
+    const updateScrollState = () => {
+      const sections = measuredSections.current;
+      if (sections.length !== SECTION_SELECTORS.length) return;
+
+      const viewportCenter = window.scrollY + window.innerHeight * 0.5;
+
+      let phase = 0;
+      if (viewportCenter <= sections[0].center) {
+        phase = 0;
+      } else if (viewportCenter >= sections[sections.length - 1].center) {
+        phase = sections.length - 1;
+      } else {
+        for (let i = 0; i < sections.length - 1; i += 1) {
+          const current = sections[i];
+          const next = sections[i + 1];
+          if (viewportCenter >= current.center && viewportCenter <= next.center) {
+            const t = (viewportCenter - current.center) / Math.max(next.center - current.center, 1);
+            phase = i + THREE.MathUtils.clamp(t, 0, 1);
+            break;
+          }
+        }
+      }
+
+      let activeIndex = 0;
+      let smallestDistance = Number.POSITIVE_INFINITY;
+
+      sections.forEach((section, index) => {
+        if (viewportCenter >= section.top && viewportCenter <= section.bottom) {
+          activeIndex = index;
+          smallestDistance = 0;
+          return;
+        }
+
+        if (smallestDistance > 0) {
+          const distance = Math.abs(viewportCenter - section.center);
+          if (distance < smallestDistance) {
+            smallestDistance = distance;
+            activeIndex = index;
+          }
+        }
+      });
+
+      const active = sections[activeIndex];
+      const local = (viewportCenter - active.top) / Math.max(active.bottom - active.top, 1);
+
+      phaseTarget.current = phase;
+      localTarget.current = THREE.MathUtils.clamp(local, 0, 1);
+    };
+
     const onPointer = (event: PointerEvent) => {
-      pointer.current.x = event.clientX / window.innerWidth;
-      pointer.current.y = 1 - event.clientY / window.innerHeight;
+      pointer.current.set(
+        event.clientX / Math.max(window.innerWidth, 1),
+        1 - event.clientY / Math.max(window.innerHeight, 1),
+      );
     };
-    const onScroll = () => {
-      const max = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
-      scroll.current = window.scrollY / max;
+
+    const onResize = () => {
+      measure();
+      updateScrollState();
     };
-    onScroll();
+
+    measure();
+    updateScrollState();
+
+    const resizeObserver = new ResizeObserver(() => {
+      measure();
+      updateScrollState();
+    });
+
+    resizeObserver.observe(document.documentElement);
+
+    window.addEventListener("scroll", updateScrollState, { passive: true });
     window.addEventListener("pointermove", onPointer, { passive: true });
-    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize, { passive: true });
+
     return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("scroll", updateScrollState);
       window.removeEventListener("pointermove", onPointer);
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
       material.dispose();
     };
   }, [material]);
 
-  useFrame(({ clock }) => {
-    if (!mesh.current) return;
-    material.uniforms.uTime.value = clock.elapsedTime;
-    material.uniforms.uScroll.value += (scroll.current - material.uniforms.uScroll.value) * 0.035;
-    material.uniforms.uPointer.value.lerp(pointer.current, 0.04);
+  useFrame(({ clock, camera }) => {
+    if (!mesh.current || document.hidden) return;
 
-    const s = material.uniforms.uScroll.value;
-    mesh.current.rotation.z = -0.18 + s * 0.82;
-    mesh.current.rotation.x = -0.34 + Math.sin(s * Math.PI * 2) * 0.12;
-    mesh.current.position.x = Math.sin(s * 5.2) * 0.75;
-    mesh.current.position.y = Math.cos(s * 4.4) * 0.36;
-    mesh.current.position.z = -0.55 + Math.sin(s * 3.1) * 0.22;
+    const phase = material.uniforms.uPhase.value;
+    const local = material.uniforms.uLocal.value;
+
+    material.uniforms.uTime.value = clock.elapsedTime;
+    material.uniforms.uPhase.value = THREE.MathUtils.lerp(phase, phaseTarget.current, 0.045);
+    material.uniforms.uLocal.value = THREE.MathUtils.lerp(local, localTarget.current, 0.055);
+    material.uniforms.uPointer.value.lerp(pointer.current, 0.035);
+
+    const p = material.uniforms.uPhase.value;
+
+    mesh.current.position.x = interpolateKeyframe([0.45, 0.15, -0.25, 0.28, -0.18, 0.10, 0.32, 0.05], p);
+    mesh.current.position.y = interpolateKeyframe([0.12, -0.12, 0.04, 0.15, -0.20, 0.08, -0.04, 0.16], p);
+    mesh.current.position.z = interpolateKeyframe([-0.58, -0.62, -0.50, -0.64, -0.50, -0.70, -0.56, -0.62], p);
+    mesh.current.rotation.x = interpolateKeyframe([-0.30, -0.19, -0.14, -0.20, -0.28, -0.10, -0.16, -0.28], p);
+    mesh.current.rotation.z = interpolateKeyframe([-0.13, 0.05, -0.035, 0.025, -0.07, 0.018, 0.045, 0.11], p);
+
+    const scale = interpolateKeyframe([1.42, 1.34, 1.40, 1.36, 1.44, 1.40, 1.38, 1.46], p);
+    mesh.current.scale.set(scale, scale * 0.92, 1);
+
+    camera.position.x = interpolateKeyframe([0.04, 0.0, -0.05, 0.04, -0.03, 0.0, 0.03, 0.0], p);
+    camera.position.y = interpolateKeyframe([0.03, -0.02, 0.0, 0.03, -0.02, 0.0, 0.02, 0.0], p);
+    camera.lookAt(0, 0, 0);
   });
 
+  const segments =
+    quality === "high"
+      ? ([154, 118] as const)
+      : quality === "medium"
+        ? ([112, 86] as const)
+        : ([68, 52] as const);
+
   return (
-    <mesh ref={mesh} scale={[1.42, 1.2, 1]}>
-      <planeGeometry args={[8.8, 7.2, lowPower ? 72 : 120, lowPower ? 56 : 96]} />
+    <mesh ref={mesh}>
+      <planeGeometry args={[9.4, 7.8, segments[0], segments[1]]} />
       <primitive object={material} attach="material" />
     </mesh>
   );
 }
 
-function Threads() {
-  const group = useRef<THREE.Group>(null);
-  const curves = useMemo(() => {
-    return [-1.8, -0.8, 0.2, 1.1].map((offset, index) => {
-      const pts = Array.from({ length: 28 }, (_, i) => {
-        const t = i / 27;
-        return new THREE.Vector3(
-          -4.3 + t * 8.6,
-          offset + Math.sin(t * Math.PI * (2 + index * 0.2)) * 0.22,
-          -0.7 + Math.sin(t * 7 + index) * 0.08,
-        );
-      });
-      return new THREE.CatmullRomCurve3(pts);
-    });
-  }, []);
-
-  useFrame(({ clock }) => {
-    if (group.current) group.current.rotation.z = Math.sin(clock.elapsedTime * 0.08) * 0.08;
-  });
-
-  return (
-    <group ref={group} position={[0, 0, -0.2]}>
-      {curves.map((curve, i) => (
-        <mesh key={i}>
-          <tubeGeometry args={[curve, 96, 0.008 + i * 0.002, 5, false]} />
-          <meshBasicMaterial color="#f6f2e8" transparent opacity={0.23} />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-function Scene({ lowPower }: { lowPower: boolean }) {
-  return (
-    <>
-      <Fabric lowPower={lowPower} />
-      {!lowPower && <Threads />}
-    </>
-  );
+function Scene({ quality }: { quality: QualityTier }) {
+  return <Fabric quality={quality} />;
 }
 
 export default function GlobalThreeScene() {
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [lowPower, setLowPower] = useState(false);
+  const [quality, setQuality] = useState<QualityTier>("medium");
 
   useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setReducedMotion(mq.matches);
-    const nav = navigator as Navigator & { deviceMemory?: number };
-    setLowPower((nav.deviceMemory ?? 8) <= 4 || (navigator.hardwareConcurrency ?? 8) <= 4 || window.innerWidth < 640);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const updateMotion = () => setReducedMotion(motionQuery.matches);
+    const updateQuality = () => setQuality(getQualityTier());
+
+    updateMotion();
+    updateQuality();
+
+    motionQuery.addEventListener("change", updateMotion);
+    window.addEventListener("resize", updateQuality, { passive: true });
+
+    return () => {
+      motionQuery.removeEventListener("change", updateMotion);
+      window.removeEventListener("resize", updateQuality);
+    };
   }, []);
 
   if (reducedMotion) {
     return <div className="three-fallback" aria-hidden="true" />;
   }
 
+  const dpr: [number, number] =
+    quality === "high" ? [1, 1.6] : quality === "medium" ? [1, 1.35] : [1, 1.05];
+
   return (
-    <div className="three-layer" aria-hidden="true">
+    <div className={`three-layer three-quality-${quality}`} aria-hidden="true">
       <Canvas
-        camera={{ position: [0, 0, 5.15], fov: 44 }}
-        dpr={lowPower ? [1, 1.15] : [1, 1.5]}
-        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+        camera={{ position: [0, 0, 5.35], fov: 43 }}
+        dpr={dpr}
+        gl={{
+          antialias: quality !== "low",
+          alpha: true,
+          powerPreference: "high-performance",
+        }}
+        fallback={<div className="three-fallback three-fallback-inline" />}
       >
-        <Scene lowPower={lowPower} />
+        <Scene quality={quality} />
       </Canvas>
+      <div className="three-atmosphere" />
     </div>
   );
 }
