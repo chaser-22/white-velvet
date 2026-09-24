@@ -115,6 +115,7 @@ function SignatureMaterial({ quality }: { quality: QualityTier }) {
 }
 
 export default function GlobalThreeScene() {
+  const layer = useRef<HTMLDivElement>(null);
   const [quality, setQuality] = useState<QualityTier>("medium");
   const [reducedMotion, setReducedMotion] = useState(false);
 
@@ -126,13 +127,24 @@ export default function GlobalThreeScene() {
       setQuality(getQualityTier());
     };
 
+    const updateVisibility = () => {
+      if (!layer.current) return;
+      const fadeDistance = Math.max(window.innerHeight * 0.78, 520);
+      const opacity = THREE.MathUtils.clamp(1 - window.scrollY / fadeDistance, 0, 1);
+      layer.current.style.opacity = opacity.toFixed(3);
+      layer.current.style.visibility = opacity < 0.01 ? "hidden" : "visible";
+    };
+
     update();
+    updateVisibility();
     media.addEventListener("change", update);
     window.addEventListener("resize", update, { passive: true });
+    window.addEventListener("scroll", updateVisibility, { passive: true });
 
     return () => {
       media.removeEventListener("change", update);
       window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", updateVisibility);
     };
   }, []);
 
