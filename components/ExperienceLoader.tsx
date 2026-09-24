@@ -32,14 +32,14 @@ export default function ExperienceLoader() {
     const minimumTimer = window.setTimeout(() => {
       minimumElapsed = true;
       beginExit();
-    }, 820);
+    }, 3000);
 
     const safetyTimer = window.setTimeout(() => {
       sceneReady = true;
       fontsReady = true;
       minimumElapsed = true;
       beginExit();
-    }, 2600);
+    }, 5600);
 
     if (document.fonts) {
       document.fonts.ready.then(() => {

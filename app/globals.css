@@ -780,3 +780,44 @@ body {
     transform: none !important;
   }
 }
+
+
+/* Motion tuning — longer loader, softer palette, clearer idle life */
+.experience-loader {
+  background:
+    radial-gradient(circle at 50% 34%, rgba(255,255,255,.90), transparent 30%),
+    radial-gradient(ellipse at 68% 72%, rgba(206,211,208,.30), transparent 42%),
+    linear-gradient(142deg, #f5f0e7 0%, #e4e1da 58%, #c5cac8 118%);
+}
+.experience-loader::before {
+  opacity: .76;
+  filter: blur(.2px);
+}
+.experience-loader-mark {
+  background: rgba(252,250,245,.30);
+  border-color: rgba(16,20,23,.20);
+}
+.three-layer {
+  background:
+    radial-gradient(circle at 70% 18%, rgba(255,255,255,.78), transparent 32%),
+    radial-gradient(circle at 22% 78%, rgba(244,240,231,.23), transparent 34%),
+    linear-gradient(145deg, #f0ebe2 0%, #d8dad6 49%, #9ca3a4 112%);
+}
+.three-atmosphere {
+  opacity: .56;
+  background:
+    radial-gradient(circle at 16% 24%, rgba(255,255,255,.20), transparent 30%),
+    radial-gradient(circle at 83% 72%, rgba(12,18,20,.075), transparent 35%),
+    linear-gradient(90deg, rgba(244,240,231,.10), transparent 46%, rgba(255,255,255,.045));
+}
+.hero-copy::before {
+  background: radial-gradient(
+    ellipse at 38% 50%,
+    rgba(250,247,240,.94) 0%,
+    rgba(248,245,238,.72) 44%,
+    rgba(248,245,238,0) 78%
+  );
+}
+@media (max-width: 760px) {
+  .three-atmosphere { opacity: .64; }
+}
