@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Integritetspolicy" };
+export const metadata: Metadata = {
+  title: "Integritetspolicy",
+  alternates: { canonical: "/integritet" },
+  openGraph: { url: "/integritet" },
+};
 
 export default function PrivacyPage() {
   return (
