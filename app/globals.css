@@ -2810,3 +2810,17 @@ body {
     transform: none;
   }
 }
+
+
+/* Hero background continuity — use the same velvet field as the rest of the page */
+.hero-copy::before {
+  content: none !important;
+  display: none !important;
+}
+
+@media (max-width: 760px) {
+  .hero-copy::before {
+    content: none !important;
+    display: none !important;
+  }
+}
