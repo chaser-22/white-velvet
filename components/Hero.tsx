@@ -20,13 +20,6 @@ export default function Hero() {
             <a className="text-link" href="#resultat">Se före & efter <ArrowDownRight size={17} /></a>
           </div>
         </Reveal>
-
-        <div className="hero-orbit" aria-hidden="true">
-          <div className="orbit-card orbit-card-right">
-            <span>02</span>
-            <strong>Yta</strong>
-          </div>
-        </div>
       </div>
 
       <div className="trust-strip" aria-label="Viktiga fördelar">
