@@ -1,17 +1,11 @@
 export default function About() {
   return (
-    <section className="about purity-stage" data-purity="0.97">
-      <div className="about-kicker">WHITE VELVET / 97% PURE</div>
-      <h2>När allt onödigt<br />är borta återstår<br />materialet.</h2>
-      <p className="about-lead">
-        White Velvet kombinerar modern utrustning med ett materialmedvetet arbetssätt.
-        Resultatet ska vara tydligt, lugnt och välskött — inte överbehandlat.
-      </p>
+    <section className="about treatment-stage" data-treatment-stage="7">
+      <div className="about-kicker">WHITE VELVET / MATERIAL CARE</div>
+      <h2>Det premiuma ligger<br />inte i maskinen.<br />Det ligger i kontrollen.</h2>
+      <p className="about-lead">White Velvet arbetar med modern utrustning, men tekniken är bara värdefull när den används med rätt metod för rätt material.</p>
       <div className="about-notes">
-        <p><span>01</span> Materialanpassat</p>
-        <p><span>02</span> Miljömedvetet</p>
-        <p><span>03</span> Flexibelt</p>
-        <p><span>04</span> Detaljfokuserat</p>
+        <p><span>01</span> Materialanpassat</p><p><span>02</span> Miljömedvetet</p><p><span>03</span> Flexibelt</p><p><span>04</span> Detaljfokuserat</p>
       </div>
     </section>
   );
