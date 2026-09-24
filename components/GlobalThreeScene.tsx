@@ -50,19 +50,19 @@ const vertexShader = /* glsl */ `
     float wFaq = phaseWeight(6.0);
     float wFooter = phaseWeight(7.0);
 
-    float slowTime = uTime * 0.085;
+    float slowTime = uTime * 0.19;
     float idleBreath =
-      sin(slowTime * 0.72 + p.y * 0.46) * 0.036 +
-      cos(slowTime * 0.51 - p.x * 0.31) * 0.021 +
-      sin(slowTime * 0.28 + (p.x + p.y) * 0.21) * 0.014;
+      sin(slowTime * 0.92 + p.y * 0.46) * 0.050 +
+      cos(slowTime * 0.68 - p.x * 0.31) * 0.030 +
+      sin(slowTime * 0.41 + (p.x + p.y) * 0.21) * 0.018;
 
     float idleDrift =
-      sin(p.x * 0.34 + slowTime * 0.46) * 0.020 +
-      cos(p.y * 0.28 - slowTime * 0.38) * 0.014;
+      sin(p.x * 0.34 + slowTime * 0.62) * 0.027 +
+      cos(p.y * 0.28 - slowTime * 0.50) * 0.020;
 
     float idleSwell =
-      sin(length(p.xy) * 0.58 - slowTime * 0.34) * 0.013 +
-      sin((p.x - p.y) * 0.22 + slowTime * 0.27) * 0.009;
+      sin(length(p.xy) * 0.58 - slowTime * 0.48) * 0.020 +
+      sin((p.x - p.y) * 0.22 + slowTime * 0.39) * 0.014;
 
     float heroFold =
       sin(p.x * 1.05 + slowTime) * 0.25 +
@@ -466,12 +466,12 @@ function Fabric({ quality }: { quality: QualityTier }) {
     const p = material.uniforms.uPhase.value;
 
     const idleX =
-      Math.sin(clock.elapsedTime * 0.102) * 0.026 +
-      Math.sin(clock.elapsedTime * 0.041) * 0.010;
+      Math.sin(clock.elapsedTime * 0.145) * 0.034 +
+      Math.sin(clock.elapsedTime * 0.067) * 0.014;
     const idleY =
-      Math.cos(clock.elapsedTime * 0.081) * 0.019 +
-      Math.sin(clock.elapsedTime * 0.033) * 0.008;
-    const idleZ = Math.sin(clock.elapsedTime * 0.056) * 0.010;
+      Math.cos(clock.elapsedTime * 0.118) * 0.026 +
+      Math.sin(clock.elapsedTime * 0.052) * 0.011;
+    const idleZ = Math.sin(clock.elapsedTime * 0.091) * 0.016;
     const flowValue = material.uniforms.uFlow.value;
 
     const targetX = interpolateKeyframe([0.45, 0.15, -0.25, 0.28, -0.18, 0.10, 0.32, 0.05], p) + idleX;
@@ -480,8 +480,8 @@ function Fabric({ quality }: { quality: QualityTier }) {
       interpolateKeyframe([-0.58, -0.62, -0.50, -0.64, -0.50, -0.70, -0.56, -0.62], p) +
       idleZ +
       Math.abs(flowValue) * 0.020;
-    const idleRX = Math.sin(clock.elapsedTime * 0.061) * 0.009;
-    const idleRZ = Math.cos(clock.elapsedTime * 0.049) * 0.011;
+    const idleRX = Math.sin(clock.elapsedTime * 0.096) * 0.012;
+    const idleRZ = Math.cos(clock.elapsedTime * 0.078) * 0.015;
     const targetRX =
       interpolateKeyframe([-0.30, -0.19, -0.14, -0.20, -0.28, -0.10, -0.16, -0.28], p) +
       idleRX -
@@ -504,11 +504,11 @@ function Fabric({ quality }: { quality: QualityTier }) {
 
     const cameraX =
       interpolateKeyframe([0.04, 0.0, -0.05, 0.04, -0.03, 0.0, 0.03, 0.0], p) +
-      Math.sin(clock.elapsedTime * 0.046) * 0.010 +
+      Math.sin(clock.elapsedTime * 0.082) * 0.014 +
       flowValue * 0.012;
     const cameraY =
       interpolateKeyframe([0.03, -0.02, 0.0, 0.03, -0.02, 0.0, 0.02, 0.0], p) +
-      Math.cos(clock.elapsedTime * 0.039) * 0.007;
+      Math.cos(clock.elapsedTime * 0.071) * 0.010;
     camera.position.x = THREE.MathUtils.damp(camera.position.x, cameraX, 2.45, delta);
     camera.position.y = THREE.MathUtils.damp(camera.position.y, cameraY, 2.45, delta);
     camera.lookAt(0, 0, 0);

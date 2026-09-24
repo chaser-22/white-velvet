@@ -1131,3 +1131,65 @@ body {
     transform: none !important;
   }
 }
+
+
+/* Centered floating header + clearly visible idle breathing */
+.site-header {
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+.site-header.is-scrolled {
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) translateY(2px) scale(1.012);
+}
+
+.three-atmosphere {
+  inset: -3%;
+  transform: translate3d(0,0,0) scale(1.035);
+  animation: ambientVeilBreath 18s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+}
+@keyframes ambientVeilBreath {
+  0% {
+    transform: translate3d(-1.1%, -.7%, 0) scale(1.035);
+    opacity: .52;
+  }
+  50% {
+    transform: translate3d(.8%, .6%, 0) scale(1.052);
+    opacity: .62;
+  }
+  100% {
+    transform: translate3d(1.3%, -.3%, 0) scale(1.04);
+    opacity: .56;
+  }
+}
+
+@media (max-width: 760px) {
+  .site-header,
+  .site-header.is-scrolled {
+    left: 50% !important;
+    right: auto !important;
+  }
+  .site-header {
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  .site-header.is-scrolled {
+    transform: translateX(-50%) translateY(1px) scale(1.008);
+  }
+  .three-atmosphere {
+    animation-duration: 22s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header,
+  .site-header.is-scrolled {
+    transform: translateX(-50%) !important;
+  }
+  .three-atmosphere {
+    animation: none !important;
+    transform: scale(1.035) !important;
+  }
+}
