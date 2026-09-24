@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import sharp from "sharp";
 
 export const runtime = "nodejs";
 
@@ -18,25 +19,22 @@ export async function GET(request: NextRequest) {
   const source = assets[name];
   if (!source) return NextResponse.json({ error: "Unknown asset" }, { status: 404 });
 
-  const optimized = new URL("/_next/image", request.nextUrl.origin);
-  optimized.searchParams.set("url", source);
-  optimized.searchParams.set("w", "960");
-  optimized.searchParams.set("q", "55");
-
-  const response = await fetch(optimized, {
-    headers: { Accept: "image/webp" },
-    cache: "no-store",
-  });
-
+  const response = await fetch(source, { cache: "no-store" });
   if (!response.ok) {
     return NextResponse.json({ error: "Fetch failed", status: response.status }, { status: 502 });
   }
 
-  const bytes = Buffer.from(await response.arrayBuffer());
+  const sourceBuffer = Buffer.from(await response.arrayBuffer());
+  const output = await sharp(sourceBuffer)
+    .rotate()
+    .resize({ width: 960, withoutEnlargement: true })
+    .webp({ quality: 55, effort: 4 })
+    .toBuffer();
+
   return NextResponse.json({
     name,
-    type: response.headers.get("content-type") || "image/webp",
-    size: bytes.length,
-    base64: bytes.toString("base64"),
+    type: "image/webp",
+    size: output.length,
+    base64: output.toString("base64"),
   });
 }
