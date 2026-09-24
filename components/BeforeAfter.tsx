@@ -58,11 +58,11 @@ function Compare({ item }: { item: (typeof comparisons)[number] }) {
 
 export default function BeforeAfter() {
   return (
-    <section className="section-shell results" id="resultat">
+    <section className="results room-stage" id="resultat" data-room-stage="5">
       <Reveal className="section-heading centered-heading">
         <p className="eyebrow">FÖRE & EFTER</p>
-        <h2>Resultatet ska kunna ses.</h2>
-        <p>Dra reglaget över bilderna för att jämföra verkliga arbeten från White Velvet.</p>
+        <h2>Dra gränsen mellan före och efter.</h2>
+        <p>Samma idé som i rummet ovan — fast här med verkliga arbeten från White Velvet.</p>
       </Reveal>
       <div className="compare-grid">
         {comparisons.map((item) => <Reveal key={item.title}><Compare item={item} /></Reveal>)}

@@ -3,7 +3,7 @@ import { contact, instagramUrl } from "@/lib/content";
 
 export default function Footer() {
   return (
-    <footer className="site-footer" id="kontakt">
+    <footer className="site-footer room-stage" id="kontakt" data-room-stage="10">
       <div className="footer-main">
         <div className="footer-brand">
           <p className="eyebrow light">WHITE VELVET · VÄSTERÅS</p>

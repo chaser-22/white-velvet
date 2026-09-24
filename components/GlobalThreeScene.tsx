@@ -6,641 +6,373 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 type QualityTier = "high" | "medium" | "low";
 
-const SECTION_SELECTORS = [
-  "#top",
-  "#tjanster",
-  "#resultat",
-  ".process",
-  ".about",
-  "#boka",
-  "#faq",
-  "#kontakt",
-];
-
-const vertexShader = /* glsl */ `
-  uniform float uTime;
-  uniform float uPhase;
-  uniform float uLocal;
-  uniform float uServiceMode;
-  uniform float uServiceProgress;
-  uniform float uServiceHover;
-  uniform float uResultControl;
-  uniform float uResultMix;
-  uniform vec2 uPointer;
-  uniform float uPointerStrength;
-
-  varying vec2 vUv;
-  varying vec3 vWorld;
-  varying float vCleanMask;
-  varying float vServiceClean;
-  varying float vServiceMode;
-
-  float phaseWeight(float target) {
-    return 1.0 - smoothstep(0.0, 0.92, abs(uPhase - target));
-  }
-
-  float modeWeight(float target) {
-    return 1.0 - smoothstep(0.0, 0.90, abs(uServiceMode - target));
-  }
-
-  void main() {
-    vUv = uv;
-    vServiceMode = uServiceMode;
-
-    vec3 p = position;
-
-    float wHero = phaseWeight(0.0);
-    float wServices = phaseWeight(1.0);
-    float wResults = phaseWeight(2.0);
-    float wProcess = phaseWeight(3.0);
-    float wAbout = phaseWeight(4.0);
-    float wBooking = phaseWeight(5.0);
-    float wFaq = phaseWeight(6.0);
-    float wFooter = phaseWeight(7.0);
-
-    float mRug = modeWeight(0.0);
-    float mUpholstery = modeWeight(1.0);
-    float mFloor = modeWeight(2.0);
-    float mVehicle = modeWeight(3.0);
-    float modeSum = mRug + mUpholstery + mFloor + mVehicle + 0.0001;
-
-    float slowTime = uTime * 0.12;
-
-    float heroFold =
-      sin(p.x * 1.04 + slowTime) * 0.24 +
-      sin(p.y * 0.90 - slowTime * 0.72) * 0.10 +
-      sin((p.x + p.y) * 0.43) * 0.055;
-
-    float serviceFront = clamp(mix(uServiceProgress, uPointer.x, uServiceHover), 0.05, 0.95);
-    float serviceClean = 1.0 - smoothstep(serviceFront - 0.10, serviceFront + 0.10, uv.x);
-
-    float rugDirty =
-      sin(p.x * 4.8 + p.y * 0.35) * 0.10 +
-      sin(p.y * 2.1) * 0.045;
-    float rugClean =
-      sin(p.x * 2.9 + p.y * 0.22) * 0.16 +
-      sin(p.y * 1.42 - slowTime * 0.3) * 0.055;
-    float rugFold = mix(rugDirty, rugClean + serviceClean * 0.055, serviceClean);
-
-    float upholsteryDirty =
-      sin(p.x * 1.8 + p.y * 1.1) * 0.115 +
-      sin(p.y * 3.6 - p.x * 0.42) * 0.055;
-    float upholsteryClean =
-      sin(p.x * 1.18 + slowTime * 0.35) * 0.105 +
-      sin(p.y * 1.08) * 0.048;
-    float upholsteryFold = mix(upholsteryDirty, upholsteryClean, serviceClean);
-
-    float floorDirty =
-      sin(p.x * 5.4 + p.y * 0.45) * 0.035 +
-      sin(p.y * 6.2) * 0.018;
-    float floorClean =
-      sin(p.x * 0.72 + slowTime * 0.20) * 0.018 +
-      sin(p.y * 0.60) * 0.012;
-    float floorFold = mix(floorDirty, floorClean, serviceClean);
-
-    float vehicleDirty =
-      sin(p.x * 2.4 + p.y * 1.8) * 0.075 +
-      sin(p.y * 4.0 - p.x * 0.55) * 0.035;
-    float vehicleClean =
-      sin(p.x * 1.05 + slowTime * 0.28) * 0.082 +
-      sin(p.y * 0.92) * 0.034;
-    float vehicleFold = mix(vehicleDirty, vehicleClean, serviceClean);
-
-    float serviceFold = (
-      rugFold * mRug +
-      upholsteryFold * mUpholstery +
-      floorFold * mFloor +
-      vehicleFold * mVehicle
-    ) / modeSum;
-
-    float resultProgress = mix(uLocal, uResultControl, uResultMix);
-    float resultFront = clamp(resultProgress, 0.04, 0.96);
-    float cleanMask = 1.0 - smoothstep(resultFront - 0.11, resultFront + 0.11, uv.x);
-
-    float dirtyTexture =
-      sin(p.x * 3.4 + p.y * 1.8) * 0.085 +
-      sin(p.y * 4.8 - p.x * 0.6) * 0.045;
-    float cleanTexture =
-      sin(p.x * 1.10 + slowTime * 0.45) * 0.075 +
-      sin(p.y * 0.95) * 0.032;
-    float resultFold = mix(dirtyTexture, cleanTexture, cleanMask);
-
-    float processFold =
-      sin(p.y * 2.05 + p.x * 0.18 + slowTime * 0.32) * 0.072 +
-      sin(p.x * 0.78) * 0.033;
-
-    float aboutFold =
-      sin(p.x * 0.78 + p.y * 0.42 + slowTime * 0.42) * 0.18 +
-      sin(p.y * 0.72 - slowTime * 0.38) * 0.075;
-
-    float bookingFold =
-      sin(p.x * 0.92 + slowTime * 0.22) * 0.052 +
-      sin(p.y * 0.72) * 0.023;
-
-    float faqFold =
-      sin(p.x * 1.30 + slowTime * 0.30) * 0.082 +
-      sin(p.y * 1.12 - slowTime * 0.25) * 0.035;
-
-    float footerFold =
-      sin(p.x * 0.72 + slowTime * 0.32) * 0.18 +
-      sin(p.y * 0.62 + p.x * 0.20) * 0.09;
-
-    float weightSum =
-      wHero + wServices + wResults + wProcess +
-      wAbout + wBooking + wFaq + wFooter + 0.0001;
-
-    float displacement = (
-      heroFold * wHero +
-      serviceFold * wServices +
-      resultFold * wResults +
-      processFold * wProcess +
-      aboutFold * wAbout +
-      bookingFold * wBooking +
-      faqFold * wFaq +
-      footerFold * wFooter
-    ) / weightSum;
-
-    float pointerLift =
-      exp(-distance(uv, uPointer) * 7.5) *
-      0.115 * uPointerStrength *
-      (1.0 - wBooking * 0.82);
-
-    p.z += displacement + pointerLift;
-
-    float lateral =
-      sin(p.y * 0.58 + uPhase * 0.72) * 0.052 +
-      sin(p.x * 0.31 - uPhase * 0.38) * 0.023;
-
-    p.x += lateral * (0.75 + wAbout * 0.35);
-    p.y += cos(p.x * 0.42 + uPhase * 0.44) * 0.032;
-
-    vCleanMask = cleanMask;
-    vServiceClean = serviceClean;
-
-    vec4 world = modelMatrix * vec4(p, 1.0);
-    vWorld = world.xyz;
-    gl_Position = projectionMatrix * viewMatrix * world;
-  }
-`;
-
-const fragmentShader = /* glsl */ `
-  uniform float uPhase;
-  uniform float uLocal;
-  uniform float uServiceMode;
-  uniform float uServiceProgress;
-  uniform float uServiceHover;
-  uniform float uResultControl;
-  uniform float uResultMix;
-  uniform vec2 uPointer;
-
-  varying vec2 vUv;
-  varying vec3 vWorld;
-  varying float vCleanMask;
-  varying float vServiceClean;
-  varying float vServiceMode;
-
-  float phaseWeight(float target) {
-    return 1.0 - smoothstep(0.0, 0.92, abs(uPhase - target));
-  }
-
-  float modeWeight(float target) {
-    return 1.0 - smoothstep(0.0, 0.90, abs(vServiceMode - target));
-  }
-
-  float hash21(vec2 p) {
-    p = fract(p * vec2(123.34, 456.21));
-    p += dot(p, p + 45.32);
-    return fract(p.x * p.y);
-  }
-
-  float softSpot(vec2 uv, vec2 center, float radius) {
-    return exp(-distance(uv, center) * radius);
-  }
-
-  void main() {
-    vec3 dx = dFdx(vWorld);
-    vec3 dy = dFdy(vWorld);
-    vec3 normal = normalize(cross(dx, dy));
-    if (!gl_FrontFacing) normal = -normal;
-
-    vec3 viewDir = normalize(cameraPosition - vWorld);
-    vec3 lightA = normalize(vec3(-0.52, 0.70, 0.84));
-    vec3 lightB = normalize(vec3(0.62, -0.24, 0.74));
-    vec3 lightDir = normalize(mix(lightA, lightB, smoothstep(3.8, 6.3, uPhase)));
-
-    float diffuse = max(dot(normal, lightDir), 0.0);
-    float reverseDiffuse = max(dot(normal, -lightDir), 0.0);
-    float rim = pow(1.0 - abs(dot(normal, viewDir)), 2.35);
-    float velvetSheen = pow(max(0.0, 1.0 - abs(dot(normal, viewDir))), 1.55);
-
-    float wHero = phaseWeight(0.0);
-    float wServices = phaseWeight(1.0);
-    float wResults = phaseWeight(2.0);
-    float wProcess = phaseWeight(3.0);
-    float wAbout = phaseWeight(4.0);
-    float wBooking = phaseWeight(5.0);
-    float wFaq = phaseWeight(6.0);
-    float wFooter = phaseWeight(7.0);
-
-    float mRug = modeWeight(0.0);
-    float mUpholstery = modeWeight(1.0);
-    float mFloor = modeWeight(2.0);
-    float mVehicle = modeWeight(3.0);
-    float modeSum = mRug + mUpholstery + mFloor + mVehicle + 0.0001;
-
-    vec3 ivory = vec3(0.935, 0.915, 0.875);
-    vec3 warmIvory = vec3(0.955, 0.935, 0.895);
-    vec3 pearl = vec3(0.79, 0.80, 0.785);
-    vec3 softSilver = vec3(0.70, 0.725, 0.72);
-    vec3 charcoal = vec3(0.075, 0.092, 0.098);
-    vec3 midnight = vec3(0.038, 0.052, 0.058);
-    vec3 dusty = vec3(0.49, 0.515, 0.51);
-    vec3 staleWarm = vec3(0.44, 0.425, 0.39);
-    vec3 deepTextile = vec3(0.16, 0.185, 0.19);
-
-    float heroPointerClean = softSpot(vUv, uPointer, 5.0);
-    float heroScrollClean = smoothstep(0.03, 0.82, uLocal);
-    float heroClean = max(heroScrollClean, heroPointerClean * 0.64);
-    vec3 heroColor = mix(vec3(0.72, 0.71, 0.67), ivory, heroClean);
-
-    vec3 rugColor = mix(staleWarm, warmIvory, vServiceClean);
-    vec3 upholsteryColor = mix(vec3(0.47, 0.475, 0.455), pearl, vServiceClean);
-    vec3 floorColor = mix(vec3(0.43, 0.45, 0.445), vec3(0.77, 0.79, 0.785), vServiceClean);
-    vec3 vehicleColor = mix(vec3(0.50, 0.52, 0.52), deepTextile, vServiceClean);
-
-    vec3 serviceColor = (
-      rugColor * mRug +
-      upholsteryColor * mUpholstery +
-      floorColor * mFloor +
-      vehicleColor * mVehicle
-    ) / modeSum;
-
-    float dustCell = hash21(floor(vUv * vec2(118.0, 92.0)));
-    float dust = smoothstep(0.88, 0.99, dustCell) * (1.0 - vServiceClean);
-
-    float stainA = softSpot(vUv, vec2(0.63, 0.44), 10.0);
-    float stainB = softSpot(vUv, vec2(0.37, 0.62), 13.0);
-    float stain = clamp(stainA * 0.72 + stainB * 0.45, 0.0, 1.0) * (1.0 - vServiceClean);
-
-    float scratches =
-      pow(abs(sin(vUv.y * 430.0 + vUv.x * 37.0)), 22.0) *
-      (0.35 + 0.65 * hash21(floor(vUv * 70.0))) *
-      (1.0 - vServiceClean);
-
-    float fog =
-      (0.5 + 0.5 * sin(vUv.x * 19.0 + sin(vUv.y * 13.0))) *
-      (0.5 + 0.5 * sin(vUv.y * 22.0 - vUv.x * 3.0)) *
-      (1.0 - vServiceClean);
-
-    serviceColor -= dust * 0.11 * mRug;
-    serviceColor -= stain * vec3(0.15, 0.115, 0.075) * mUpholstery;
-    serviceColor -= scratches * 0.085 * mFloor;
-    serviceColor = mix(serviceColor, vec3(0.68, 0.70, 0.695), fog * 0.25 * mVehicle);
-
-    vec3 resultColor = mix(dusty, warmIvory, vCleanMask);
-
-    float weightSum =
-      wHero + wServices + wResults + wProcess +
-      wAbout + wBooking + wFaq + wFooter + 0.0001;
-
-    vec3 base = (
-      heroColor * wHero +
-      serviceColor * wServices +
-      resultColor * wResults +
-      charcoal * wProcess +
-      warmIvory * wAbout +
-      midnight * wBooking +
-      softSilver * wFaq +
-      midnight * wFooter
-    ) / weightSum;
-
-    float threadY = 0.5 + 0.5 * sin(vUv.y * 520.0 + sin(vUv.x * 24.0) * 0.35);
-    float threadX = 0.5 + 0.5 * sin(vUv.x * 230.0 + vUv.y * 4.0);
-    float weave = (threadY * 0.72 + threadX * 0.28 - 0.5) * 0.030;
-
-    float rugPile =
-      (0.5 + 0.5 * sin(vUv.x * 390.0 + sin(vUv.y * 36.0))) *
-      mRug * wServices;
-    weave += (rugPile - 0.5) * 0.025 * mix(0.55, 1.0, vServiceClean);
-
-    float upholsteryWeave =
-      (0.5 + 0.5 * sin(vUv.x * 210.0)) *
-      (0.5 + 0.5 * sin(vUv.y * 188.0));
-    weave += (upholsteryWeave - 0.5) * 0.020 * mUpholstery * wServices;
-
-    float floorGrain = sin((vUv.x + vUv.y * 0.08) * 330.0) * 0.007;
-    weave += floorGrain * mFloor * wServices * (1.0 - vServiceClean * 0.45);
-
-    float serviceFront = clamp(mix(uServiceProgress, uPointer.x, uServiceHover), 0.05, 0.95);
-    float serviceEdge = exp(-pow((vUv.x - serviceFront) * 18.0, 2.0)) * wServices;
-
-    float resultProgress = mix(uLocal, uResultControl, uResultMix);
-    float resultFront = clamp(resultProgress, 0.04, 0.96);
-    float restorationLine = exp(-pow((vUv.x - resultFront) * 18.0, 2.0)) * wResults;
-
-    float cleanSheen = mix(0.48, 1.22, max(vCleanMask, vServiceClean));
-    float floorPolish = mFloor * wServices * vServiceClean;
-
-    float sheenStrength =
-      0.19 * wHero +
-      0.20 * wServices * cleanSheen +
-      0.28 * wResults * cleanSheen +
-      0.14 * wProcess +
-      0.33 * wAbout +
-      0.15 * wBooking +
-      0.20 * wFaq +
-      0.18 * wFooter;
-
-    float lighting = 0.47 + diffuse * 0.63 + reverseDiffuse * 0.08;
-    vec3 color = base * lighting;
-    color += velvetSheen * sheenStrength;
-    color += rim * (0.085 + 0.08 * wAbout + floorPolish * 0.16);
-    color += weave;
-    color += serviceEdge * vec3(0.18, 0.18, 0.16);
-    color += restorationLine * vec3(0.22, 0.21, 0.18);
-    color += floorPolish * pow(max(dot(reflect(-lightDir, normal), viewDir), 0.0), 18.0) * 0.38;
-
-    float pointerGlow = softSpot(vUv, uPointer, 9.0);
-    color += pointerGlow * 0.018 * (1.0 - wBooking);
-
-    float darkPhase = clamp(wProcess * 0.70 + wBooking + wFooter, 0.0, 1.0);
-    color = mix(color, color * 0.88, darkPhase * 0.42);
-
-    gl_FragColor = vec4(color, 0.92);
-  }
-`;
+const CAMERA_POSITIONS = [
+  [6.7, 3.2, 8.6],
+  [2.7, 0.4, 3.6],
+  [1.6, 2.5, 3.0],
+  [4.2, 1.15, 2.5],
+  [-1.8, 0.7, 4.2],
+  [6.2, 3.1, 8.2],
+  [3.6, 2.3, 7.2],
+  [0.0, 2.0, 7.5],
+  [0.0, 0.9, 5.8],
+  [5.0, 2.8, 8.0],
+  [6.5, 3.4, 8.8],
+] as const;
+
+const CAMERA_TARGETS = [
+  [0.0, -0.25, -1.5],
+  [-1.55, -0.55, -2.65],
+  [0.0, -1.42, -0.35],
+  [0.6, -1.42, -1.0],
+  [3.15, -0.65, -2.7],
+  [0.0, -0.25, -1.5],
+  [0.0, -0.2, -1.6],
+  [0.0, -0.15, -1.8],
+  [0.0, -0.25, -2.0],
+  [0.0, -0.15, -1.6],
+  [0.0, -0.15, -1.8],
+] as const;
 
 function getQualityTier(): QualityTier {
   if (typeof window === "undefined") return "medium";
-
   const nav = navigator as Navigator & { deviceMemory?: number };
   const memory = nav.deviceMemory ?? 8;
   const cores = navigator.hardwareConcurrency ?? 8;
-  const width = window.innerWidth;
-
-  if (width < 700 || memory <= 4 || cores <= 4) return "low";
-  if (width >= 1280 && memory >= 8 && cores >= 8) return "high";
+  if (window.innerWidth < 720 || memory <= 4 || cores <= 4) return "low";
+  if (window.innerWidth >= 1280 && memory >= 8 && cores >= 8) return "high";
   return "medium";
 }
 
-function interpolateKeyframe(values: number[], phase: number) {
-  const clamped = THREE.MathUtils.clamp(phase, 0, values.length - 1);
-  const index = Math.floor(clamped);
-  const next = Math.min(index + 1, values.length - 1);
-  const t = THREE.MathUtils.smoothstep(clamped - index, 0, 1);
-  return THREE.MathUtils.lerp(values[index], values[next], t);
+function lerpTuple(a: readonly number[], b: readonly number[], t: number) {
+  return [
+    THREE.MathUtils.lerp(a[0], b[0], t),
+    THREE.MathUtils.lerp(a[1], b[1], t),
+    THREE.MathUtils.lerp(a[2], b[2], t),
+  ] as const;
 }
 
-function Fabric({ quality }: { quality: QualityTier }) {
-  const mesh = useRef<THREE.Mesh>(null);
-  const pointer = useRef(new THREE.Vector2(0.5, 0.5));
-  const phaseTarget = useRef(0);
+function Room({ quality }: { quality: QualityTier }) {
+  const stageTarget = useRef(0);
   const localTarget = useRef(0);
-  const serviceModeTarget = useRef(0);
-  const serviceProgressTarget = useRef(0.12);
-  const serviceHoverTarget = useRef(0);
-  const resultControlTarget = useRef(0.52);
-  const resultMixTarget = useRef(0);
 
-  const material = useMemo(
-    () =>
-      new THREE.ShaderMaterial({
-        uniforms: {
-          uTime: { value: 0 },
-          uPhase: { value: 0 },
-          uLocal: { value: 0 },
-          uServiceMode: { value: 0 },
-          uServiceProgress: { value: 0.12 },
-          uServiceHover: { value: 0 },
-          uResultControl: { value: 0.52 },
-          uResultMix: { value: 0 },
-          uPointer: { value: new THREE.Vector2(0.5, 0.5) },
-          uPointerStrength: { value: quality === "low" ? 0 : 1 },
-        },
-        vertexShader,
-        fragmentShader,
-        transparent: true,
-        side: THREE.DoubleSide,
-        depthWrite: false,
-      }),
-    [quality],
-  );
+  const sofaClean = useRef(0);
+  const rugClean = useRef(0);
+  const floorClean = useRef(0);
+  const travelClean = useRef(0);
+
+  const sofaGroup = useRef<THREE.Group>(null);
+  const travelGroup = useRef<THREE.Group>(null);
+  const cleanLight = useRef<THREE.PointLight>(null);
+
+  const sofaMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: "#8f8a81", roughness: 0.95 }), []);
+  const sofaStainMaterial = useMemo(() => new THREE.MeshBasicMaterial({ color: "#5c5145", transparent: true, opacity: 0.34, depthWrite: false }), []);
+  const rugMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: "#817b6d", roughness: 1 }), []);
+  const rugStainMaterial = useMemo(() => new THREE.MeshBasicMaterial({ color: "#554d40", transparent: true, opacity: 0.30, depthWrite: false }), []);
+  const floorMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({ color: "#7c756b", roughness: 0.78, metalness: 0.02, clearcoat: 0.08, clearcoatRoughness: 0.55 }), []);
+  const travelMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: "#676b69", roughness: 0.92 }), []);
+  const travelStainMaterial = useMemo(() => new THREE.MeshBasicMaterial({ color: "#474b49", transparent: true, opacity: 0.28, depthWrite: false }), []);
+  const reflectionMaterial = useMemo(() => new THREE.MeshBasicMaterial({ color: "#fff9ea", transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }), []);
+  const dustMaterial = useMemo(() => new THREE.PointsMaterial({ color: "#f8f0dc", size: quality === "low" ? 0.035 : 0.025, transparent: true, opacity: 0.28, depthWrite: false }), [quality]);
+
+  const dustGeometry = useMemo(() => {
+    const count = quality === "high" ? 90 : quality === "medium" ? 56 : 28;
+    const positions = new Float32Array(count * 3);
+    for (let i = 0; i < count; i += 1) {
+      const t = i / Math.max(count - 1, 1);
+      positions[i * 3] = -4.7 + Math.sin(i * 12.9898) * 1.1;
+      positions[i * 3 + 1] = -0.8 + ((i * 37) % count) / count * 5.3;
+      positions[i * 3 + 2] = -3.8 + t * 7.0 + Math.cos(i * 4.31) * 0.45;
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    return geometry;
+  }, [quality]);
 
   useEffect(() => {
-    let cancelled = false;
-    let disposeGsap = () => {};
+    let disposed = false;
+    let cleanup = () => {};
 
-    const onPointer = (event: PointerEvent) => {
-      pointer.current.set(
-        event.clientX / Math.max(window.innerWidth, 1),
-        1 - event.clientY / Math.max(window.innerHeight, 1),
-      );
-    };
-
-    const onCompare = (event: Event) => {
-      const detail = (event as CustomEvent<{ value?: number }>).detail;
-      if (typeof detail?.value !== "number") return;
-      resultControlTarget.current = THREE.MathUtils.clamp(detail.value, 0, 1);
-      resultMixTarget.current = 1;
-    };
-
-    window.addEventListener("pointermove", onPointer, { passive: true });
-    window.addEventListener("whitevelvet:compare", onCompare);
-
-    const setupGsap = async () => {
+    const setup = async () => {
       const [{ gsap }, { ScrollTrigger }] = await Promise.all([
         import("gsap"),
         import("gsap/ScrollTrigger"),
       ]);
-
-      if (cancelled) return;
-
+      if (disposed) return;
       gsap.registerPlugin(ScrollTrigger);
-      const triggers: Array<{ kill: () => void }> = [];
-      const cardCleanups: Array<() => void> = [];
 
-      SECTION_SELECTORS.forEach((selector, index) => {
-        const element = document.querySelector<HTMLElement>(selector);
-        if (!element) return;
-
-        const trigger = ScrollTrigger.create({
-          trigger: element,
-          start: "top center",
-          end: "bottom center",
-          onEnter: () => {
-            phaseTarget.current = index;
-            if (index !== 2) resultMixTarget.current = 0;
-          },
-          onEnterBack: () => {
-            phaseTarget.current = index;
-            if (index !== 2) resultMixTarget.current = 0;
-          },
-          onUpdate: (self) => {
-            if (!self.isActive) return;
-            phaseTarget.current = index;
-            localTarget.current = self.progress;
-          },
+      const triggers = Array.from(document.querySelectorAll<HTMLElement>("[data-room-stage]"))
+        .map((element) => {
+          const stage = Number(element.dataset.roomStage ?? 0);
+          return ScrollTrigger.create({
+            trigger: element,
+            start: "top center",
+            end: "bottom center",
+            onEnter: () => { stageTarget.current = stage; },
+            onEnterBack: () => { stageTarget.current = stage; },
+            onUpdate: (self) => {
+              if (!self.isActive) return;
+              stageTarget.current = stage;
+              localTarget.current = self.progress;
+            },
+          });
         });
-
-        triggers.push(trigger);
-      });
-
-      document.querySelectorAll<HTMLElement>("[data-cleaning-mode]").forEach((card) => {
-        const mode = Number(card.dataset.cleaningMode ?? 0);
-
-        const setHover = () => {
-          serviceModeTarget.current = mode;
-          serviceHoverTarget.current = quality === "low" ? 0 : 1;
-        };
-        const clearHover = () => {
-          serviceHoverTarget.current = 0;
-        };
-
-        card.addEventListener("pointerenter", setHover);
-        card.addEventListener("pointerleave", clearHover);
-        card.addEventListener("focusin", setHover);
-        card.addEventListener("focusout", clearHover);
-
-        cardCleanups.push(() => {
-          card.removeEventListener("pointerenter", setHover);
-          card.removeEventListener("pointerleave", clearHover);
-          card.removeEventListener("focusin", setHover);
-          card.removeEventListener("focusout", clearHover);
-        });
-
-        const trigger = ScrollTrigger.create({
-          trigger: card,
-          start: "top 78%",
-          end: "bottom 32%",
-          onEnter: () => {
-            serviceModeTarget.current = mode;
-          },
-          onEnterBack: () => {
-            serviceModeTarget.current = mode;
-          },
-          onUpdate: (self) => {
-            if (!self.isActive || serviceHoverTarget.current > 0.5) return;
-            serviceModeTarget.current = mode;
-            serviceProgressTarget.current = THREE.MathUtils.clamp(0.08 + self.progress * 0.84, 0.08, 0.92);
-          },
-        });
-
-        triggers.push(trigger);
-      });
 
       ScrollTrigger.refresh();
-
-      disposeGsap = () => {
-        triggers.forEach((trigger) => trigger.kill());
-        cardCleanups.forEach((cleanup) => cleanup());
-      };
+      cleanup = () => triggers.forEach((trigger) => trigger.kill());
     };
 
-    void setupGsap();
+    void setup();
 
     return () => {
-      cancelled = true;
-      disposeGsap();
-      window.removeEventListener("pointermove", onPointer);
-      window.removeEventListener("whitevelvet:compare", onCompare);
-      material.dispose();
+      disposed = true;
+      cleanup();
+      sofaMaterial.dispose();
+      sofaStainMaterial.dispose();
+      rugMaterial.dispose();
+      rugStainMaterial.dispose();
+      floorMaterial.dispose();
+      travelMaterial.dispose();
+      travelStainMaterial.dispose();
+      reflectionMaterial.dispose();
+      dustMaterial.dispose();
+      dustGeometry.dispose();
     };
-  }, [material, quality]);
+  }, [sofaMaterial, sofaStainMaterial, rugMaterial, rugStainMaterial, floorMaterial, travelMaterial, travelStainMaterial, reflectionMaterial, dustMaterial, dustGeometry]);
 
-  useFrame(({ clock, camera }) => {
-    if (!mesh.current || document.hidden) return;
+  useFrame(({ camera, clock }) => {
+    const stage = stageTarget.current;
+    const local = localTarget.current;
 
-    const uniforms = material.uniforms;
+    const cleanTarget = (chapter: number) => stage > chapter ? 1 : stage < chapter ? 0 : local;
+    sofaClean.current = THREE.MathUtils.lerp(sofaClean.current, cleanTarget(1), 0.055);
+    rugClean.current = THREE.MathUtils.lerp(rugClean.current, cleanTarget(2), 0.055);
+    floorClean.current = THREE.MathUtils.lerp(floorClean.current, cleanTarget(3), 0.055);
+    travelClean.current = THREE.MathUtils.lerp(travelClean.current, cleanTarget(4), 0.055);
 
-    uniforms.uTime.value = clock.elapsedTime;
-    uniforms.uPhase.value = THREE.MathUtils.lerp(uniforms.uPhase.value, phaseTarget.current, 0.055);
-    uniforms.uLocal.value = THREE.MathUtils.lerp(uniforms.uLocal.value, localTarget.current, 0.065);
-    uniforms.uServiceMode.value = THREE.MathUtils.lerp(uniforms.uServiceMode.value, serviceModeTarget.current, 0.075);
-    uniforms.uServiceProgress.value = THREE.MathUtils.lerp(uniforms.uServiceProgress.value, serviceProgressTarget.current, 0.07);
-    uniforms.uServiceHover.value = THREE.MathUtils.lerp(uniforms.uServiceHover.value, serviceHoverTarget.current, 0.10);
-    uniforms.uResultControl.value = THREE.MathUtils.lerp(uniforms.uResultControl.value, resultControlTarget.current, 0.12);
-    uniforms.uResultMix.value = THREE.MathUtils.lerp(uniforms.uResultMix.value, resultMixTarget.current, 0.08);
-    uniforms.uPointer.value.lerp(pointer.current, 0.045);
+    sofaMaterial.color.lerpColors(new THREE.Color("#837c72"), new THREE.Color("#d8cfc1"), sofaClean.current);
+    sofaMaterial.roughness = THREE.MathUtils.lerp(0.98, 0.74, sofaClean.current);
+    sofaStainMaterial.opacity = (1 - sofaClean.current) * 0.34;
 
-    const phase = uniforms.uPhase.value;
+    rugMaterial.color.lerpColors(new THREE.Color("#746d5f"), new THREE.Color("#cfc3aa"), rugClean.current);
+    rugMaterial.roughness = THREE.MathUtils.lerp(1, 0.7, rugClean.current);
+    rugStainMaterial.opacity = (1 - rugClean.current) * 0.30;
 
-    mesh.current.position.x = interpolateKeyframe([0.45, 0.12, -0.24, 0.28, -0.18, 0.10, 0.32, 0.05], phase);
-    mesh.current.position.y = interpolateKeyframe([0.12, -0.12, 0.04, 0.15, -0.20, 0.08, -0.04, 0.16], phase);
-    mesh.current.position.z = interpolateKeyframe([-0.58, -0.60, -0.50, -0.64, -0.50, -0.70, -0.56, -0.62], phase);
-    mesh.current.rotation.x = interpolateKeyframe([-0.30, -0.17, -0.14, -0.20, -0.28, -0.10, -0.16, -0.28], phase);
-    mesh.current.rotation.z = interpolateKeyframe([-0.13, 0.035, -0.035, 0.025, -0.07, 0.018, 0.045, 0.11], phase);
+    floorMaterial.color.lerpColors(new THREE.Color("#706960"), new THREE.Color("#a89e8d"), floorClean.current);
+    floorMaterial.roughness = THREE.MathUtils.lerp(0.82, 0.17, floorClean.current);
+    floorMaterial.clearcoat = THREE.MathUtils.lerp(0.06, 0.72, floorClean.current);
+    floorMaterial.clearcoatRoughness = THREE.MathUtils.lerp(0.7, 0.08, floorClean.current);
+    reflectionMaterial.opacity = floorClean.current * 0.12;
 
-    const scale = interpolateKeyframe([1.42, 1.36, 1.40, 1.36, 1.44, 1.40, 1.38, 1.46], phase);
-    mesh.current.scale.set(scale, scale * 0.92, 1);
+    travelMaterial.color.lerpColors(new THREE.Color("#5a5d5b"), new THREE.Color("#9da09a"), travelClean.current);
+    travelMaterial.roughness = THREE.MathUtils.lerp(0.96, 0.68, travelClean.current);
+    travelStainMaterial.opacity = (1 - travelClean.current) * 0.28;
 
-    camera.position.x = interpolateKeyframe([0.04, 0.0, -0.05, 0.04, -0.03, 0.0, 0.03, 0.0], phase);
-    camera.position.y = interpolateKeyframe([0.03, -0.02, 0.0, 0.03, -0.02, 0.0, 0.02, 0.0], phase);
-    camera.lookAt(0, 0, 0);
+    const overallClean = (sofaClean.current + rugClean.current + floorClean.current + travelClean.current) / 4;
+    dustMaterial.opacity = (1 - overallClean) * 0.30;
+
+    if (sofaGroup.current) {
+      sofaGroup.current.position.y = -0.78 + sofaClean.current * 0.035;
+    }
+    if (travelGroup.current) {
+      travelGroup.current.rotation.y = -0.12 + travelClean.current * 0.045;
+    }
+
+    if (cleanLight.current) {
+      const activeProgress =
+        stage === 1 ? sofaClean.current :
+        stage === 2 ? rugClean.current :
+        stage === 3 ? floorClean.current :
+        stage === 4 ? travelClean.current : 0;
+      cleanLight.current.intensity = stage >= 1 && stage <= 4 ? (quality === "low" ? 0.55 : 1.1) : 0.18;
+      cleanLight.current.position.x = -4.5 + activeProgress * 9.0;
+      cleanLight.current.position.y = stage === 3 ? -0.45 : 0.9;
+      cleanLight.current.position.z = stage === 4 ? -2.4 : -0.5;
+    }
+
+    const currentStage = THREE.MathUtils.clamp(stage, 0, CAMERA_POSITIONS.length - 1);
+    const from = Math.floor(currentStage);
+    const to = Math.min(from + 1, CAMERA_POSITIONS.length - 1);
+    const transition = THREE.MathUtils.smoothstep(local, 0.58, 1);
+    const position = lerpTuple(CAMERA_POSITIONS[from], CAMERA_POSITIONS[to], transition * 0.28);
+    const target = lerpTuple(CAMERA_TARGETS[from], CAMERA_TARGETS[to], transition * 0.28);
+
+    camera.position.lerp(new THREE.Vector3(...position), 0.045);
+    const lookTarget = new THREE.Vector3(...target);
+    const currentDirection = new THREE.Vector3();
+    camera.getWorldDirection(currentDirection);
+    const currentTarget = camera.position.clone().add(currentDirection.multiplyScalar(8));
+    currentTarget.lerp(lookTarget, 0.055);
+    camera.lookAt(currentTarget);
+
+    if (dustGeometry.attributes.position) {
+      const points = dustGeometry.attributes.position as THREE.BufferAttribute;
+      const arr = points.array as Float32Array;
+      const drift = Math.sin(clock.elapsedTime * 0.18) * 0.0006;
+      for (let i = 1; i < arr.length; i += 3) arr[i] += drift;
+      points.needsUpdate = quality !== "low";
+    }
   });
 
-  const segments =
-    quality === "high"
-      ? ([154, 118] as const)
-      : quality === "medium"
-        ? ([112, 86] as const)
-        : ([68, 52] as const);
+  const wallMaterial = <meshStandardMaterial color="#e7e0d4" roughness={0.93} />;
+  const darkMaterial = <meshStandardMaterial color="#24292a" roughness={0.78} />;
 
   return (
-    <mesh ref={mesh}>
-      <planeGeometry args={[9.4, 7.8, segments[0], segments[1]]} />
-      <primitive object={material} attach="material" />
-    </mesh>
+    <>
+      <ambientLight intensity={0.88} color="#efe7d8" />
+      <directionalLight
+        position={[-4, 7, 5]}
+        intensity={2.2}
+        color="#fff4dd"
+        castShadow={quality !== "low"}
+        shadow-mapSize-width={quality === "high" ? 2048 : 1024}
+        shadow-mapSize-height={quality === "high" ? 2048 : 1024}
+      />
+      <pointLight position={[5, 2, 1]} intensity={0.75} color="#dbe8ea" />
+      <pointLight ref={cleanLight} position={[-4, 1, -1]} intensity={0.3} distance={8} color="#fff2d8" />
+
+      <group>
+        <mesh position={[0, 2.3, -5.2]} receiveShadow>
+          <boxGeometry args={[16, 7.8, 0.16]} />
+          {wallMaterial}
+        </mesh>
+        <mesh position={[-7.8, 2.3, -0.8]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
+          <boxGeometry args={[9, 7.8, 0.16]} />
+          {wallMaterial}
+        </mesh>
+        <mesh position={[0, -1.52, -0.5]} rotation={[0, 0, 0]} receiveShadow material={floorMaterial}>
+          <boxGeometry args={[16, 0.12, 11]} />
+        </mesh>
+
+        <mesh position={[-4.9, 1.7, -5.0]}>
+          <boxGeometry args={[0.12, 4.1, 0.18]} />
+          {darkMaterial}
+        </mesh>
+        <mesh position={[-2.5, 1.7, -5.0]}>
+          <boxGeometry args={[0.12, 4.1, 0.18]} />
+          {darkMaterial}
+        </mesh>
+        <mesh position={[-3.7, 3.72, -5.0]}>
+          <boxGeometry args={[2.5, 0.12, 0.18]} />
+          {darkMaterial}
+        </mesh>
+
+        <group ref={sofaGroup} position={[-1.55, -0.78, -2.72]}>
+          <mesh castShadow receiveShadow material={sofaMaterial} position={[0, 0.0, 0]}>
+            <boxGeometry args={[3.75, 0.62, 1.45]} />
+          </mesh>
+          <mesh castShadow material={sofaMaterial} position={[0, 0.88, -0.55]} rotation={[-0.05, 0, 0]}>
+            <boxGeometry args={[3.75, 1.4, 0.48]} />
+          </mesh>
+          <mesh castShadow material={sofaMaterial} position={[-1.88, 0.46, 0]}>
+            <boxGeometry args={[0.42, 1.15, 1.52]} />
+          </mesh>
+          <mesh castShadow material={sofaMaterial} position={[1.88, 0.46, 0]}>
+            <boxGeometry args={[0.42, 1.15, 1.52]} />
+          </mesh>
+          {[-1.15, 0, 1.15].map((x) => (
+            <mesh key={x} castShadow material={sofaMaterial} position={[x, 0.42, 0.15]}>
+              <boxGeometry args={[1.03, 0.26, 1.10]} />
+            </mesh>
+          ))}
+          <mesh position={[0.45, 0.56, 0.72]} rotation={[-Math.PI / 2, 0, 0]} material={sofaStainMaterial}>
+            <circleGeometry args={[0.34, 30]} />
+          </mesh>
+          <mesh position={[-0.85, 0.56, 0.72]} rotation={[-Math.PI / 2, 0, 0]} material={sofaStainMaterial}>
+            <circleGeometry args={[0.18, 28]} />
+          </mesh>
+        </group>
+
+        <group position={[0.0, -1.43, -0.15]}>
+          <mesh receiveShadow material={rugMaterial} position={[0, 0, 0]}>
+            <boxGeometry args={[5.2, 0.06, 3.25]} />
+          </mesh>
+          <mesh position={[-0.85, 0.035, 0.25]} rotation={[-Math.PI / 2, 0, 0]} material={rugStainMaterial}>
+            <circleGeometry args={[0.48, 40]} />
+          </mesh>
+          <mesh position={[1.15, 0.035, -0.45]} rotation={[-Math.PI / 2, 0, 0]} material={rugStainMaterial}>
+            <circleGeometry args={[0.30, 36]} />
+          </mesh>
+          {Array.from({ length: 13 }, (_, i) => (
+            <mesh key={i} position={[-2.35 + i * 0.39, 0.045, 0]} material={rugStainMaterial}>
+              <boxGeometry args={[0.012, 0.008, 3.0]} />
+            </mesh>
+          ))}
+        </group>
+
+        <group position={[0.7, -1.22, 0.45]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.07, 0.07, 0.6, 20]} />
+            {darkMaterial}
+          </mesh>
+          <mesh position={[0, 0.32, 0]} castShadow>
+            <cylinderGeometry args={[0.82, 0.82, 0.09, 48]} />
+            <meshStandardMaterial color="#262a2b" roughness={0.5} />
+          </mesh>
+        </group>
+
+        <group ref={travelGroup} position={[3.2, -0.72, -2.82]} rotation={[0, -0.12, 0]}>
+          <mesh castShadow material={travelMaterial} position={[0, 0, 0]}>
+            <boxGeometry args={[1.6, 0.45, 1.22]} />
+          </mesh>
+          <mesh castShadow material={travelMaterial} position={[0, 0.88, -0.48]} rotation={[-0.12, 0, 0]}>
+            <boxGeometry args={[1.6, 1.35, 0.36]} />
+          </mesh>
+          <mesh position={[0.28, 0.28, 0.63]} rotation={[-Math.PI / 2, 0, 0]} material={travelStainMaterial}>
+            <circleGeometry args={[0.25, 30]} />
+          </mesh>
+        </group>
+
+        <mesh position={[1.1, -1.39, -1.55]} rotation={[-Math.PI / 2, 0, 0]} material={reflectionMaterial}>
+          <planeGeometry args={[6.8, 3.7]} />
+        </mesh>
+
+        <points geometry={dustGeometry} material={dustMaterial} />
+      </group>
+    </>
   );
 }
 
-function Scene({ quality }: { quality: QualityTier }) {
-  return <Fabric quality={quality} />;
-}
-
 export default function GlobalThreeScene() {
-  const [reducedMotion, setReducedMotion] = useState(false);
   const [quality, setQuality] = useState<QualityTier>("medium");
+  const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
-    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-    const updateMotion = () => setReducedMotion(motionQuery.matches);
-    const updateQuality = () => setQuality(getQualityTier());
-
-    updateMotion();
-    updateQuality();
-
-    motionQuery.addEventListener("change", updateMotion);
-    window.addEventListener("resize", updateQuality, { passive: true });
-
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => {
+      setReducedMotion(media.matches);
+      setQuality(getQualityTier());
+    };
+    update();
+    media.addEventListener("change", update);
+    window.addEventListener("resize", update, { passive: true });
     return () => {
-      motionQuery.removeEventListener("change", updateMotion);
-      window.removeEventListener("resize", updateQuality);
+      media.removeEventListener("change", update);
+      window.removeEventListener("resize", update);
     };
   }, []);
 
   if (reducedMotion) {
-    return <div className="three-fallback" aria-hidden="true" />;
+    return <div className="three-fallback room-fallback" aria-hidden="true" />;
   }
 
   const dpr: [number, number] =
-    quality === "high" ? [1, 1.6] : quality === "medium" ? [1, 1.35] : [1, 1.05];
+    quality === "high" ? [1, 1.55] : quality === "medium" ? [1, 1.3] : [1, 1];
 
   return (
-    <div className={`three-layer three-quality-${quality}`} aria-hidden="true">
+    <div className="three-layer white-room-canvas" aria-hidden="true">
       <Canvas
-        camera={{ position: [0, 0, 5.35], fov: 43 }}
+        shadows={quality !== "low"}
+        camera={{ position: [6.7, 3.2, 8.6], fov: 42, near: 0.1, far: 40 }}
         dpr={dpr}
-        gl={{
-          antialias: quality !== "low",
-          alpha: true,
-          powerPreference: "high-performance",
-        }}
-        fallback={<div className="three-fallback three-fallback-inline" />}
+        gl={{ antialias: quality !== "low", alpha: true, powerPreference: "high-performance" }}
+        fallback={<div className="three-fallback room-fallback" />}
       >
-        <Scene quality={quality} />
+        <color attach="background" args={["#dcd6cb"]} />
+        <fog attach="fog" args={["#dcd6cb", 10, 24]} />
+        <Room quality={quality} />
       </Canvas>
-      <div className="three-atmosphere" />
+      <div className="room-grade" />
     </div>
   );
 }

@@ -1,48 +1,58 @@
-import Image from "next/image";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowDownRight } from "lucide-react";
 import { services } from "@/lib/content";
-import Reveal from "./Reveal";
+
+const chapterCopy = [
+  {
+    micro: "MÖBELTVÄTT",
+    statement: "Fläckar försvinner. Texturen stannar.",
+    detail: "Vi rengör soffor, fåtöljer och andra textilier utifrån materialets förutsättningar — inte med en standardbehandling.",
+  },
+  {
+    micro: "MATTVÄTT",
+    statement: "Fibrerna får resa sig igen.",
+    detail: "Smuts, damm och fläckar arbetas ur mattan med en metod anpassad efter konstruktion, material och skick.",
+  },
+  {
+    micro: "GOLVPOLERING",
+    statement: "Från matt yta till kontrollerad lyster.",
+    detail: "Rengöring och polering återger golvet ett välskött uttryck utan att göra ytan visuellt överbehandlad.",
+  },
+  {
+    micro: "BÅT & HUSBIL",
+    statement: "Mindre utrymmen. Samma precision.",
+    detail: "Säten, dynor, madrasser och interiöra ytor rengörs metodiskt där varje detalj påverkar helhetsintrycket.",
+  },
+];
 
 export default function Services() {
   return (
-    <section className="section-shell services" id="tjanster">
-      <Reveal className="section-heading split-heading">
-        <div>
-          <p className="eyebrow">TJÄNSTER</p>
-          <h2>Rätt metod för varje yta.</h2>
-        </div>
-        <p>
-          Vi utgår från material, skick och användning — inte en standardlösning.
-          Det gör behandlingen skonsammare och resultatet mer genomtänkt.
-        </p>
-      </Reveal>
-
-      <div className="service-grid">
-        {services.map((service, index) => (
-          <Reveal key={service.id} className="service-card">
-            <div className="service-cleaning-target" data-cleaning-mode={index}>
-              <div className="service-media">
-                <Image
-                  src={service.image}
-                  alt={`${service.title} hos White Velvet`}
-                  fill
-                  sizes="(max-width: 800px) 100vw, 50vw"
-                />
-                <span className="service-index">0{index + 1}</span>
-              </div>
-              <div className="service-copy">
-                <p className="mini-label">{service.eyebrow}</p>
-                <h3>{service.title}</h3>
-                <p>{service.short}</p>
-                <details>
-                  <summary>Mer om tjänsten <ArrowUpRight size={15} /></summary>
-                  <p>{service.body}</p>
-                </details>
-              </div>
-            </div>
-          </Reveal>
-        ))}
+    <section className="services-room" id="tjanster" aria-label="White Velvets tjänster">
+      <div className="services-intro">
+        <p className="eyebrow">ETT RUM · FYRA BEHANDLINGAR</p>
+        <p>Scrolla genom rummet. Varje material återställs på sitt eget sätt.</p>
       </div>
+
+      {services.slice(0, 4).map((service, index) => {
+        const copy = chapterCopy[index];
+        return (
+          <article
+            className={"room-chapter room-chapter-" + (index + 1)}
+            data-room-stage={index + 1}
+            data-room-service={index}
+            key={service.id}
+          >
+            <div className="chapter-copy">
+              <div className="chapter-number">0{index + 1}</div>
+              <p className="eyebrow">{copy.micro}</p>
+              <h2>{copy.statement}</h2>
+              <p>{copy.detail}</p>
+              <a href="#boka" className="chapter-link">
+                Boka {service.title.toLowerCase()} <ArrowDownRight size={16} />
+              </a>
+            </div>
+          </article>
+        );
+      })}
     </section>
   );
 }

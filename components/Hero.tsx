@@ -1,43 +1,33 @@
-import { ArrowDownRight, ArrowUpRight } from "lucide-react";
-import Reveal from "./Reveal";
+import { ArrowDown, ArrowUpRight } from "lucide-react";
 
 export default function Hero() {
   return (
-    <section className="hero section-shell" id="top">
-      <div className="hero-grid">
-        <Reveal className="hero-copy">
-          <p className="eyebrow">PROFESSIONELL RENGÖRING · VÄSTERÅS</p>
-          <h1>
-            Rent, på riktigt.
-            <span>Med känsla för materialet.</span>
-          </h1>
+    <section className="hero room-stage" id="top" data-room-stage="0">
+      <div className="hero-frame">
+        <div className="hero-topline">
+          <span>Professionell rengöring</span>
+          <span>Västerås · Sverige</span>
+        </div>
+
+        <div className="hero-copy">
+          <p className="eyebrow">WHITE VELVET</p>
+          <h1>Vi återställer<br />rummet.</h1>
           <p className="hero-lead">
-            White Velvet rengör mattor, möbler, golv och interiörer med precision,
-            moderna metoder och ett lugn som märks i resultatet.
+            Textilier, möbler och golv rengjorda med precision — så att materialet
+            får tillbaka sitt lugn, sin lyster och sin känsla.
           </p>
           <div className="hero-actions">
-            <a className="button button-dark" href="#boka">Boka rengöring <ArrowUpRight size={17} /></a>
-            <a className="text-link" href="#resultat">Se före & efter <ArrowDownRight size={17} /></a>
-          </div>
-        </Reveal>
-
-        <div className="hero-orbit" aria-hidden="true">
-          <div className="orbit-card">
-            <span>01</span>
-            <strong>Textil</strong>
-          </div>
-          <div className="orbit-card orbit-card-right">
-            <span>02</span>
-            <strong>Yta</strong>
+            <a className="button button-dark" href="#tjanster">Se rummet förändras <ArrowDown size={16} /></a>
+            <a className="text-link" href="#boka">Boka rengöring <ArrowUpRight size={16} /></a>
           </div>
         </div>
-      </div>
 
-      <div className="trust-strip" aria-label="Viktiga fördelar">
-        <span>Miljömedvetna metoder</span>
-        <span>Materialanpassad rengöring</span>
-        <span>Flexibla tider</span>
-        <span>Västerås</span>
+        <div className="hero-index" aria-label="White Velvets tjänster">
+          <span>01 Möbler</span>
+          <span>02 Mattor</span>
+          <span>03 Golv</span>
+          <span>04 Interiör</span>
+        </div>
       </div>
     </section>
   );
