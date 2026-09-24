@@ -66,10 +66,24 @@ export default function ExperienceLoader() {
       aria-live="polite"
       aria-label="White Velvet laddar"
     >
+      <div className="experience-loader-fabric" aria-hidden="true">
+        <span className="loader-fold loader-fold-a" />
+        <span className="loader-fold loader-fold-b" />
+        <span className="loader-fold loader-fold-c" />
+      </div>
+
       <div className="experience-loader-inner">
-        <span className="experience-loader-mark">WV</span>
+        <div className="experience-loader-emblem" aria-hidden="true">
+          <span className="loader-orbit loader-orbit-a" />
+          <span className="loader-orbit loader-orbit-b" />
+          <span className="experience-loader-mark">WV</span>
+        </div>
+        <p className="experience-loader-kicker">MATERIAL CARE · VÄSTERÅS</p>
         <div className="experience-loader-rule" aria-hidden="true"><span /></div>
-        <span className="experience-loader-caption">WHITE VELVET · VÄSTERÅS</span>
+        <div className="experience-loader-status">
+          <span>WHITE VELVET</span>
+          <span className="loader-status-word">PREPARING SURFACE</span>
+        </div>
       </div>
     </div>
   );

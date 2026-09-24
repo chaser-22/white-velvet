@@ -52,9 +52,13 @@ const vertexShader = /* glsl */ `
 
     float slowTime = uTime * 0.085;
     float idleBreath =
-      sin(slowTime * 0.72 + p.y * 0.46) * 0.030 +
-      cos(slowTime * 0.51 - p.x * 0.31) * 0.018 +
-      sin(slowTime * 0.28 + (p.x + p.y) * 0.21) * 0.012;
+      sin(slowTime * 0.72 + p.y * 0.46) * 0.036 +
+      cos(slowTime * 0.51 - p.x * 0.31) * 0.021 +
+      sin(slowTime * 0.28 + (p.x + p.y) * 0.21) * 0.014;
+
+    float idleDrift =
+      sin(p.x * 0.34 + slowTime * 0.46) * 0.014 +
+      cos(p.y * 0.28 - slowTime * 0.38) * 0.010;
 
     float heroFold =
       sin(p.x * 1.05 + slowTime) * 0.25 +
@@ -118,7 +122,7 @@ const vertexShader = /* glsl */ `
       sin(p.y * 0.72 + slowTime * 2.2 + uFlow * 0.7) * 0.10 * flowStrength +
       sin((p.x - p.y) * 0.38 - slowTime * 1.5) * 0.045 * flowStrength;
 
-    p.z += displacement + idleBreath + pointerLift + flowWave;
+    p.z += displacement + idleBreath + idleDrift + pointerLift + flowWave;
 
     float lateral =
       sin(p.y * 0.58 + uPhase * 0.72) * 0.055 +
@@ -283,6 +287,7 @@ function Fabric({ quality }: { quality: QualityTier }) {
   const flowTarget = useRef(0);
   const lastScrollY = useRef(0);
   const lastScrollTime = useRef(0);
+  const scrollRaf = useRef<number | null>(null);
   const measuredSections = useRef<Array<{ top: number; bottom: number; center: number }>>([]);
 
   const material = useMemo(
@@ -323,13 +328,14 @@ function Fabric({ quality }: { quality: QualityTier }) {
     };
 
     const updateScrollState = () => {
+      scrollRaf.current = null;
       const now = performance.now();
       const y = window.scrollY;
       if (lastScrollTime.current > 0) {
         const dt = Math.max(now - lastScrollTime.current, 8);
-        const velocity = ((y - lastScrollY.current) / dt) * 0.095;
-        const nextFlow = THREE.MathUtils.clamp(velocity, -0.82, 0.82);
-        flowTarget.current = THREE.MathUtils.lerp(flowTarget.current, nextFlow, 0.34);
+        const velocity = ((y - lastScrollY.current) / dt) * 0.080;
+        const nextFlow = THREE.MathUtils.clamp(velocity, -0.64, 0.64);
+        flowTarget.current = THREE.MathUtils.lerp(flowTarget.current, nextFlow, 0.24);
       }
       lastScrollY.current = y;
       lastScrollTime.current = now;
@@ -387,6 +393,11 @@ function Fabric({ quality }: { quality: QualityTier }) {
       localTarget.current = THREE.MathUtils.clamp(local, 0, 1);
     };
 
+    const onScroll = () => {
+      if (scrollRaf.current !== null) return;
+      scrollRaf.current = window.requestAnimationFrame(updateScrollState);
+    };
+
     const onPointer = (event: PointerEvent) => {
       pointer.current.set(
         event.clientX / Math.max(window.innerWidth, 1),
@@ -409,13 +420,14 @@ function Fabric({ quality }: { quality: QualityTier }) {
 
     resizeObserver.observe(document.documentElement);
 
-    window.addEventListener("scroll", updateScrollState, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("pointermove", onPointer, { passive: true });
     window.addEventListener("resize", onResize, { passive: true });
 
     return () => {
       resizeObserver.disconnect();
-      window.removeEventListener("scroll", updateScrollState);
+      if (scrollRaf.current !== null) window.cancelAnimationFrame(scrollRaf.current);
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointer);
       window.removeEventListener("resize", onResize);
       material.dispose();
@@ -428,48 +440,52 @@ function Fabric({ quality }: { quality: QualityTier }) {
     const phase = material.uniforms.uPhase.value;
     const local = material.uniforms.uLocal.value;
     const flow = material.uniforms.uFlow.value;
-    const phaseAlpha = 1 - Math.exp(-3.0 * delta);
-    const localAlpha = 1 - Math.exp(-4.0 * delta);
-    const pointerAlpha = 1 - Math.exp(-1.65 * delta);
+    const phaseAlpha = 1 - Math.exp(-2.35 * delta);
+    const localAlpha = 1 - Math.exp(-2.85 * delta);
+    const pointerAlpha = 1 - Math.exp(-1.35 * delta);
 
     material.uniforms.uTime.value = clock.elapsedTime;
     material.uniforms.uPhase.value = THREE.MathUtils.lerp(phase, phaseTarget.current, phaseAlpha);
     material.uniforms.uLocal.value = THREE.MathUtils.lerp(local, localTarget.current, localAlpha);
     material.uniforms.uPointer.value.lerp(pointer.current, pointerAlpha);
-    material.uniforms.uFlow.value = THREE.MathUtils.lerp(flow, flowTarget.current, 1 - Math.exp(-4.25 * delta));
-    flowTarget.current *= Math.pow(0.075, delta);
+    material.uniforms.uFlow.value = THREE.MathUtils.lerp(flow, flowTarget.current, 1 - Math.exp(-3.4 * delta));
+    flowTarget.current *= Math.pow(0.045, delta);
 
     const p = material.uniforms.uPhase.value;
 
     const idleX =
-      Math.sin(clock.elapsedTime * 0.115) * 0.022 +
-      Math.sin(clock.elapsedTime * 0.047) * 0.009;
+      Math.sin(clock.elapsedTime * 0.102) * 0.026 +
+      Math.sin(clock.elapsedTime * 0.041) * 0.010;
     const idleY =
-      Math.cos(clock.elapsedTime * 0.092) * 0.015 +
-      Math.sin(clock.elapsedTime * 0.036) * 0.007;
+      Math.cos(clock.elapsedTime * 0.081) * 0.019 +
+      Math.sin(clock.elapsedTime * 0.033) * 0.008;
+    const idleZ = Math.sin(clock.elapsedTime * 0.056) * 0.010;
     const flowValue = material.uniforms.uFlow.value;
 
     const targetX = interpolateKeyframe([0.45, 0.15, -0.25, 0.28, -0.18, 0.10, 0.32, 0.05], p) + idleX;
     const targetY = interpolateKeyframe([0.12, -0.12, 0.04, 0.15, -0.20, 0.08, -0.04, 0.16], p) + idleY;
-    const targetZ = interpolateKeyframe([-0.58, -0.62, -0.50, -0.64, -0.50, -0.70, -0.56, -0.62], p) + Math.abs(flowValue) * 0.025;
+    const targetZ =
+      interpolateKeyframe([-0.58, -0.62, -0.50, -0.64, -0.50, -0.70, -0.56, -0.62], p) +
+      idleZ +
+      Math.abs(flowValue) * 0.020;
     const targetRX = interpolateKeyframe([-0.30, -0.19, -0.14, -0.20, -0.28, -0.10, -0.16, -0.28], p) - flowValue * 0.018;
     const targetRZ = interpolateKeyframe([-0.13, 0.05, -0.035, 0.025, -0.07, 0.018, 0.045, 0.11], p) + flowValue * 0.025;
 
-    mesh.current.position.x = THREE.MathUtils.damp(mesh.current.position.x, targetX, 4.0, delta);
-    mesh.current.position.y = THREE.MathUtils.damp(mesh.current.position.y, targetY, 4.0, delta);
-    mesh.current.position.z = THREE.MathUtils.damp(mesh.current.position.z, targetZ, 4.0, delta);
-    mesh.current.rotation.x = THREE.MathUtils.damp(mesh.current.rotation.x, targetRX, 4.0, delta);
-    mesh.current.rotation.z = THREE.MathUtils.damp(mesh.current.rotation.z, targetRZ, 4.0, delta);
+    mesh.current.position.x = THREE.MathUtils.damp(mesh.current.position.x, targetX, 3.2, delta);
+    mesh.current.position.y = THREE.MathUtils.damp(mesh.current.position.y, targetY, 3.2, delta);
+    mesh.current.position.z = THREE.MathUtils.damp(mesh.current.position.z, targetZ, 3.2, delta);
+    mesh.current.rotation.x = THREE.MathUtils.damp(mesh.current.rotation.x, targetRX, 3.0, delta);
+    mesh.current.rotation.z = THREE.MathUtils.damp(mesh.current.rotation.z, targetRZ, 3.0, delta);
 
     const scale = interpolateKeyframe([1.42, 1.34, 1.40, 1.36, 1.44, 1.40, 1.38, 1.46], p);
-    const sx = THREE.MathUtils.damp(mesh.current.scale.x, scale, 4.0, delta);
-    const sy = THREE.MathUtils.damp(mesh.current.scale.y, scale * 0.92, 4.0, delta);
+    const sx = THREE.MathUtils.damp(mesh.current.scale.x, scale, 3.1, delta);
+    const sy = THREE.MathUtils.damp(mesh.current.scale.y, scale * 0.92, 3.1, delta);
     mesh.current.scale.set(sx, sy, 1);
 
     const cameraX = interpolateKeyframe([0.04, 0.0, -0.05, 0.04, -0.03, 0.0, 0.03, 0.0], p) + flowValue * 0.012;
     const cameraY = interpolateKeyframe([0.03, -0.02, 0.0, 0.03, -0.02, 0.0, 0.02, 0.0], p);
-    camera.position.x = THREE.MathUtils.damp(camera.position.x, cameraX, 3.2, delta);
-    camera.position.y = THREE.MathUtils.damp(camera.position.y, cameraY, 3.2, delta);
+    camera.position.x = THREE.MathUtils.damp(camera.position.x, cameraX, 2.45, delta);
+    camera.position.y = THREE.MathUtils.damp(camera.position.y, cameraY, 2.45, delta);
     camera.lookAt(0, 0, 0);
   });
 
