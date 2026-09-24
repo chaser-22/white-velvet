@@ -3063,3 +3063,90 @@ body {
     max-width: 280px;
   }
 }
+
+
+/* WHITE VELVET — strict alignment for trust feature row */
+.trust-feature-grid {
+  align-items: stretch;
+}
+
+.trust-item {
+  display: grid;
+  grid-template-rows: 44px auto;
+  align-content: start;
+  justify-items: center;
+  min-height: 158px;
+  padding: 24px 18px 26px;
+  gap: 14px;
+  text-align: center;
+}
+
+.trust-icon {
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  align-self: start;
+  justify-self: center;
+}
+
+.trust-item > div:last-child {
+  width: 100%;
+  max-width: 230px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-rows: 16px minmax(52px, auto);
+  align-items: start;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.trust-item p {
+  margin: 0;
+  height: 16px;
+  line-height: 16px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.trust-item strong {
+  width: 100%;
+  min-height: 52px;
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: center;
+  text-wrap: balance;
+}
+
+@media (max-width: 900px) {
+  .trust-item {
+    grid-template-rows: 44px auto;
+    min-height: 154px;
+    padding: 24px 20px 26px;
+    gap: 14px;
+  }
+
+  .trust-item > div:last-child {
+    grid-template-rows: 16px minmax(52px, auto);
+  }
+}
+
+@media (max-width: 560px) {
+  .trust-item {
+    grid-template-rows: 44px auto;
+    min-height: 146px;
+    padding: 22px 20px 24px;
+    gap: 13px;
+  }
+
+  .trust-item > div:last-child {
+    max-width: 280px;
+    grid-template-rows: 16px minmax(50px, auto);
+  }
+
+  .trust-item strong {
+    min-height: 50px;
+  }
+}
