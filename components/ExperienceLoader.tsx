@@ -8,6 +8,12 @@ export default function ExperienceLoader() {
   const [state, setState] = useState<LoaderState>("visible");
 
   useEffect(() => {
+    const sessionKey = "wv:intro-seen";
+    if (window.sessionStorage.getItem(sessionKey) === "1") {
+      setState("gone");
+      return;
+    }
+
     let sceneReady = Boolean((window as Window & { __wvSceneReady?: boolean }).__wvSceneReady);
     let fontsReady = !document.fonts;
     let minimumElapsed = false;
@@ -17,6 +23,7 @@ export default function ExperienceLoader() {
     const beginExit = () => {
       if (!sceneReady || !fontsReady || !minimumElapsed || leaveTimer) return;
       leaveTimer = window.setTimeout(() => {
+        window.sessionStorage.setItem(sessionKey, "1");
         setState("leaving");
         goneTimer = window.setTimeout(() => setState("gone"), 980);
       }, 90);
