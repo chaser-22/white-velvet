@@ -2824,3 +2824,79 @@ body {
     display: none !important;
   }
 }
+
+
+/* WHITE VELVET — larger centered loading composition */
+.experience-loader-minimal {
+  display: grid;
+  place-items: center;
+}
+
+.loader-minimal-brand {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(560px, 88vw);
+  transform: translate(-50%, -50%);
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+
+.loader-minimal-mark {
+  width: 118px;
+  height: 118px;
+  font-size: 30px;
+  border-width: 1px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.56) inset,
+    0 24px 58px rgba(24,30,30,.07);
+}
+
+.loader-minimal-name {
+  margin-top: 34px;
+  font-size: 14px;
+  letter-spacing: .34em;
+  padding-left: .34em;
+}
+
+.loader-minimal-progress {
+  width: min(360px, 68vw);
+  height: 3px;
+  margin-top: 30px;
+  border-radius: 999px;
+  background: rgba(16,20,23,.11);
+}
+
+.loader-minimal-progress span {
+  border-radius: inherit;
+}
+
+.experience-loader-minimal.is-leaving .loader-minimal-brand {
+  transform: translate(-50%, calc(-50% - 6px)) scale(.99);
+}
+
+@media (max-width: 760px) {
+  .loader-minimal-brand {
+    width: min(420px, 88vw);
+  }
+
+  .loader-minimal-mark {
+    width: 96px;
+    height: 96px;
+    font-size: 25px;
+  }
+
+  .loader-minimal-name {
+    margin-top: 28px;
+    font-size: 12px;
+    letter-spacing: .30em;
+    padding-left: .30em;
+  }
+
+  .loader-minimal-progress {
+    width: min(280px, 72vw);
+    height: 3px;
+    margin-top: 26px;
+  }
+}
