@@ -821,3 +821,40 @@ body {
 @media (max-width: 760px) {
   .three-atmosphere { opacity: .64; }
 }
+
+
+/* Background texture — brushed pearl / suede, old motion preserved */
+.three-layer {
+  background:
+    radial-gradient(ellipse at 72% 16%, rgba(255,255,255,.82), transparent 30%),
+    radial-gradient(ellipse at 20% 80%, rgba(233,228,219,.32), transparent 38%),
+    linear-gradient(148deg, #f1ece3 0%, #d8d9d4 52%, #9ea4a3 116%);
+}
+.three-atmosphere {
+  opacity: .58;
+  background:
+    repeating-linear-gradient(
+      168deg,
+      rgba(255,255,255,.018) 0px,
+      rgba(255,255,255,.018) 1px,
+      rgba(18,24,25,.012) 1px,
+      rgba(18,24,25,.012) 3px,
+      transparent 3px,
+      transparent 7px
+    ),
+    radial-gradient(circle at 18% 22%, rgba(255,255,255,.22), transparent 31%),
+    radial-gradient(circle at 84% 74%, rgba(22,28,29,.07), transparent 36%);
+  mix-blend-mode: soft-light;
+}
+.three-fallback {
+  background:
+    repeating-linear-gradient(
+      168deg,
+      rgba(255,255,255,.022) 0px,
+      rgba(255,255,255,.022) 1px,
+      transparent 1px,
+      transparent 7px
+    ),
+    radial-gradient(ellipse at 70% 18%, rgba(255,255,255,.92), transparent 29%),
+    linear-gradient(145deg, #eee9e0 0%, #d0d3cf 56%, #7f8989 128%);
+}

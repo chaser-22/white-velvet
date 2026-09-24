@@ -50,11 +50,11 @@ const vertexShader = /* glsl */ `
     float wFaq = phaseWeight(6.0);
     float wFooter = phaseWeight(7.0);
 
-    float slowTime = uTime * 0.092;
+    float slowTime = uTime * 0.085;
     float idleBreath =
-      sin(slowTime * 0.72 + p.y * 0.46) * 0.044 +
-      cos(slowTime * 0.51 - p.x * 0.31) * 0.025 +
-      sin(slowTime * 0.28 + (p.x + p.y) * 0.21) * 0.016;
+      sin(slowTime * 0.72 + p.y * 0.46) * 0.030 +
+      cos(slowTime * 0.51 - p.x * 0.31) * 0.018 +
+      sin(slowTime * 0.28 + (p.x + p.y) * 0.21) * 0.012;
 
     float heroFold =
       sin(p.x * 1.05 + slowTime) * 0.25 +
@@ -159,10 +159,8 @@ const fragmentShader = /* glsl */ `
     if (!gl_FrontFacing) normal = -normal;
 
     vec3 viewDir = normalize(cameraPosition - vWorld);
-    float lightDriftX = sin(uTime * 0.075) * 0.055;
-    float lightDriftY = cos(uTime * 0.061) * 0.035;
-    vec3 lightA = normalize(vec3(-0.52 + lightDriftX, 0.70 + lightDriftY, 0.84));
-    vec3 lightB = normalize(vec3(0.62 - lightDriftX * 0.7, -0.24 + lightDriftY * 0.5, 0.74));
+    vec3 lightA = normalize(vec3(-0.52, 0.70, 0.84));
+    vec3 lightB = normalize(vec3(0.62, -0.24, 0.74));
     vec3 lightDir = normalize(mix(lightA, lightB, smoothstep(3.8, 6.3, uPhase)));
 
     float diffuse = max(dot(normal, lightDir), 0.0);
@@ -204,14 +202,20 @@ const fragmentShader = /* glsl */ `
       midnight * wFooter
     ) / weightSum;
 
-    float threadY = 0.5 + 0.5 * sin(vUv.y * 520.0 + sin(vUv.x * 24.0) * 0.35);
-    float threadX = 0.5 + 0.5 * sin(vUv.x * 230.0 + vUv.y * 4.0);
-    float weave = (threadY * 0.72 + threadX * 0.28 - 0.5) * 0.032;
+    float brushA = 0.5 + 0.5 * sin(vUv.y * 138.0 + sin(vUv.x * 15.0) * 1.35);
+    float brushB = 0.5 + 0.5 * sin((vUv.x * 0.34 + vUv.y) * 92.0 + sin(vUv.y * 8.0));
+    float brushC = 0.5 + 0.5 * sin((vUv.x - vUv.y * 0.22) * 54.0);
+    float suedeGrain =
+      (brushA * 0.52 + brushB * 0.31 + brushC * 0.17 - 0.5) * 0.030;
+
+    float broadNap =
+      sin(vUv.y * 18.0 + sin(vUv.x * 5.0) * 0.8) * 0.010 +
+      sin((vUv.x + vUv.y) * 11.0) * 0.006;
 
     float serviceGrain =
-      (0.5 + 0.5 * sin(vUv.x * 84.0 + vUv.y * 16.0)) *
-      (0.5 + 0.5 * sin(vUv.y * 71.0));
-    weave += (serviceGrain - 0.5) * 0.018 * wServices;
+      (0.5 + 0.5 * sin(vUv.x * 47.0 + vUv.y * 12.0)) *
+      (0.5 + 0.5 * sin(vUv.y * 39.0));
+    suedeGrain += (serviceGrain - 0.5) * 0.012 * wServices;
 
     float cleanFront = clamp(uLocal, 0.04, 0.96);
     float restorationLine = exp(-pow((vUv.x - cleanFront) * 18.0, 2.0)) * wResults;
@@ -234,18 +238,11 @@ const fragmentShader = /* glsl */ `
     vec3 color = base * lighting;
     color += velvetSheen * sheenStrength;
     color += rim * (0.09 + 0.08 * wAbout);
-    color += weave + nap;
+    color += suedeGrain + broadNap + nap * 0.55;
     color += restorationLine * vec3(0.22, 0.21, 0.18);
 
     float pointerGlow = exp(-distance(vUv, uPointer) * 9.0);
-    color += pointerGlow * 0.014 * (1.0 - wBooking);
-
-    float idleSheen = 0.5 + 0.5 * sin(
-      uTime * 0.11 +
-      vUv.x * 2.3 +
-      vUv.y * 1.7
-    );
-    color += idleSheen * velvetSheen * 0.012 * (1.0 - darkPhase * 0.5);
+    color += pointerGlow * 0.018 * (1.0 - wBooking);
 
     float centerVeil = smoothstep(0.82, 0.24, distance(vUv, vec2(0.5)));
     color += centerVeil * 0.018;
@@ -296,7 +293,7 @@ function Fabric({ quality }: { quality: QualityTier }) {
           uPhase: { value: 0 },
           uLocal: { value: 0 },
           uPointer: { value: new THREE.Vector2(0.5, 0.5) },
-          uPointerStrength: { value: quality === "low" ? 0 : 0.58 },
+          uPointerStrength: { value: quality === "low" ? 0 : 0.72 },
           uFlow: { value: 0 },
         },
         vertexShader,
@@ -330,8 +327,8 @@ function Fabric({ quality }: { quality: QualityTier }) {
       const y = window.scrollY;
       if (lastScrollTime.current > 0) {
         const dt = Math.max(now - lastScrollTime.current, 8);
-        const velocity = ((y - lastScrollY.current) / dt) * 0.082;
-        const nextFlow = THREE.MathUtils.clamp(velocity, -0.68, 0.68);
+        const velocity = ((y - lastScrollY.current) / dt) * 0.095;
+        const nextFlow = THREE.MathUtils.clamp(velocity, -0.82, 0.82);
         flowTarget.current = THREE.MathUtils.lerp(flowTarget.current, nextFlow, 0.34);
       }
       lastScrollY.current = y;
@@ -445,26 +442,18 @@ function Fabric({ quality }: { quality: QualityTier }) {
     const p = material.uniforms.uPhase.value;
 
     const idleX =
-      Math.sin(clock.elapsedTime * 0.105) * 0.032 +
-      Math.sin(clock.elapsedTime * 0.043) * 0.012;
+      Math.sin(clock.elapsedTime * 0.115) * 0.022 +
+      Math.sin(clock.elapsedTime * 0.047) * 0.009;
     const idleY =
-      Math.cos(clock.elapsedTime * 0.083) * 0.022 +
-      Math.sin(clock.elapsedTime * 0.034) * 0.010;
+      Math.cos(clock.elapsedTime * 0.092) * 0.015 +
+      Math.sin(clock.elapsedTime * 0.036) * 0.007;
     const flowValue = material.uniforms.uFlow.value;
 
     const targetX = interpolateKeyframe([0.45, 0.15, -0.25, 0.28, -0.18, 0.10, 0.32, 0.05], p) + idleX;
     const targetY = interpolateKeyframe([0.12, -0.12, 0.04, 0.15, -0.20, 0.08, -0.04, 0.16], p) + idleY;
     const targetZ = interpolateKeyframe([-0.58, -0.62, -0.50, -0.64, -0.50, -0.70, -0.56, -0.62], p) + Math.abs(flowValue) * 0.025;
-    const idleTiltX = Math.sin(clock.elapsedTime * 0.071) * 0.008;
-    const idleTiltZ = Math.cos(clock.elapsedTime * 0.058) * 0.010;
-    const targetRX =
-      interpolateKeyframe([-0.30, -0.19, -0.14, -0.20, -0.28, -0.10, -0.16, -0.28], p) +
-      idleTiltX -
-      flowValue * 0.015;
-    const targetRZ =
-      interpolateKeyframe([-0.13, 0.05, -0.035, 0.025, -0.07, 0.018, 0.045, 0.11], p) +
-      idleTiltZ +
-      flowValue * 0.020;
+    const targetRX = interpolateKeyframe([-0.30, -0.19, -0.14, -0.20, -0.28, -0.10, -0.16, -0.28], p) - flowValue * 0.018;
+    const targetRZ = interpolateKeyframe([-0.13, 0.05, -0.035, 0.025, -0.07, 0.018, 0.045, 0.11], p) + flowValue * 0.025;
 
     mesh.current.position.x = THREE.MathUtils.damp(mesh.current.position.x, targetX, 4.0, delta);
     mesh.current.position.y = THREE.MathUtils.damp(mesh.current.position.y, targetY, 4.0, delta);
