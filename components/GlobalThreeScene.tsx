@@ -50,24 +50,24 @@ const vertexShader = /* glsl */ `
     float wFaq = phaseWeight(6.0);
     float wFooter = phaseWeight(7.0);
 
-    float idleFast = uTime * 0.36;
-    float idleMid = uTime * 0.245;
-    float idleSlow = uTime * 0.143;
+    float idleFast = uTime * 0.74;
+    float idleMid = uTime * 0.48;
+    float idleSlow = uTime * 0.30;
     float slowTime = uTime * 0.16;
 
     float idleBreath =
-      sin(idleFast + p.y * 0.44) * 0.048 +
-      cos(idleMid - p.x * 0.29) * 0.034 +
-      sin(idleSlow + (p.x + p.y) * 0.18) * 0.024;
+      sin(idleFast + p.y * 0.44) * 0.070 +
+      cos(idleMid - p.x * 0.29) * 0.050 +
+      sin(idleSlow + (p.x + p.y) * 0.18) * 0.032;
 
     float idleDrift =
-      sin(p.x * 0.31 + idleMid * 0.84) * 0.030 +
-      cos(p.y * 0.27 - idleSlow * 1.12) * 0.022;
+      sin(p.x * 0.31 + idleMid * 0.84) * 0.040 +
+      cos(p.y * 0.27 - idleSlow * 1.12) * 0.030;
 
     float idleSwell =
-      sin(length(p.xy) * 0.55 - idleSlow * 0.92) * 0.025 +
-      sin((p.x - p.y) * 0.20 + idleMid * 0.76) * 0.017 +
-      cos((p.x + p.y) * 0.13 + idleFast * 0.42) * 0.010;
+      sin(length(p.xy) * 0.55 - idleSlow * 0.92) * 0.040 +
+      sin((p.x - p.y) * 0.20 + idleMid * 0.76) * 0.026 +
+      cos((p.x + p.y) * 0.13 + idleFast * 0.42) * 0.018;
 
     float heroFold =
       sin(p.x * 1.05 + slowTime) * 0.25 +
@@ -245,7 +245,7 @@ const fragmentShader = /* glsl */ `
       0.5 + 0.5 * sin((vUv.x * 0.34 + vUv.y) * 390.0 + sin(uTime * 0.12) * 0.42);
     float nap = (napDirection - 0.5) * 0.020;
 
-    float sheenTravel = 0.5 + 0.5 * sin(uTime * 0.19);
+    float sheenTravel = 0.5 + 0.5 * sin(uTime * 0.68);
     float sheenAxis = vUv.x * 0.82 + vUv.y * 0.22;
     float travelingSheen = exp(-pow((sheenAxis - mix(0.10, 0.92, sheenTravel)) * 4.1, 2.0));
 
@@ -477,14 +477,14 @@ function Fabric({ quality }: { quality: QualityTier }) {
     const p = material.uniforms.uPhase.value;
 
     const idleX =
-      Math.sin(clock.elapsedTime * 0.36) * 0.027 +
-      Math.sin(clock.elapsedTime * 0.143) * 0.018;
+      Math.sin(clock.elapsedTime * 0.58) * 0.040 +
+      Math.sin(clock.elapsedTime * 0.27) * 0.022;
     const idleY =
-      Math.cos(clock.elapsedTime * 0.245) * 0.023 +
-      Math.sin(clock.elapsedTime * 0.118) * 0.012;
+      Math.cos(clock.elapsedTime * 0.43) * 0.032 +
+      Math.sin(clock.elapsedTime * 0.23) * 0.016;
     const idleZ =
-      Math.sin(clock.elapsedTime * 0.19) * 0.018 +
-      Math.cos(clock.elapsedTime * 0.109) * 0.008;
+      Math.sin(clock.elapsedTime * 0.34) * 0.030 +
+      Math.cos(clock.elapsedTime * 0.19) * 0.014;
     const flowValue = material.uniforms.uFlow.value;
 
     const targetX = interpolateKeyframe([0.45, 0.15, -0.25, 0.28, -0.18, 0.10, 0.32, 0.05], p) + idleX;
@@ -494,11 +494,11 @@ function Fabric({ quality }: { quality: QualityTier }) {
       idleZ +
       Math.abs(flowValue) * 0.020;
     const idleRX =
-      Math.sin(clock.elapsedTime * 0.245) * 0.010 +
-      Math.cos(clock.elapsedTime * 0.118) * 0.005;
+      Math.sin(clock.elapsedTime * 0.41) * 0.016 +
+      Math.cos(clock.elapsedTime * 0.21) * 0.008;
     const idleRZ =
-      Math.cos(clock.elapsedTime * 0.19) * 0.013 +
-      Math.sin(clock.elapsedTime * 0.143) * 0.006;
+      Math.cos(clock.elapsedTime * 0.35) * 0.020 +
+      Math.sin(clock.elapsedTime * 0.24) * 0.010;
     const targetRX =
       interpolateKeyframe([-0.30, -0.19, -0.14, -0.20, -0.28, -0.10, -0.16, -0.28], p) +
       idleRX -
@@ -521,13 +521,13 @@ function Fabric({ quality }: { quality: QualityTier }) {
 
     const cameraX =
       interpolateKeyframe([0.04, 0.0, -0.05, 0.04, -0.03, 0.0, 0.03, 0.0], p) +
-      Math.sin(clock.elapsedTime * 0.19) * 0.012 +
-      Math.sin(clock.elapsedTime * 0.109) * 0.006 +
+      Math.sin(clock.elapsedTime * 0.31) * 0.020 +
+      Math.sin(clock.elapsedTime * 0.17) * 0.010 +
       flowValue * 0.010;
     const cameraY =
       interpolateKeyframe([0.03, -0.02, 0.0, 0.03, -0.02, 0.0, 0.02, 0.0], p) +
-      Math.cos(clock.elapsedTime * 0.143) * 0.009;
-    const cameraZ = 5.45 + Math.sin(clock.elapsedTime * 0.118) * 0.025;
+      Math.cos(clock.elapsedTime * 0.24) * 0.014;
+    const cameraZ = 5.45 + Math.sin(clock.elapsedTime * 0.21) * 0.045;
     camera.position.x = THREE.MathUtils.damp(camera.position.x, cameraX, 2.15, delta);
     camera.position.y = THREE.MathUtils.damp(camera.position.y, cameraY, 2.15, delta);
     camera.position.z = THREE.MathUtils.damp(camera.position.z, cameraZ, 1.8, delta);
@@ -603,6 +603,7 @@ export default function GlobalThreeScene() {
   return (
     <div className={`three-layer three-quality-${quality} ${sceneReady ? "three-scene-ready" : ""}`} aria-hidden="true">
       <Canvas
+        frameloop="always"
         onCreated={signalSceneReady}
         camera={{ position: [0, 0, 5.35], fov: 43 }}
         dpr={dpr}
@@ -615,7 +616,10 @@ export default function GlobalThreeScene() {
       >
         <Scene quality={quality} />
       </Canvas>
-      <div className="three-atmosphere" />
+      <div className="three-atmosphere">
+        <span className="ambient-sheen ambient-sheen-a" />
+        <span className="ambient-sheen ambient-sheen-b" />
+      </div>
     </div>
   );
 }
