@@ -144,7 +144,7 @@ export default function GlobalThreeScene() {
     quality === "high" ? [1, 1.45] : quality === "medium" ? [1, 1.2] : [1, 1];
 
   return (
-    <div className="three-layer signature-scene" aria-hidden="true">
+    <div ref={layer} className="three-layer signature-scene" aria-hidden="true">
       <Canvas
         camera={{ position: [0, 0, 5.5], fov: 42, near: 0.1, far: 30 }}
         dpr={dpr}
