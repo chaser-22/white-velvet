@@ -147,7 +147,7 @@ export default function BookingWizard() {
             style={{ "--booking-progress": `${(step / (labels.length - 1)) * 100}%` } as CSSProperties}
           >
             {labels.map((label, i) => (
-              <div className={i <= step ? "active" : ""} key={label}>
+              <div className={i <= step ? "active" : ""} key={label} aria-current={i === step ? "step" : undefined}>
                 <span>{i < step ? <Check size={13} /> : i + 1}</span>
                 <small>{label}</small>
               </div>
