@@ -30,13 +30,14 @@ const jsonLd = {
 export default function Home() {
   return (
     <div className="v2-site">
+      <a className="skip-link" href="#main-content">Hoppa till innehåll</a>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <MotionEngine />
       <V2Scene />
       <V2Intro />
       <V2Header />
 
-      <main>
+      <main id="main-content">
         <section className="v2-hero" id="top">
           <div className="v2-hero-grid">
             <div className="v2-hero-copy">
