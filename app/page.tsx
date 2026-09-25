@@ -77,42 +77,6 @@ export default function Home() {
           <V2BeforeAfter />
         </section>
 
-        <section className="v2-process" id="metod">
-          <div className="v2-section-label">
-            <p>SÅ FUNGERAR DET</p>
-          </div>
-
-          <div className="v2-process-grid">
-            <div className="v2-process-intro">
-              <h2>Från förfrågan till besök.</h2>
-            </div>
-
-            <div className="v2-process-steps">
-              <article>
-                <span>01</span>
-                <div>
-                  <h3>Välj tjänst</h3>
-                  <p>Berätta vad du vill ha hjälp med och ge oss de viktigaste detaljerna.</p>
-                </div>
-              </article>
-              <article>
-                <span>02</span>
-                <div>
-                  <h3>Önska tid</h3>
-                  <p>Välj ett datum och tidsfönster som passar. Vi bekräftar tiden efter din förfrågan.</p>
-                </div>
-              </article>
-              <article>
-                <span>03</span>
-                <div>
-                  <h3>Vi tar hand om resten</h3>
-                  <p>White Velvet återkommer med bekräftelse och praktisk information inför besöket.</p>
-                </div>
-              </article>
-            </div>
-          </div>
-        </section>
-
         <section className="v2-booking-stage">
           <div className="v2-section-label">
             <p>BOKNINGSFÖRFRÅGAN</p>
