@@ -6,7 +6,6 @@ export default function V2Services() {
   return (
     <section className="v2-services" id="tjanster">
       <div className="v2-section-label">
-        <span>01</span>
         <p>TJÄNSTER</p>
       </div>
 
@@ -16,9 +15,8 @@ export default function V2Services() {
       </div>
 
       <div className="v2-service-list">
-        {services.map((service, index) => (
+        {services.map((service) => (
           <article className="v2-service-row" key={service.id}>
-            <div className="v2-service-number">0{index + 1}</div>
             <div className="v2-service-media">
               <Image
                 src={service.image}
