@@ -9,7 +9,7 @@ import V2FAQ from "@/components/v2/V2FAQ";
 import V2Footer from "@/components/v2/V2Footer";
 import V2BeforeAfter from "@/components/v2/V2BeforeAfter";
 import BookingWizard from "@/components/BookingWizard";
-import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Clock3, Leaf, MapPin, ScanLine } from "lucide-react";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -60,10 +60,10 @@ export default function Home() {
             </div>
 
             <aside className="v2-hero-index v2-main-trust" aria-label="Viktiga fördelar">
-              <div><span>ANSVARSFULLT</span><p>Miljömedvetna metoder</p></div>
-              <div><span>PRECISION</span><p>Materialanpassad rengöring</p></div>
-              <div><span>ANPASSAT</span><p>Flexibla tider</p></div>
-              <div><span>LOKALT</span><p>Västerås</p></div>
+              <div><Leaf size={19} strokeWidth={1.45} /><span>ANSVARSFULLT</span><p>Miljömedvetna metoder</p></div>
+              <div><ScanLine size={19} strokeWidth={1.45} /><span>PRECISION</span><p>Materialanpassad rengöring</p></div>
+              <div><Clock3 size={19} strokeWidth={1.45} /><span>ANPASSAT</span><p>Flexibla tider</p></div>
+              <div><MapPin size={19} strokeWidth={1.45} /><span>LOKALT</span><p>Västerås</p></div>
             </aside>
           </div>
 
