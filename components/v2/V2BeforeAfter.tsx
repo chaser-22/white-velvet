@@ -19,8 +19,8 @@ const work = [
 export default function V2BeforeAfter() {
   return (
     <div className="v2-compare-grid">
-      {work.map((item, index) => (
-        <Comparison key={item.title} item={item} index={index} />
+      {work.map((item) => (
+        <Comparison key={item.title} item={item} />
       ))}
     </div>
   );
@@ -28,17 +28,14 @@ export default function V2BeforeAfter() {
 
 function Comparison({
   item,
-  index,
 }: {
   item: (typeof work)[number];
-  index: number;
 }) {
   const [value, setValue] = useState(52);
 
   return (
     <article className="v2-compare">
       <div className="v2-compare-topline">
-        <span>0{index + 1}</span>
         <p>{item.title}</p>
         <strong>VERKLIGT KUNDARBETE</strong>
       </div>
