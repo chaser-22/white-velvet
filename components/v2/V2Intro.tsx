@@ -3,7 +3,6 @@
 import gsap from "gsap";
 import { useLayoutEffect, useRef, useState } from "react";
 
-const SESSION_KEY = "wv-v2-cinematic-intro";
 const MIN_DURATION = 3200;
 const SAFETY_DURATION = 7000;
 
@@ -15,10 +14,7 @@ type IntroState = {
 type WVWindow = Window & {
   __wvV2SceneReady?: boolean;
   __wvV2IntroState?: IntroState;
-  __wvV2IntroSeen?: boolean;
 };
-
-let introPlayedThisSession = false;
 
 export default function V2Intro() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -34,21 +30,6 @@ export default function V2Intro() {
 
     const win = window as WVWindow;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const alreadySeen =
-      introPlayedThisSession ||
-      win.__wvV2IntroSeen ||
-      window.sessionStorage.getItem(SESSION_KEY) === "1";
-
-    if (alreadySeen) {
-      win.__wvV2IntroSeen = true;
-      win.__wvV2IntroState = { active: false, progress: 100 };
-      root.style.display = "none";
-      document.documentElement.classList.remove("v2-intro-lock");
-      setVisible(false);
-      window.dispatchEvent(new Event("wv:intro-complete"));
-      return;
-    }
-
     let alive = true;
     let safetyTimer = 0;
     let minimumTimer = 0;
@@ -126,9 +107,6 @@ export default function V2Intro() {
 
       const finalize = () => {
         if (!alive) return;
-        introPlayedThisSession = true;
-        win.__wvV2IntroSeen = true;
-        window.sessionStorage.setItem(SESSION_KEY, "1");
         document.documentElement.classList.remove("v2-intro-lock");
         window.dispatchEvent(new Event("wv:intro-complete"));
         setVisible(false);
@@ -264,15 +242,14 @@ export default function V2Intro() {
       const elapsed = now - started;
       const timeReady = Math.min(elapsed / minimumDuration, 1);
 
-      const readiness =
-        (sceneReady ? 0.46 : 0) +
-        (fontsReady ? 0.16 : 0) +
-        (windowReady ? 0.18 : 0) +
-        timeReady * 0.20;
+      const readinessBoost =
+        (sceneReady ? 3.0 : 0) +
+        (fontsReady ? 1.5 : 0) +
+        (windowReady ? 1.5 : 0);
 
       const allReady = sceneReady && fontsReady && windowReady && minimumReady;
-      const target = allReady ? 100 : Math.min(97, 4 + readiness * 93);
-      const smoothing = 1 - Math.exp(-delta * (target === 100 ? 6.4 : 3.2));
+      const target = allReady ? 100 : Math.min(96, 6 + timeReady * 84 + readinessBoost);
+      const smoothing = 1 - Math.exp(-delta * (target === 100 ? 7.0 : 4.0));
 
       displayed += (target - displayed) * smoothing;
       renderProgress(displayed);
