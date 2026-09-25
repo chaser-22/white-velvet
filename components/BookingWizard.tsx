@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { CSSProperties, FormEvent, useEffect, useMemo, useState } from "react";
 import { bookingServices } from "@/lib/content";
 
 const labels = ["Tjänst", "Detaljer", "Plats", "Tid", "Kontakt", "Klart"];
@@ -97,7 +97,11 @@ export default function BookingWizard() {
         </div>
 
         <form onSubmit={submit} className="booking-card" noValidate>
-          <div className="booking-progress" aria-label={`Steg ${step + 1} av ${labels.length}`}>
+          <div
+            className="booking-progress"
+            aria-label={`Steg ${step + 1} av ${labels.length}`}
+            style={{ "--booking-progress": `${(step / (labels.length - 1)) * 100}%` } as CSSProperties}
+          >
             {labels.map((label, i) => (
               <div className={i <= step ? "active" : ""} key={label}>
                 <span>{i < step ? <Check size={13} /> : i + 1}</span>
@@ -107,6 +111,7 @@ export default function BookingWizard() {
           </div>
 
           <div className="booking-step" aria-live="polite">
+            <div className="booking-step-panel" key={step}>
             {step === 0 && (
               <>
                 <p className="step-kicker">STEG 1</p>
@@ -212,6 +217,7 @@ export default function BookingWizard() {
                 </div>
               </div>
             )}
+            </div>
           </div>
 
           {step < 5 && (
