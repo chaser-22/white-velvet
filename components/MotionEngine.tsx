@@ -16,14 +16,14 @@ export default function MotionEngine() {
     }
 
     const lenis = new Lenis({
-      lerp: 0.085,
+      lerp: 0.07,
       smoothWheel: true,
-      wheelMultiplier: 0.9,
-      touchMultiplier: 1,
+      wheelMultiplier: 0.82,
+      touchMultiplier: 1.05,
       syncTouch: false,
       anchors: {
         offset: -92,
-        duration: 1.05,
+        duration: 1.15,
       },
     });
 
