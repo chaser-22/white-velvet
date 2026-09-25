@@ -15,43 +15,68 @@ export default function MotionEngine() {
       return;
     }
 
+    const previousScrollBehavior = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior = "auto";
+
     const lenis = new Lenis({
-      lerp: 0.07,
+      lerp: 0.085,
       smoothWheel: true,
-      wheelMultiplier: 0.82,
-      touchMultiplier: 1.05,
+      wheelMultiplier: 0.9,
+      touchMultiplier: 1,
       syncTouch: false,
       anchors: {
-        offset: -92,
-        duration: 1.15,
+        offset: -88,
+        duration: 1,
       },
     });
 
-    const onScroll = () => {
-      ScrollTrigger.update();
+    let resizeTimer = 0;
+    let alive = true;
+
+    const onScroll = () => ScrollTrigger.update();
+    const raf = (time: number) => lenis.raf(time * 1000);
+
+    const refresh = () => {
+      if (!alive) return;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (!alive) return;
+          lenis.resize();
+          ScrollTrigger.refresh();
+        });
+      });
     };
 
-    const raf = (time: number) => {
-      lenis.raf(time * 1000);
+    const onResize = () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(refresh, 90);
     };
 
     lenis.on("scroll", onScroll);
     gsap.ticker.add(raf);
     gsap.ticker.lagSmoothing(0);
 
-    const refresh = () => ScrollTrigger.refresh();
     window.addEventListener("wv:intro-complete", refresh);
+    window.addEventListener("resize", onResize, { passive: true });
+    window.addEventListener("load", refresh, { once: true });
 
     if (document.fonts) {
-      document.fonts.ready.then(refresh);
-    } else {
-      refresh();
+      document.fonts.ready.then(() => {
+        if (alive) refresh();
+      });
     }
 
+    refresh();
+
     return () => {
+      alive = false;
+      window.clearTimeout(resizeTimer);
       window.removeEventListener("wv:intro-complete", refresh);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("load", refresh);
       gsap.ticker.remove(raf);
       lenis.destroy();
+      document.documentElement.style.scrollBehavior = previousScrollBehavior;
     };
   }, []);
 
