@@ -73,9 +73,9 @@ export default function V2Header() {
           <div className="v2-mobile-menu-inner">
             <p>WHITE VELVET / VÄSTERÅS</p>
             <nav aria-label="Mobilnavigation">
-              {nav.map(([label, href], index) => (
+              {nav.map(([label, href]) => (
                 <a href={href} key={href} onClick={() => setOpen(false)}>
-                  <span>0{index + 1}</span>{label}
+                  {label}
                 </a>
               ))}
             </nav>
