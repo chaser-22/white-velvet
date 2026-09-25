@@ -22,6 +22,25 @@ export default function V2Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    if (!open) {
+      document.documentElement.classList.remove("v2-menu-open");
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+
+    document.documentElement.classList.add("v2-menu-open");
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.documentElement.classList.remove("v2-menu-open");
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
   return (
     <>
       <header className={`v2-site-header ${compact ? "is-compact" : ""}`}>
@@ -40,6 +59,7 @@ export default function V2Header() {
             className="v2-menu-button"
             type="button"
             aria-expanded={open}
+            aria-controls="v2-mobile-nav"
             aria-label={open ? "Stäng meny" : "Öppna meny"}
             onClick={() => setOpen((value) => !value)}
           >
@@ -49,10 +69,10 @@ export default function V2Header() {
       </header>
 
       {open && (
-        <div className="v2-mobile-menu">
+        <div className="v2-mobile-menu" id="v2-mobile-nav">
           <div className="v2-mobile-menu-inner">
             <p>WHITE VELVET / VÄSTERÅS</p>
-            <nav>
+            <nav aria-label="Mobilnavigation">
               {nav.map(([label, href], index) => (
                 <a href={href} key={href} onClick={() => setOpen(false)}>
                   <span>0{index + 1}</span>{label}
