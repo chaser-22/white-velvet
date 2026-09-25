@@ -838,7 +838,7 @@ html:has(.v2-site) {
 
 /* Footer */
 .v2-footer {
-  padding: 82px 0 28px;
+  padding: 40px 0 28px;
   background: rgba(247,244,237,.10) !important;
   color: var(--v2-ink-strong);
   backdrop-filter: blur(7px);
@@ -868,7 +868,7 @@ html:has(.v2-site) {
 
 .v2-footer-grid {
   max-width: 980px;
-  margin-top: 68px;
+  margin-top: 0;
   grid-template-columns: repeat(4, 1fr);
   border-top-color: var(--v2-border);
 }
