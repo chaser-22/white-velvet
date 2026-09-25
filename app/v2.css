@@ -33,6 +33,18 @@ html.v2-intro-lock body {
   overflow: hidden !important;
 }
 
+
+html.v2-intro-lock .v2-site-header,
+html.v2-intro-lock .v2-hero-copy > * {
+  opacity: 0;
+  visibility: hidden;
+}
+
+html.v2-intro-lock .v2-site-header,
+html.v2-intro-lock .v2-hero-copy > * {
+  will-change: transform, opacity, filter;
+}
+
 .v2-canvas-shell,
 .v2-canvas-fallback {
   position: fixed;
