@@ -40,36 +40,36 @@ export default function Home() {
         <section className="v2-hero" id="top">
           <div className="v2-hero-grid">
             <div className="v2-hero-copy">
-              <p className="v2-hero-reveal v2-overline">PROFESSIONELL MATERIALVÅRD / VÄSTERÅS</p>
+              <p className="v2-hero-reveal v2-overline">PROFESSIONELL RENGÖRING · VÄSTERÅS</p>
               <h1 className="v2-hero-reveal">
-                Vi rengör
-                <span>utan att sudda ut materialet.</span>
+                Rent, på riktigt.
+                <span>Med känsla för materialet.</span>
               </h1>
               <p className="v2-hero-reveal v2-hero-lead">
-                White Velvet arbetar med textil, golv och interiör som material — inte som standardytor.
-                Metoden väljs efter struktur, skick och vad ytan faktiskt behöver.
+                White Velvet rengör mattor, möbler, golv och interiörer med precision,
+                moderna metoder och ett lugn som märks i resultatet.
               </p>
               <div className="v2-hero-reveal v2-hero-actions">
                 <a className="v2-primary-action" href="#boka">
                   Boka rengöring <ArrowUpRight size={17} />
                 </a>
                 <a className="v2-secondary-action" href="#resultat">
-                  Se transformationen <ArrowDownRight size={17} />
+                  Se före & efter <ArrowDownRight size={17} />
                 </a>
               </div>
             </div>
 
-            <aside className="v2-hero-index">
-              <div><span>01</span><p>MATTOR</p></div>
-              <div><span>02</span><p>MÖBLER</p></div>
-              <div><span>03</span><p>GOLV</p></div>
-              <div><span>04</span><p>INTERIÖR</p></div>
+            <aside className="v2-hero-index v2-main-trust" aria-label="Viktiga fördelar">
+              <div><span>ANSVARSFULLT</span><p>Miljömedvetna metoder</p></div>
+              <div><span>PRECISION</span><p>Materialanpassad rengöring</p></div>
+              <div><span>ANPASSAT</span><p>Flexibla tider</p></div>
+              <div><span>LOKALT</span><p>Västerås</p></div>
             </aside>
           </div>
 
           <div className="v2-hero-footer">
-            <span>SCROLL TO EXPLORE</span>
-            <p>Material care / precise treatment / considered result</p>
+            <span>DETALJER SOM GÖR SKILLNAD</span>
+            <p>Genomtänkt från metod till tid.</p>
           </div>
         </section>
 
@@ -81,12 +81,9 @@ export default function Home() {
             <p>RESTORATION EVIDENCE</p>
           </div>
           <div className="v2-results-intro">
-            <p>FÖRE / EFTER</p>
-            <h2>Rengöring ska kunna läsas i ytan.</h2>
-            <span>
-              Dra mellan före och efter. Samma material, samma objekt — efter en metod anpassad
-              efter konstruktion och skick.
-            </span>
+            <p>FÖRE & EFTER</p>
+            <h2>Resultatet ska kunna ses.</h2>
+            <span>Dra reglaget över bilderna för att jämföra verkliga arbeten från White Velvet.</span>
           </div>
           <V2BeforeAfter />
         </section>
@@ -99,37 +96,34 @@ export default function Home() {
 
           <div className="v2-process-grid">
             <div className="v2-process-intro">
-              <p className="v2-overline">FRÅN BEDÖMNING TILL RESULTAT</p>
-              <h2>Precision börjar innan maskinen startar.</h2>
+              <p className="v2-overline">SÅ FUNGERAR DET</p>
+              <h2>En enkel väg till ett renare resultat.</h2>
+              <p className="v2-process-lead">
+                Rengöring ska kännas trygg från första kontakt till sista detalj. Därför håller vi
+                processen tydlig, personlig och lätt att följa.
+              </p>
             </div>
 
             <div className="v2-process-steps">
               <article>
                 <span>01</span>
                 <div>
-                  <h3>Läs materialet.</h3>
-                  <p>Vi bedömer fiber, yta, konstruktion, slitage och känslighet innan behandling.</p>
+                  <h3>Välj tjänst</h3>
+                  <p>Berätta vad du vill ha hjälp med och ge oss de viktigaste detaljerna.</p>
                 </div>
               </article>
               <article>
                 <span>02</span>
                 <div>
-                  <h3>Välj behandling.</h3>
-                  <p>Metod, kemi, temperatur och mekanik anpassas efter ytan — inte efter en standardmall.</p>
+                  <h3>Önska tid</h3>
+                  <p>Välj ett datum och tidsfönster som passar. Vi bekräftar tiden efter din förfrågan.</p>
                 </div>
               </article>
               <article>
                 <span>03</span>
                 <div>
-                  <h3>Arbeta kontrollerat.</h3>
-                  <p>Rengöringen sker metodiskt med fokus på jämnhet, materialkänsla och ett lugnt resultat.</p>
-                </div>
-              </article>
-              <article>
-                <span>04</span>
-                <div>
-                  <h3>Avsluta rent.</h3>
-                  <p>Vi lämnar ytan återställd, balanserad och utan ett överbehandlat uttryck.</p>
+                  <h3>Vi tar hand om resten</h3>
+                  <p>White Velvet återkommer med bekräftelse och praktisk information inför besöket.</p>
                 </div>
               </article>
             </div>
@@ -138,20 +132,20 @@ export default function Home() {
 
         <section className="v2-about" id="om">
           <div className="v2-about-copy">
-            <p className="v2-overline">WHITE VELVET / VÄSTERÅS</p>
-            <h2>Materialvård med mindre brus och mer kontroll.</h2>
+            <p className="v2-overline">WHITE VELVET</p>
+            <h2>Renare ytor. Lugnare helhet.</h2>
             <p>
-              White Velvet är byggt kring en enkel idé: behandla varje yta som något med egna
-              egenskaper. Det betyder lugnare beslut, tydligare metod och en finish som känns
-              naturlig snarare än överarbetad.
+              White Velvet arbetar med professionell rengöring i Västerås och kombinerar modern
+              utrustning med ett materialmedvetet arbetssätt. Målet är enkelt: ett resultat som känns
+              lika genomtänkt som det ser ut.
             </p>
           </div>
 
           <div className="v2-about-matrix">
-            <div><span>01</span><strong>Materialanpassat</strong><p>Metoden följer ytan.</p></div>
-            <div><span>02</span><strong>Miljömedvetet</strong><p>Genomtänkt produktval.</p></div>
-            <div><span>03</span><strong>Flexibelt</strong><p>Tider efter verkliga behov.</p></div>
-            <div><span>04</span><strong>Lokalt</strong><p>Västerås med omnejd.</p></div>
+            <div><span>01</span><strong>Precision</strong><p>Varje uppdrag bedöms efter material, skick och behov.</p></div>
+            <div><span>02</span><strong>Miljömedvetet</strong><p>Skonsamma och noggrant utvalda rengöringsprodukter.</p></div>
+            <div><span>03</span><strong>Flexibelt</strong><p>Tider och upplägg anpassas efter uppdragets praktiska förutsättningar.</p></div>
+            <div><span>04</span><strong>Omsorg</strong><p>Fokus på ett välskött resultat utan onödigt hårda metoder.</p></div>
           </div>
         </section>
 
