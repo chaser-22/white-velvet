@@ -111,7 +111,7 @@ function VelvetSurface({ quality }: { quality: Quality }) {
   const velocityTarget = useRef(0);
   const pointerTarget = useRef(new THREE.Vector2(0.5, 0.5));
   const lastScroll = useRef(0);
-  const lastTime = useRef(performance.now());
+  const lastTime = useRef(0);
 
   const material = useMemo(() => new THREE.ShaderMaterial({
     uniforms: {
@@ -134,7 +134,7 @@ function VelvetSurface({ quality }: { quality: Quality }) {
       scrollTarget.current = THREE.MathUtils.clamp(window.scrollY / max, 0, 1);
 
       const now = performance.now();
-      const dt = Math.max(now - lastTime.current, 12);
+      const dt = lastTime.current > 0 ? Math.max(now - lastTime.current, 12) : 16;
       const dy = window.scrollY - lastScroll.current;
       velocityTarget.current = THREE.MathUtils.clamp((dy / dt) * 0.09, -1, 1);
       lastScroll.current = window.scrollY;
@@ -284,6 +284,13 @@ export default function V2Scene() {
       window.removeEventListener("resize", update);
     };
   }, []);
+
+  useEffect(() => {
+    if (!reducedMotion) return;
+    const win = window as Window & { __wvV2SceneReady?: boolean };
+    win.__wvV2SceneReady = true;
+    window.dispatchEvent(new Event("wv:v2-scene-ready"));
+  }, [reducedMotion]);
 
   if (reducedMotion) {
     return <div className="v2-canvas-shell v2-canvas-fallback is-ready" aria-hidden="true" />;
