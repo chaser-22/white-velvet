@@ -57,16 +57,16 @@ const vertexShader = /* glsl */ `
     float slowTime = uTime * 0.10;
 
     float idleBreath =
-      sin(idleMid + p.y * 0.30) * 0.042 +
-      cos(idleSlow - p.x * 0.22) * 0.030;
+      sin(idleMid + p.y * 0.30) * 0.054 +
+      cos(idleSlow - p.x * 0.22) * 0.038;
 
     float idleDrift =
-      sin(p.x * 0.22 + idleSlow * 0.78) * 0.024 +
-      cos(p.y * 0.20 - idleSlow * 0.92) * 0.018;
+      sin(p.x * 0.22 + idleSlow * 0.78) * 0.031 +
+      cos(p.y * 0.20 - idleSlow * 0.92) * 0.024;
 
     float idleSwell =
-      sin(length(p.xy) * 0.42 - idleSlow * 0.72) * 0.022 +
-      sin((p.x - p.y) * 0.15 + idleMid * 0.56) * 0.016;
+      sin(length(p.xy) * 0.42 - idleSlow * 0.72) * 0.029 +
+      sin((p.x - p.y) * 0.15 + idleMid * 0.56) * 0.021;
 
     float diagonal = p.x * 0.78 + p.y * 0.34;
     float crossDiagonal = p.y * 0.62 - p.x * 0.20;
@@ -491,7 +491,7 @@ function Fabric({ quality }: { quality: QualityTier }) {
     // Keep the material visibly alive even when scroll input is completely idle.
     // A slightly accelerated time base makes the velvet deformation readable
     // without making the scene feel nervous or tied to scroll velocity.
-    const idleTime = clock.elapsedTime * 1.16;
+    const idleTime = clock.elapsedTime * 1.28;
     material.uniforms.uTime.value = idleTime;
     material.uniforms.uPhase.value = THREE.MathUtils.lerp(phase, phaseTarget.current, phaseAlpha);
     material.uniforms.uLocal.value = THREE.MathUtils.lerp(local, localTarget.current, localAlpha);
@@ -519,9 +519,18 @@ function Fabric({ quality }: { quality: QualityTier }) {
       Math.sin(idleTime * 0.30) * 0.046 +
       Math.cos(idleTime * 0.15) * 0.022;
     const flowValue = material.uniforms.uFlow.value;
+    const pointerX = (pointer.current.x - 0.5) * 2;
+    const pointerY = (pointer.current.y - 0.5) * 2;
+    const pointerMotion = quality === "low" ? 0 : 1;
 
-    const targetX = interpolateKeyframe([0.45, 0.15, -0.25, 0.28, -0.18, 0.10, 0.32, 0.05], p) + idleX * motionIntensity;
-    const targetY = interpolateKeyframe([0.12, -0.12, 0.04, 0.15, -0.20, 0.08, -0.04, 0.16], p) + idleY * motionIntensity;
+    const targetX =
+      interpolateKeyframe([0.45, 0.15, -0.25, 0.28, -0.18, 0.10, 0.32, 0.05], p) +
+      idleX * motionIntensity +
+      pointerX * 0.048 * pointerMotion * motionIntensity;
+    const targetY =
+      interpolateKeyframe([0.12, -0.12, 0.04, 0.15, -0.20, 0.08, -0.04, 0.16], p) +
+      idleY * motionIntensity +
+      pointerY * 0.034 * pointerMotion * motionIntensity;
     const targetZ =
       interpolateKeyframe([-0.58, -0.62, -0.50, -0.64, -0.50, -0.70, -0.56, -0.62], p) +
       idleZ * motionIntensity +
@@ -539,7 +548,10 @@ function Fabric({ quality }: { quality: QualityTier }) {
       interpolateKeyframe([-0.30, -0.19, -0.14, -0.20, -0.28, -0.10, -0.16, -0.28], p) +
       idleRX * motionIntensity -
       flowValue * 0.018 * motionIntensity;
-    const targetRY = idleRY * motionIntensity + flowValue * 0.010 * motionIntensity;
+    const targetRY =
+      idleRY * motionIntensity +
+      flowValue * 0.010 * motionIntensity +
+      pointerX * 0.020 * pointerMotion * motionIntensity;
     const targetRZ =
       interpolateKeyframe([-0.13, 0.05, -0.035, 0.025, -0.07, 0.018, 0.045, 0.11], p) +
       idleRZ * motionIntensity +
@@ -566,10 +578,12 @@ function Fabric({ quality }: { quality: QualityTier }) {
       interpolateKeyframe([0.04, 0.0, -0.05, 0.04, -0.03, 0.0, 0.03, 0.0], p) +
       Math.sin(idleTime * 0.40) * 0.044 * motionIntensity +
       Math.sin(idleTime * 0.23) * 0.022 * motionIntensity +
-      flowValue * 0.010 * motionIntensity;
+      flowValue * 0.010 * motionIntensity +
+      pointerX * 0.052 * pointerMotion * motionIntensity;
     const cameraY =
       interpolateKeyframe([0.03, -0.02, 0.0, 0.03, -0.02, 0.0, 0.02, 0.0], p) +
-      Math.cos(idleTime * 0.32) * 0.034 * motionIntensity;
+      Math.cos(idleTime * 0.32) * 0.034 * motionIntensity +
+      pointerY * 0.038 * pointerMotion * motionIntensity;
     const cameraZ =
       5.45 +
       Math.sin(idleTime * 0.30) * 0.082 * motionIntensity +
@@ -644,7 +658,7 @@ export default function GlobalThreeScene() {
   }
 
   const dpr: [number, number] =
-    quality === "high" ? [1, 1.3] : quality === "medium" ? [1, 1.1] : [1, 1.0];
+    quality === "high" ? [1, 1.45] : quality === "medium" ? [1, 1.2] : [1, 1.0];
 
   return (
     <div className={`three-layer three-quality-${quality} ${sceneReady ? "three-scene-ready" : ""}`} aria-hidden="true">
@@ -657,6 +671,7 @@ export default function GlobalThreeScene() {
           antialias: quality !== "low",
           alpha: true,
           powerPreference: "high-performance",
+          stencil: false,
         }}
         fallback={<div className="three-fallback three-fallback-inline" />}
       >
