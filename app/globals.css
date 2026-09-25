@@ -4009,3 +4009,180 @@ html.wv-intro-entering .three-atmosphere {
     transition: none !important;
   }
 }
+
+
+/* WHITE VELVET 2026 — unified cinematic motion layer */
+html {
+  scroll-behavior: auto;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
+html.wv-intro-pending body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.wv-intro-active .site-header,
+.wv-intro-active .hero-copy > .eyebrow,
+.wv-intro-active .hero-copy > h1,
+.wv-intro-active .hero-copy > .hero-lead,
+.wv-intro-active .hero-copy > .hero-actions,
+.wv-intro-active .trust-strip,
+.wv-intro-active .three-layer,
+.wv-intro-active .three-atmosphere {
+  transition: none !important;
+}
+
+.experience-loader-minimal {
+  overflow: hidden;
+  isolation: isolate;
+  transform: translateZ(0);
+  will-change: opacity, transform;
+}
+
+.experience-loader-minimal::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: -14%;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(255,255,255,.28), transparent 35%),
+    linear-gradient(112deg, transparent 28%, rgba(255,255,255,.12) 45%, rgba(255,255,255,.36) 51%, rgba(255,255,255,.08) 58%, transparent 73%);
+  opacity: .55;
+  transform: translate3d(-18%, 0, 0) rotate(-2deg);
+  animation: wvLoaderLightPass 4s cubic-bezier(.55,0,.25,1) both;
+}
+
+.loader-velvet-fold-a {
+  animation-duration: 4s;
+}
+
+.loader-velvet-fold-b {
+  animation-duration: 4s;
+}
+
+.loader-velvet-glow {
+  animation-duration: 4s;
+}
+
+.loader-minimal-mark {
+  width: 144px;
+  height: 144px;
+  font-size: 37px;
+  background: rgba(251,249,244,.22);
+  border-color: rgba(16,20,23,.16);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.62) inset,
+    0 30px 90px rgba(24,30,30,.08);
+  animation-duration: 4s;
+}
+
+.loader-minimal-name {
+  margin-top: 38px;
+  font-size: 15px;
+  letter-spacing: .36em;
+  padding-left: .36em;
+  animation-duration: 4s;
+}
+
+.loader-minimal-progress {
+  width: min(420px, 72vw);
+  height: 4px;
+  margin-top: 34px;
+  background: rgba(16,20,23,.09);
+  box-shadow: 0 1px 0 rgba(255,255,255,.42) inset;
+}
+
+.loader-minimal-progress span {
+  animation: none !important;
+  transform-origin: left center;
+  transition: transform .10s cubic-bezier(.25,.46,.45,.94);
+  will-change: transform;
+}
+
+.loader-minimal-percent {
+  margin-top: 18px;
+  font-size: 20px;
+  letter-spacing: .055em;
+  color: rgba(16,20,23,.60);
+}
+
+.three-layer canvas {
+  transform: translateZ(0);
+}
+
+.three-atmosphere {
+  will-change: opacity, transform;
+}
+
+@keyframes wvLoaderLightPass {
+  0% {
+    opacity: 0;
+    transform: translate3d(-24%, 0, 0) rotate(-2deg);
+  }
+  18% {
+    opacity: .34;
+  }
+  68% {
+    opacity: .58;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(24%, 0, 0) rotate(2deg);
+  }
+}
+
+@media (max-width: 760px) {
+  .loader-minimal-brand {
+    width: min(520px, 92vw);
+  }
+
+  .loader-minimal-mark {
+    width: 112px;
+    height: 112px;
+    font-size: 29px;
+  }
+
+  .loader-minimal-name {
+    margin-top: 28px;
+    font-size: 12px;
+    letter-spacing: .32em;
+    padding-left: .32em;
+  }
+
+  .loader-minimal-progress {
+    width: min(340px, 76vw);
+    height: 4px;
+    margin-top: 27px;
+  }
+
+  .loader-minimal-percent {
+    margin-top: 15px;
+    font-size: 17px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .experience-loader-minimal::after {
+    animation: none !important;
+    opacity: .16;
+    transform: none;
+  }
+
+  .loader-minimal-progress span {
+    transition: none !important;
+  }
+}
