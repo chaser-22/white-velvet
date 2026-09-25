@@ -69,10 +69,6 @@ export default function Home() {
             </aside>
           </div>
 
-          <div className="v2-hero-footer">
-            <span>DETALJER SOM GÖR SKILLNAD</span>
-            <p>Genomtänkt från metod till tid.</p>
-          </div>
         </section>
 
         <V2Services />
