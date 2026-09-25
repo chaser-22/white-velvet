@@ -3198,3 +3198,46 @@ html.v2-menu-open body {
     border-radius: 22px;
   }
 }
+
+
+/* V2 SECTION LABEL CLEANUP — remove numeric prefixes and center labels */
+.v2-section-label {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  text-align: center;
+}
+
+.v2-section-label > span {
+  display: none;
+}
+
+.v2-section-label > p {
+  width: 100%;
+  text-align: center;
+}
+
+.v2-process .v2-section-label,
+.v2-results .v2-section-label,
+.v2-booking-stage .v2-section-label,
+.v2-faq .v2-section-label,
+.v2-services .v2-section-label {
+  text-align: center;
+}
+
+.v2-process .v2-overline,
+.v2-about .v2-overline {
+  text-align: center;
+}
+
+.v2-process-intro,
+.v2-about-copy {
+  text-align: center;
+}
+
+.v2-process-intro h2,
+.v2-process-lead,
+.v2-about-copy h2,
+.v2-about-copy > p:last-child {
+  margin-left: auto;
+  margin-right: auto;
+}
