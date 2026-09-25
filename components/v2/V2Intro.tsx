@@ -1,131 +1,301 @@
 "use client";
 
 import gsap from "gsap";
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 
-const DURATION = 4000;
+const SESSION_KEY = "wv-v2-cinematic-intro";
+const MIN_DURATION = 3200;
+const SAFETY_DURATION = 7000;
+
+type IntroState = {
+  active: boolean;
+  progress: number;
+};
+
+type WVWindow = Window & {
+  __wvV2SceneReady?: boolean;
+  __wvV2IntroState?: IntroState;
+  __wvV2IntroSeen?: boolean;
+};
+
+let introPlayedThisSession = false;
 
 export default function V2Intro() {
   const rootRef = useRef<HTMLDivElement>(null);
+  const lineRef = useRef<HTMLSpanElement>(null);
+  const percentRef = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(true);
-  const [progress, setProgress] = useState(0);
 
-  useEffect(() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  useLayoutEffect(() => {
     const root = rootRef.current;
-    if (!root) return;
+    const line = lineRef.current;
+    const percent = percentRef.current;
+    if (!root || !line || !percent) return;
 
-    let sceneReady = Boolean((window as Window & { __wvV2SceneReady?: boolean }).__wvV2SceneReady);
-    let minimumReady = false;
-    let finished = false;
+    const win = window as WVWindow;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const alreadySeen =
+      introPlayedThisSession ||
+      win.__wvV2IntroSeen ||
+      window.sessionStorage.getItem(SESSION_KEY) === "1";
+
+    if (alreadySeen) {
+      win.__wvV2IntroSeen = true;
+      win.__wvV2IntroState = { active: false, progress: 100 };
+      root.style.display = "none";
+      document.documentElement.classList.remove("v2-intro-lock");
+      setVisible(false);
+      window.dispatchEvent(new Event("wv:intro-complete"));
+      return;
+    }
+
+    let alive = true;
+    let frame = 0;
+    let safetyTimer = 0;
+    let minimumTimer = 0;
+    let entryTimeline: gsap.core.Timeline | null = null;
+    let exitTimeline: gsap.core.Timeline | null = null;
+    let completed = false;
     let displayed = 0;
-    const started = performance.now();
+    let lastDisplayed = -1;
+    let lastFrame = performance.now();
 
+    let sceneReady = Boolean(win.__wvV2SceneReady);
+    let fontsReady = !document.fonts;
+    let windowReady = document.readyState === "complete";
+    let minimumReady = false;
+
+    const started = performance.now();
+    const minimumDuration = reduce ? 700 : MIN_DURATION;
+
+    win.__wvV2IntroState = { active: true, progress: 0 };
     document.documentElement.classList.add("v2-intro-lock");
 
-    const interval = window.setInterval(() => {
-      const elapsed = performance.now() - started;
-      const ratio = Math.min(elapsed / DURATION, 1);
-      const eased = 1 - Math.pow(1 - ratio, 2.1);
-      let target = eased * 94 + (sceneReady ? 5 : 0);
-      target = Math.min(target, 99);
-      displayed += (target - displayed) * 0.18;
-      setProgress(Math.round(displayed));
-    }, 48);
+    const renderProgress = (value: number) => {
+      const rounded = Math.max(0, Math.min(100, Math.round(value)));
+      if (rounded === lastDisplayed) return;
+      lastDisplayed = rounded;
+      percent.textContent = `${rounded.toString().padStart(2, "0")}%`;
+      line.style.transform = `scaleX(${rounded / 100})`;
+      root.setAttribute("aria-valuenow", String(rounded));
+      if (win.__wvV2IntroState) win.__wvV2IntroState.progress = rounded;
+    };
 
-    const complete = () => {
-      if (finished || !minimumReady || !sceneReady) return;
-      finished = true;
-      window.clearInterval(interval);
-      setProgress(100);
+    entryTimeline = gsap.timeline({ defaults: { ease: "power3.out" } });
+    entryTimeline
+      .fromTo(".v2-loader-seal", {
+        opacity: 0,
+        scale: 0.88,
+        filter: "blur(10px)",
+      }, {
+        opacity: 1,
+        scale: 1,
+        filter: "blur(0px)",
+        duration: reduce ? 0.01 : 0.9,
+      }, 0.08)
+      .fromTo(".v2-loader-mark", {
+        opacity: 0,
+        y: 18,
+        filter: "blur(12px)",
+        letterSpacing: "-0.015em",
+      }, {
+        opacity: 1,
+        y: 0,
+        filter: "blur(0px)",
+        letterSpacing: "-0.045em",
+        duration: reduce ? 0.01 : 1.15,
+      }, 0.18)
+      .fromTo(".v2-loader-progress", {
+        opacity: 0,
+        y: 10,
+      }, {
+        opacity: 1,
+        y: 0,
+        duration: reduce ? 0.01 : 0.8,
+      }, 0.72);
 
-      if (reduce) {
+    const finish = () => {
+      if (!alive || completed) return;
+      completed = true;
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(safetyTimer);
+      window.clearTimeout(minimumTimer);
+
+      displayed = 100;
+      renderProgress(100);
+      win.__wvV2IntroState = { active: false, progress: 100 };
+
+      const finalize = () => {
+        if (!alive) return;
+        introPlayedThisSession = true;
+        win.__wvV2IntroSeen = true;
+        window.sessionStorage.setItem(SESSION_KEY, "1");
         document.documentElement.classList.remove("v2-intro-lock");
         window.dispatchEvent(new Event("wv:intro-complete"));
         setVisible(false);
+      };
+
+      if (reduce) {
+        root.style.opacity = "0";
+        finalize();
         return;
       }
 
-      const tl = gsap.timeline({
-        onComplete: () => {
-          document.documentElement.classList.remove("v2-intro-lock");
-          window.dispatchEvent(new Event("wv:intro-complete"));
-          setVisible(false);
-        },
-      });
-
-      tl.to(".v2-loader-mark", {
-        scale: 1.12,
-        letterSpacing: "0.22em",
-        duration: 0.65,
-        ease: "power3.inOut",
-      }, 0)
-        .to(".v2-loader-rule span", {
-          scaleX: 1,
-          duration: 0.45,
-          ease: "power2.out",
+      exitTimeline = gsap.timeline({ onComplete: finalize });
+      exitTimeline
+        .to(".v2-loader-progress", {
+          opacity: 0,
+          y: -8,
+          duration: 0.34,
+          ease: "power2.in",
         }, 0)
+        .to(".v2-loader-seal", {
+          opacity: 0,
+          scale: 1.08,
+          filter: "blur(8px)",
+          duration: 0.58,
+          ease: "power2.inOut",
+        }, 0.03)
+        .to(".v2-loader-mark", {
+          opacity: 0,
+          y: -10,
+          scale: 1.045,
+          filter: "blur(7px)",
+          letterSpacing: "-0.025em",
+          duration: 0.68,
+          ease: "power3.inOut",
+        }, 0.04)
         .to(root, {
           autoAlpha: 0,
-          scale: 1.025,
-          duration: 0.78,
-          ease: "power3.inOut",
-        }, 0.35)
-        .fromTo(".v2-hero-reveal", {
-          y: 36,
+          duration: 0.88,
+          ease: "power2.inOut",
+        }, 0.20)
+        .fromTo(".v2-site-header", {
+          y: -24,
           opacity: 0,
-          filter: "blur(10px)",
+          filter: "blur(8px)",
         }, {
           y: 0,
           opacity: 1,
           filter: "blur(0px)",
-          duration: 1.05,
-          stagger: 0.09,
-          ease: "power4.out",
-        }, 0.48)
-        .fromTo(".v2-site-header", {
-          y: -18,
+          duration: 0.86,
+          ease: "power3.out",
+        }, 0.26)
+        .fromTo(".v2-hero-copy .v2-overline", {
+          y: 22,
           opacity: 0,
+          filter: "blur(8px)",
         }, {
           y: 0,
           opacity: 1,
-          duration: 0.9,
+          filter: "blur(0px)",
+          duration: 0.72,
           ease: "power3.out",
-        }, 0.64)
-        .fromTo(".v2-hero-index", {
+        }, 0.36)
+        .fromTo(".v2-hero h1", {
+          y: 34,
           opacity: 0,
-          x: 18,
+          filter: "blur(12px)",
         }, {
+          y: 0,
           opacity: 1,
-          x: 0,
-          duration: 0.85,
+          filter: "blur(0px)",
+          duration: 1.0,
+          ease: "power4.out",
+        }, 0.45)
+        .fromTo(".v2-hero-lead", {
+          y: 26,
+          opacity: 0,
+          filter: "blur(9px)",
+        }, {
+          y: 0,
+          opacity: 1,
+          filter: "blur(0px)",
+          duration: 0.84,
           ease: "power3.out",
-        }, 0.82);
+        }, 0.62)
+        .fromTo(".v2-hero-actions", {
+          y: 20,
+          opacity: 0,
+          filter: "blur(7px)",
+        }, {
+          y: 0,
+          opacity: 1,
+          filter: "blur(0px)",
+          duration: 0.76,
+          ease: "power3.out",
+        }, 0.75);
     };
 
-    const onScene = () => {
+    const onSceneReady = () => {
       sceneReady = true;
-      complete();
     };
 
-    window.addEventListener("wv:v2-scene-ready", onScene);
+    const onWindowLoad = () => {
+      windowReady = true;
+    };
 
-    const minimumTimer = window.setTimeout(() => {
+    window.addEventListener("wv:v2-scene-ready", onSceneReady);
+    window.addEventListener("load", onWindowLoad, { once: true });
+
+    if (document.fonts) {
+      document.fonts.ready.then(() => {
+        if (alive) fontsReady = true;
+      });
+    }
+
+    minimumTimer = window.setTimeout(() => {
       minimumReady = true;
-      complete();
-    }, DURATION);
+    }, minimumDuration);
 
-    const safety = window.setTimeout(() => {
+    safetyTimer = window.setTimeout(() => {
       sceneReady = true;
+      fontsReady = true;
+      windowReady = true;
       minimumReady = true;
-      complete();
-    }, 6500);
+      finish();
+    }, SAFETY_DURATION);
+
+    const tick = (now: number) => {
+      if (!alive || completed) return;
+
+      const delta = Math.min((now - lastFrame) / 1000, 0.08);
+      lastFrame = now;
+      const elapsed = now - started;
+      const timeReady = Math.min(elapsed / minimumDuration, 1);
+
+      const readiness =
+        (sceneReady ? 0.46 : 0) +
+        (fontsReady ? 0.16 : 0) +
+        (windowReady ? 0.18 : 0) +
+        timeReady * 0.20;
+
+      const allReady = sceneReady && fontsReady && windowReady && minimumReady;
+      const target = allReady ? 100 : Math.min(97, 4 + readiness * 93);
+      const smoothing = 1 - Math.exp(-delta * (target === 100 ? 6.4 : 3.2));
+
+      displayed += (target - displayed) * smoothing;
+      renderProgress(displayed);
+
+      if (allReady && displayed >= 99.15) {
+        finish();
+        return;
+      }
+
+      frame = window.requestAnimationFrame(tick);
+    };
+
+    frame = window.requestAnimationFrame(tick);
 
     return () => {
-      window.removeEventListener("wv:v2-scene-ready", onScene);
-      window.clearInterval(interval);
+      alive = false;
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(safetyTimer);
       window.clearTimeout(minimumTimer);
-      window.clearTimeout(safety);
+      window.removeEventListener("wv:v2-scene-ready", onSceneReady);
+      window.removeEventListener("load", onWindowLoad);
+      entryTimeline?.kill();
+      exitTimeline?.kill();
       document.documentElement.classList.remove("v2-intro-lock");
     };
   }, []);
@@ -133,17 +303,24 @@ export default function V2Intro() {
   if (!visible) return null;
 
   return (
-    <div className="v2-loader" ref={rootRef} role="status" aria-label={`White Velvet laddar ${progress} procent`}>
-      <div className="v2-loader-material" aria-hidden="true" />
+    <div
+      className="v2-loader"
+      ref={rootRef}
+      role="progressbar"
+      aria-label="White Velvet laddar"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={0}
+    >
+      <div className="v2-loader-sheen" aria-hidden="true" />
       <div className="v2-loader-core">
-        <p className="v2-loader-kicker">MATERIAL CARE / VÄSTERÅS</p>
+        <div className="v2-loader-seal" aria-hidden="true">WV</div>
         <div className="v2-loader-mark">WHITE VELVET</div>
-        <div className="v2-loader-rule" aria-hidden="true">
-          <span style={{ transform: `scaleX(${progress / 100})` }} />
-        </div>
-        <div className="v2-loader-meta">
-          <span>RESTORING SURFACE</span>
-          <strong>{progress.toString().padStart(2, "0")}%</strong>
+        <div className="v2-loader-progress">
+          <div className="v2-loader-rule" aria-hidden="true">
+            <span ref={lineRef} />
+          </div>
+          <strong ref={percentRef}>00%</strong>
         </div>
       </div>
     </div>

@@ -13,6 +13,8 @@ uniform float uVelocity;
 uniform vec2 uPointer;
 uniform vec2 uPointerMotion;
 uniform float uEntrance;
+uniform float uIntro;
+uniform float uIntroProgress;
 
 varying vec2 vUv;
 varying float vDepth;
@@ -69,6 +71,13 @@ void main() {
     sin(p.y * 1.4 + scroll * 9.0 + fastT * 0.5) * 0.06 * smoothstep(0.12, 0.72, scroll) +
     cos(p.x * 1.1 - scroll * 7.0 - fastT * 0.3) * 0.05 * smoothstep(0.42, 0.96, scroll);
 
+  float introBreath =
+    sin(p.y * 0.74 + t * 0.34) * 0.145 +
+    cos(p.x * 0.53 - t * 0.27) * 0.105 +
+    sin((p.x + p.y) * 0.31 + t * 0.19) * 0.07;
+  float introLift = exp(-distance(uv, vec2(0.5, 0.48)) * 3.2) * 0.17;
+  float introSettle = 1.0 - smoothstep(0.72, 1.0, uIntroProgress) * 0.26;
+
   vec2 fromPointer = uv - uPointer;
   float d = length(fromPointer);
   float influence = exp(-d * 4.0);
@@ -85,7 +94,9 @@ void main() {
     vortex * influence * pointerSpeed * 0.08;
 
   p.z += (field + grain + breathing + chapterWave + pointerDepth) * mix(0.52, 1.0, uEntrance);
+  p.z += (introBreath + introLift) * uIntro * introSettle;
   p.z += sin(p.y * 1.8 + t * 2.8) * speed * 0.09;
+  p.x += sin(p.y * 0.58 + t * 0.16) * 0.032 * uIntro;
 
   p.xy += tangent * ring * influence * pointerSpeed * 0.065;
   p.xy += dir * influence * pointerSpeed * 0.040;
@@ -106,6 +117,8 @@ uniform float uTime;
 uniform float uScroll;
 uniform vec2 uPointer;
 uniform vec2 uPointerMotion;
+uniform float uIntro;
+uniform float uIntroProgress;
 
 varying vec2 vUv;
 varying float vDepth;
@@ -150,7 +163,27 @@ void main() {
   float vignette = smoothstep(0.92, 0.28, distance(vUv, vec2(0.5)));
   color *= mix(0.88, 1.05, vignette);
 
-  gl_FragColor = vec4(mix(color, ink, darkBand * 0.06), 0.98);
+  vec3 loaderIvory = vec3(0.93, 0.905, 0.855);
+  vec3 loaderShadow = vec3(0.055, 0.066, 0.065);
+  float loaderCenter = 1.0 - smoothstep(0.08, 0.72, distance(vUv, vec2(0.5, 0.48)));
+  float loaderFold = 0.5 + 0.5 * sin(vUv.y * 7.0 + vUv.x * 2.1 + uTime * 0.27);
+  float loaderLight = clamp(
+    0.18 + loaderCenter * 0.76 + loaderFold * 0.12 + vDepth * 0.48 + sheen * 0.16,
+    0.0,
+    1.0
+  );
+  vec3 loaderColor = mix(loaderShadow, loaderIvory, loaderLight);
+  float loaderEdge = smoothstep(0.30, 0.82, distance(vUv, vec2(0.5)));
+  loaderColor = mix(loaderColor, loaderShadow, loaderEdge * 0.62);
+
+  float sweepPosition = mix(-0.18, 1.18, smoothstep(0.0, 1.0, uIntroProgress));
+  float loaderSweep = exp(-pow((vUv.x * 0.78 + vUv.y * 0.22) - sweepPosition, 2.0) * 13.0);
+  loaderColor += loaderSweep * vec3(0.11, 0.105, 0.09);
+  loaderColor += nap * 0.85;
+
+  color = mix(color, loaderColor, uIntro);
+
+  gl_FragColor = vec4(mix(color, ink, darkBand * 0.06 * (1.0 - uIntro)), 0.985);
 }
 `;
 
@@ -182,6 +215,8 @@ function MaterialField({ quality }: { quality: Quality }) {
       uPointer: { value: new THREE.Vector2(0.5, 0.5) },
       uPointerMotion: { value: new THREE.Vector2() },
       uEntrance: { value: 0 },
+      uIntro: { value: 1 },
+      uIntroProgress: { value: 0 },
     },
     vertexShader,
     fragmentShader,
@@ -259,6 +294,30 @@ function MaterialField({ quality }: { quality: Quality }) {
       delta,
     );
 
+    const win = window as Window & {
+      __wvV2IntroState?: { active: boolean; progress: number };
+      __wvV2IntroSeen?: boolean;
+    };
+    const introState = win.__wvV2IntroState;
+    const introTarget = introState
+      ? (introState.active ? 1 : 0)
+      : (win.__wvV2IntroSeen ? 0 : 1);
+    const introProgress = introState ? introState.progress / 100 : 0;
+
+    material.uniforms.uIntro.value = THREE.MathUtils.damp(
+      material.uniforms.uIntro.value,
+      introTarget,
+      introTarget > material.uniforms.uIntro.value ? 2.8 : 1.65,
+      delta,
+    );
+    material.uniforms.uIntroProgress.value = THREE.MathUtils.damp(
+      material.uniforms.uIntroProgress.value,
+      introProgress,
+      4.2,
+      delta,
+    );
+
+    const intro = material.uniforms.uIntro.value;
     const scroll = material.uniforms.uScroll.value;
     const velocity = material.uniforms.uVelocity.value;
     const pointer = material.uniforms.uPointer.value;
@@ -270,19 +329,54 @@ function MaterialField({ quality }: { quality: Quality }) {
 
     mesh.current.position.x = THREE.MathUtils.damp(mesh.current.position.x, idleX + pointerX, 2.7, delta);
     mesh.current.position.y = THREE.MathUtils.damp(mesh.current.position.y, idleY + pointerY, 2.7, delta);
-    mesh.current.position.z = THREE.MathUtils.damp(mesh.current.position.z, -0.55 + scroll * 0.18, 2.4, delta);
+    mesh.current.position.z = THREE.MathUtils.damp(
+      mesh.current.position.z,
+      -0.55 + scroll * 0.18 + intro * 0.20,
+      2.4,
+      delta,
+    );
 
-    mesh.current.rotation.x = THREE.MathUtils.damp(mesh.current.rotation.x, -0.31 + scroll * 0.15 - velocity * 0.04, 2.5, delta);
-    mesh.current.rotation.y = THREE.MathUtils.damp(mesh.current.rotation.y, pointerX * 0.20 + Math.sin(t * 0.21) * 0.035, 2.4, delta);
-    mesh.current.rotation.z = THREE.MathUtils.damp(mesh.current.rotation.z, -0.055 + scroll * 0.11 + Math.sin(t * 0.24) * 0.038, 2.4, delta);
+    mesh.current.rotation.x = THREE.MathUtils.damp(
+      mesh.current.rotation.x,
+      -0.31 + scroll * 0.15 - velocity * 0.04 + intro * 0.10,
+      2.5,
+      delta,
+    );
+    mesh.current.rotation.y = THREE.MathUtils.damp(
+      mesh.current.rotation.y,
+      pointerX * 0.20 + Math.sin(t * 0.21) * 0.035 + intro * Math.sin(t * 0.16) * 0.025,
+      2.4,
+      delta,
+    );
+    mesh.current.rotation.z = THREE.MathUtils.damp(
+      mesh.current.rotation.z,
+      -0.055 + scroll * 0.11 + Math.sin(t * 0.24) * 0.038 - intro * 0.018,
+      2.4,
+      delta,
+    );
 
-    const pulse = 1.44 + Math.sin(t * 0.42) * 0.025 + Math.abs(velocity) * 0.014;
+    const pulse = 1.44 + Math.sin(t * 0.42) * 0.025 + Math.abs(velocity) * 0.014 + intro * 0.22;
     mesh.current.scale.x = THREE.MathUtils.damp(mesh.current.scale.x, pulse, 2.8, delta);
-    mesh.current.scale.y = THREE.MathUtils.damp(mesh.current.scale.y, pulse * 0.95, 2.8, delta);
+    mesh.current.scale.y = THREE.MathUtils.damp(mesh.current.scale.y, pulse * (0.95 + intro * 0.025), 2.8, delta);
 
-    camera.position.x = THREE.MathUtils.damp(camera.position.x, pointerX * 0.28 + idleX * 0.16, 2.4, delta);
-    camera.position.y = THREE.MathUtils.damp(camera.position.y, pointerY * 0.23 + idleY * 0.15, 2.4, delta);
-    camera.position.z = THREE.MathUtils.damp(camera.position.z, 5.15 - scroll * 0.16 + Math.sin(t * 0.23) * 0.075, 2.0, delta);
+    camera.position.x = THREE.MathUtils.damp(
+      camera.position.x,
+      pointerX * 0.28 + idleX * 0.16 + intro * Math.sin(t * 0.18) * 0.045,
+      2.4,
+      delta,
+    );
+    camera.position.y = THREE.MathUtils.damp(
+      camera.position.y,
+      pointerY * 0.23 + idleY * 0.15 + intro * Math.cos(t * 0.15) * 0.035,
+      2.4,
+      delta,
+    );
+    camera.position.z = THREE.MathUtils.damp(
+      camera.position.z,
+      5.15 - scroll * 0.16 + Math.sin(t * 0.23) * 0.075 - intro * 0.96,
+      intro > 0.02 ? 1.7 : 2.0,
+      delta,
+    );
     camera.lookAt(0, 0, 0);
   });
 
