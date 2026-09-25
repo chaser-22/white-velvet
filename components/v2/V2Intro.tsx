@@ -41,6 +41,7 @@ export default function V2Intro() {
 
       if (reduce) {
         document.documentElement.classList.remove("v2-intro-lock");
+        window.dispatchEvent(new Event("wv:intro-complete"));
         setVisible(false);
         return;
       }
@@ -48,6 +49,7 @@ export default function V2Intro() {
       const tl = gsap.timeline({
         onComplete: () => {
           document.documentElement.classList.remove("v2-intro-lock");
+          window.dispatchEvent(new Event("wv:intro-complete"));
           setVisible(false);
         },
       });
