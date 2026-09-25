@@ -7,12 +7,12 @@ export default function V2Services() {
     <section className="v2-services" id="tjanster">
       <div className="v2-section-label">
         <span>01</span>
-        <p>TREATMENT INDEX</p>
+        <p>TJÄNSTER</p>
       </div>
 
       <div className="v2-service-intro">
-        <p>Fyra behandlingar. En princip.</p>
-        <h2>Materialet bestämmer metoden.</h2>
+        <p>Vi utgår från material, skick och användning — inte en standardlösning.</p>
+        <h2>Rätt metod för varje yta.</h2>
       </div>
 
       <div className="v2-service-list">
