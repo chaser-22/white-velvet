@@ -50,7 +50,6 @@ export default function V2Intro() {
     }
 
     let alive = true;
-    let frame = 0;
     let safetyTimer = 0;
     let minimumTimer = 0;
     let entryTimeline: gsap.core.Timeline | null = null;
@@ -117,7 +116,7 @@ export default function V2Intro() {
     const finish = () => {
       if (!alive || completed) return;
       completed = true;
-      window.cancelAnimationFrame(frame);
+      gsap.ticker.remove(tick);
       window.clearTimeout(safetyTimer);
       window.clearTimeout(minimumTimer);
 
@@ -256,9 +255,10 @@ export default function V2Intro() {
       finish();
     }, SAFETY_DURATION);
 
-    const tick = (now: number) => {
+    const tick = () => {
       if (!alive || completed) return;
 
+      const now = performance.now();
       const delta = Math.min((now - lastFrame) / 1000, 0.08);
       lastFrame = now;
       const elapsed = now - started;
@@ -282,14 +282,13 @@ export default function V2Intro() {
         return;
       }
 
-      frame = window.requestAnimationFrame(tick);
     };
 
-    frame = window.requestAnimationFrame(tick);
+    gsap.ticker.add(tick);
 
     return () => {
       alive = false;
-      window.cancelAnimationFrame(frame);
+      gsap.ticker.remove(tick);
       window.clearTimeout(safetyTimer);
       window.clearTimeout(minimumTimer);
       window.removeEventListener("wv:v2-scene-ready", onSceneReady);
