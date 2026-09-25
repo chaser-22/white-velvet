@@ -431,7 +431,7 @@ html.v2-intro-lock body {
 .v2-hero-footer {
   min-height: 62px;
   display: flex;
-  align-items: end;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 20px;
   border-top: 1px solid var(--v2-line);
@@ -584,7 +584,7 @@ html.v2-intro-lock body {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 40px;
-  align-items: end;
+  align-items: flex-end;
   padding-top: 34px;
   border-top: 1px solid var(--v2-line);
 }
@@ -629,7 +629,7 @@ html.v2-intro-lock body {
   display: grid;
   grid-template-columns: 150px minmax(0, 1fr) minmax(260px, .52fr);
   gap: 46px;
-  align-items: end;
+  align-items: flex-end;
 }
 
 .v2-results-intro > p {
