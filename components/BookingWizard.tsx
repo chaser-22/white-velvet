@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
-import { CSSProperties, FormEvent, useEffect, useMemo, useState } from "react";
+import { CSSProperties, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { bookingServices } from "@/lib/content";
 
 const labels = ["Tjänst", "Detaljer", "Plats", "Tid", "Kontakt", "Klart"];
@@ -46,6 +46,10 @@ export default function BookingWizard() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [reference, setReference] = useState("");
   const [today, setToday] = useState("");
+  const [transitioning, setTransitioning] = useState(false);
+  const [direction, setDirection] = useState<"forward" | "backward">("forward");
+  const reducedMotion = useRef(false);
+  const transitionTimer = useRef<number | null>(null);
 
   useEffect(() => {
     const now = new Date();
@@ -53,7 +57,42 @@ export default function BookingWizard() {
     setToday(local.toISOString().slice(0, 10));
   }, []);
 
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => {
+      reducedMotion.current = media.matches;
+    };
+
+    sync();
+    media.addEventListener("change", sync);
+
+    return () => {
+      media.removeEventListener("change", sync);
+      if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
+    };
+  }, []);
+
   const update = <K extends keyof FormData>(key: K, value: FormData[K]) => setData((d) => ({ ...d, [key]: value }));
+
+  function moveToStep(next: number, nextDirection: "forward" | "backward") {
+    if (transitioning || next === step) return;
+
+    setDirection(nextDirection);
+
+    if (reducedMotion.current) {
+      setStep(next);
+      return;
+    }
+
+    setTransitioning(true);
+    if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
+
+    transitionTimer.current = window.setTimeout(() => {
+      setStep(next);
+      setTransitioning(false);
+      transitionTimer.current = null;
+    }, 170);
+  }
 
   const canNext = useMemo(() => {
     if (step === 0) return Boolean(data.service);
@@ -76,14 +115,14 @@ export default function BookingWizard() {
       if (!response.ok) throw new Error(result.error || "Något gick fel");
       setReference(result.reference);
       setStatus("success");
-      setStep(5);
+      moveToStep(5, "forward");
     } catch {
       setStatus("error");
     }
   }
 
   return (
-    <section className="section-shell booking" id="boka">
+    <div className="section-shell booking" id="boka">
       <div className="booking-shell">
         <div className="booking-heading">
           <p className="eyebrow light">BOKNINGSFÖRFRÅGAN</p>
@@ -96,7 +135,12 @@ export default function BookingWizard() {
           </div>
         </div>
 
-        <form onSubmit={submit} className="booking-card" noValidate>
+        <form
+          onSubmit={submit}
+          className="booking-card"
+          noValidate
+          aria-busy={transitioning || status === "loading"}
+        >
           <div
             className="booking-progress"
             aria-label={`Steg ${step + 1} av ${labels.length}`}
@@ -111,7 +155,10 @@ export default function BookingWizard() {
           </div>
 
           <div className="booking-step" aria-live="polite">
-            <div className="booking-step-panel" key={step}>
+            <div
+              className={`booking-step-panel direction-${direction} ${transitioning ? "is-exiting" : ""}`}
+              key={step}
+            >
             {step === 0 && (
               <>
                 <p className="step-kicker">STEG 1</p>
@@ -123,6 +170,7 @@ export default function BookingWizard() {
                       key={service}
                       className={data.service === service ? "choice selected" : "choice"}
                       onClick={() => update("service", service)}
+                      aria-pressed={data.service === service}
                     >
                       <span>{service}</span>
                       {data.service === service && <Check size={17} />}
@@ -205,7 +253,7 @@ export default function BookingWizard() {
             )}
 
             {step === 5 && status === "success" && (
-              <div className="success-state">
+              <div className="success-state" role="status">
                 <div className="success-icon"><Check size={28} /></div>
                 <p className="step-kicker">FÖRFRÅGAN MOTTAGEN</p>
                 <h3>Tack, {data.name.split(" ")[0]}.</h3>
@@ -222,23 +270,23 @@ export default function BookingWizard() {
 
           {step < 5 && (
             <div className="booking-controls">
-              <button type="button" className="button button-ghost" disabled={step === 0 || status === "loading"} onClick={() => setStep((s) => Math.max(0, s - 1))}>
+              <button type="button" className="button button-ghost" disabled={step === 0 || status === "loading" || transitioning} onClick={() => moveToStep(Math.max(0, step - 1), "backward")}>
                 <ArrowLeft size={16} /> Tillbaka
               </button>
               {step < 4 ? (
-                <button type="button" className="button button-light" disabled={!canNext} onClick={() => setStep((s) => s + 1)}>
+                <button type="button" className="button button-light" disabled={!canNext || transitioning} onClick={() => moveToStep(step + 1, "forward")}>
                   Fortsätt <ArrowRight size={16} />
                 </button>
               ) : (
-                <button type="submit" className="button button-light" disabled={!canNext || status === "loading"}>
+                <button type="submit" className="button button-light" disabled={!canNext || status === "loading" || transitioning}>
                   {status === "loading" ? <><Loader2 className="spin" size={16} /> Skickar…</> : <>Skicka förfrågan <ArrowRight size={16} /></>}
                 </button>
               )}
             </div>
           )}
-          {status === "error" && <p className="form-error">Förfrågan kunde inte skickas. Försök igen eller ring oss direkt.</p>}
+          {status === "error" && <p className="form-error" role="alert">Förfrågan kunde inte skickas. Försök igen eller ring oss direkt.</p>}
         </form>
       </div>
-    </section>
+    </div>
   );
 }
