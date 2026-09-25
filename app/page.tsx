@@ -78,7 +78,7 @@ export default function Home() {
         <section className="v2-results" id="resultat">
           <div className="v2-section-label">
             <span>02</span>
-            <p>RESTORATION EVIDENCE</p>
+            <p>FÖRE & EFTER</p>
           </div>
           <div className="v2-results-intro">
             <p>FÖRE & EFTER</p>
@@ -91,7 +91,7 @@ export default function Home() {
         <section className="v2-process" id="metod">
           <div className="v2-section-label">
             <span>03</span>
-            <p>METHOD / CONTROL</p>
+            <p>SÅ FUNGERAR DET</p>
           </div>
 
           <div className="v2-process-grid">
@@ -152,7 +152,7 @@ export default function Home() {
         <section className="v2-booking-stage">
           <div className="v2-section-label">
             <span>04</span>
-            <p>BOOKING / REQUEST</p>
+            <p>BOKNINGSFÖRFRÅGAN</p>
           </div>
           <div className="v2-booking-wrap">
             <BookingWizard />
