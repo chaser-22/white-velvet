@@ -7,7 +7,7 @@ import V2Header from "@/components/v2/V2Header";
 import V2Services from "@/components/v2/V2Services";
 import V2FAQ from "@/components/v2/V2FAQ";
 import V2Footer from "@/components/v2/V2Footer";
-import BeforeAfter from "@/components/BeforeAfter";
+import V2BeforeAfter from "@/components/v2/V2BeforeAfter";
 import BookingWizard from "@/components/BookingWizard";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 
@@ -88,9 +88,7 @@ export default function Home() {
               efter konstruktion och skick.
             </span>
           </div>
-          <div className="v2-before-after-wrap">
-            <BeforeAfter />
-          </div>
+          <V2BeforeAfter />
         </section>
 
         <section className="v2-process" id="metod">
