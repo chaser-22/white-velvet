@@ -1,4 +1,5 @@
 import "./v2.css";
+import "./v2-polish.css";
 
 import MotionEngine from "@/components/MotionEngine";
 import V2Scene from "@/components/v2/V2Scene";
@@ -78,11 +79,9 @@ export default function Home() {
 
         <section className="v2-results" id="resultat">
           <div className="v2-section-label">
-            <span>02</span>
             <p>FÖRE & EFTER</p>
           </div>
           <div className="v2-results-intro">
-            <p>FÖRE & EFTER</p>
             <h2>Resultatet ska kunna ses.</h2>
             <span>Dra reglaget över bilderna för att jämföra verkliga arbeten från White Velvet.</span>
           </div>
@@ -91,13 +90,11 @@ export default function Home() {
 
         <section className="v2-process" id="metod">
           <div className="v2-section-label">
-            <span>03</span>
             <p>SÅ FUNGERAR DET</p>
           </div>
 
           <div className="v2-process-grid">
             <div className="v2-process-intro">
-              <p className="v2-overline">SÅ FUNGERAR DET</p>
               <h2>En enkel väg till ett renare resultat.</h2>
               <p className="v2-process-lead">
                 Rengöring ska kännas trygg från första kontakt till sista detalj. Därför håller vi
@@ -143,16 +140,15 @@ export default function Home() {
           </div>
 
           <div className="v2-about-matrix">
-            <div><span>01</span><strong>Precision</strong><p>Varje uppdrag bedöms efter material, skick och behov.</p></div>
-            <div><span>02</span><strong>Miljömedvetet</strong><p>Skonsamma och noggrant utvalda rengöringsprodukter.</p></div>
-            <div><span>03</span><strong>Flexibelt</strong><p>Tider och upplägg anpassas efter uppdragets praktiska förutsättningar.</p></div>
-            <div><span>04</span><strong>Omsorg</strong><p>Fokus på ett välskött resultat utan onödigt hårda metoder.</p></div>
+            <div><strong>Precision</strong><p>Varje uppdrag bedöms efter material, skick och behov.</p></div>
+            <div><strong>Miljömedvetet</strong><p>Skonsamma och noggrant utvalda rengöringsprodukter.</p></div>
+            <div><strong>Flexibelt</strong><p>Tider och upplägg anpassas efter uppdragets praktiska förutsättningar.</p></div>
+            <div><strong>Omsorg</strong><p>Fokus på ett välskött resultat utan onödigt hårda metoder.</p></div>
           </div>
         </section>
 
         <section className="v2-booking-stage">
           <div className="v2-section-label">
-            <span>04</span>
             <p>BOKNINGSFÖRFRÅGAN</p>
           </div>
           <div className="v2-booking-wrap">
