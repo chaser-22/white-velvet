@@ -3108,3 +3108,93 @@ html.v2-menu-open body {
     transition: none !important;
   }
 }
+
+
+/* V2 READABILITY GUARD — keep process/about legible over dark shader phases */
+.v2-process,
+.v2-about {
+  position: relative;
+  isolation: isolate;
+  color: #111515;
+}
+
+.v2-process::before,
+.v2-about::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  border: 1px solid rgba(255,255,255,.38);
+  background:
+    radial-gradient(circle at 50% 38%, rgba(250,247,241,.72), rgba(247,244,237,.56) 54%, rgba(242,239,232,.42) 78%, rgba(242,239,232,.24) 100%);
+  backdrop-filter: blur(7px) saturate(92%);
+  -webkit-backdrop-filter: blur(7px) saturate(92%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.42),
+    0 24px 90px rgba(8,12,13,.05);
+}
+
+.v2-process::before {
+  left: max(12px, calc((100% - 1100px) / 2));
+  right: max(12px, calc((100% - 1100px) / 2));
+  top: 42px;
+  bottom: 42px;
+  border-radius: 34px;
+}
+
+.v2-about::before {
+  inset: 26px -28px 34px;
+  border-radius: 32px;
+}
+
+.v2-process .v2-section-label,
+.v2-process .v2-overline,
+.v2-about .v2-overline {
+  opacity: .86;
+}
+
+.v2-process-intro h2,
+.v2-process-steps h3,
+.v2-about-copy h2,
+.v2-about-matrix strong {
+  color: rgba(12,16,16,.98);
+  text-shadow: 0 1px 16px rgba(255,255,255,.28);
+}
+
+.v2-process-lead,
+.v2-process-steps p,
+.v2-about-copy > p:last-child,
+.v2-about-matrix p {
+  color: rgba(12,16,16,.88);
+}
+
+.v2-process-steps,
+.v2-process-steps article,
+.v2-about,
+.v2-about-matrix,
+.v2-about-matrix > div {
+  border-color: rgba(12,16,16,.22);
+}
+
+.v2-process-steps article > span,
+.v2-about-matrix span {
+  opacity: .62;
+}
+
+.v2-about-matrix > div {
+  background: rgba(255,255,255,.16);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+@media (max-width: 760px) {
+  .v2-process::before {
+    inset: 22px 6px;
+    border-radius: 24px;
+  }
+
+  .v2-about::before {
+    inset: 14px 0 20px;
+    border-radius: 22px;
+  }
+}
