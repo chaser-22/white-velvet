@@ -6,14 +6,16 @@ export default function V2FAQ() {
     <section className="v2-faq" id="faq">
       <div className="v2-section-label">
         <span>05</span>
-        <p>QUESTIONS / ANSWERS</p>
+        <p>VANLIGA FRÅGOR</p>
       </div>
       <div className="v2-faq-grid">
         <div>
-          <p className="v2-overline">DET PRAKTISKA</p>
-          <h2>Det viktigaste innan vi börjar.</h2>
+          <p className="v2-overline">VANLIGA FRÅGOR</p>
+          <h2>Innan vi kommer.</h2>
         </div>
-        <div className="v2-faq-list">
+        <div>
+          <p className="v2-faq-note">Saknar du något? Ring eller skicka ett mejl — vi hjälper gärna till att bedöma vad som passar din yta.</p>
+          <div className="v2-faq-list">
           {faqs.map((item, index) => (
             <details key={item.q}>
               <summary>
@@ -24,6 +26,7 @@ export default function V2FAQ() {
               <p>{item.a}</p>
             </details>
           ))}
+          </div>
         </div>
       </div>
     </section>
