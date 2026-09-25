@@ -59,17 +59,34 @@ void main() {
   float slowT = t * 0.62;
   float fastT = t * 1.15;
 
-  float field =
-    sin(p.x * 0.55 + slowT * 0.52 + scroll * 4.0) * 0.16 +
-    cos(p.y * 0.72 - slowT * 0.40 + scroll * 2.2) * 0.13 +
-    sin((p.x + p.y) * 0.30 + slowT * 0.28) * 0.11;
+  // Always-on travelling cloth waves. These keep moving even with no pointer or scroll input.
+  vec2 waveP = p.xy;
+  waveP.x += sin(p.y * 0.34 + t * 0.22) * 0.34;
+  waveP.y += cos(p.x * 0.29 - t * 0.18) * 0.28;
 
-  float grain = (fbm(p.xy * 0.42 + vec2(slowT * 0.06, -slowT * 0.04)) - 0.5) * 0.18;
-  float breathing = sin(fastT * 0.58 + p.y * 0.22) * 0.052 + cos(fastT * 0.41 - p.x * 0.17) * 0.036;
+  float longWave =
+    sin(waveP.x * 0.70 - t * 0.48 + waveP.y * 0.18) * 0.19 +
+    sin(waveP.y * 0.82 + t * 0.38 - waveP.x * 0.14) * 0.15 +
+    sin((waveP.x + waveP.y) * 0.42 - t * 0.29) * 0.12;
+
+  float crossWave =
+    sin(waveP.x * 1.18 + waveP.y * 0.52 - t * 0.62) * 0.060 +
+    cos(waveP.y * 1.36 - waveP.x * 0.38 + t * 0.51) * 0.048;
+
+  float field =
+    longWave +
+    crossWave +
+    sin(p.x * 0.55 + slowT * 0.38 + scroll * 4.0) * 0.08 +
+    cos(p.y * 0.72 - slowT * 0.32 + scroll * 2.2) * 0.07;
+
+  float grain = (fbm(p.xy * 0.42 + vec2(t * 0.035, -t * 0.028)) - 0.5) * 0.13;
+  float breathing =
+    sin(t * 0.46 + p.y * 0.20) * 0.045 +
+    cos(t * 0.34 - p.x * 0.16) * 0.034;
 
   float chapterWave =
-    sin(p.y * 1.4 + scroll * 9.0 + fastT * 0.5) * 0.06 * smoothstep(0.12, 0.72, scroll) +
-    cos(p.x * 1.1 - scroll * 7.0 - fastT * 0.3) * 0.05 * smoothstep(0.42, 0.96, scroll);
+    sin(p.y * 1.4 + scroll * 9.0 + fastT * 0.42) * 0.045 * smoothstep(0.12, 0.72, scroll) +
+    cos(p.x * 1.1 - scroll * 7.0 - fastT * 0.26) * 0.038 * smoothstep(0.42, 0.96, scroll);
 
   float introBreath =
     sin(p.y * 0.74 + t * 0.34) * 0.145 +
@@ -102,7 +119,13 @@ void main() {
   p.xy += dir * influence * pointerSpeed * 0.040;
 
   float edgeCurl = smoothstep(0.52, 1.0, abs(uv.x - 0.5) * 2.0);
-  p.z += edgeCurl * sin(t * 0.35 + uv.y * 4.0) * 0.055;
+  p.z += edgeCurl * sin(t * 0.30 + uv.y * 4.0) * 0.045;
+
+  // A broad rolling lift gives the whole sheet a slow wave crest/trough cycle at idle.
+  float rollingLift =
+    sin(uv.x * 5.2 - t * 0.44 + sin(uv.y * 3.0 + t * 0.18) * 0.75) * 0.050 +
+    cos(uv.y * 4.4 + t * 0.36 + cos(uv.x * 2.8 - t * 0.16) * 0.60) * 0.038;
+  p.z += rollingLift;
 
   vDepth = p.z;
   vFold = field + grain;
@@ -138,12 +161,36 @@ void main() {
   base = mix(base, graphite, darkBand * 0.92);
   base = mix(base, ivory, smoothstep(0.84, 1.0, scroll));
 
-  float velvetA = 0.5 + 0.5 * sin(vUv.y * 610.0 + sin(vUv.x * 34.0) * 1.2);
-  float velvetB = 0.5 + 0.5 * sin(vUv.y * 180.0 - vUv.x * 20.0);
-  float nap = (velvetA - 0.5) * 0.021 + (velvetB - 0.5) * 0.015;
+  // The velvet nap rides the same ambient wave field so the fine lines flow instead of sitting still.
+  vec2 windUv = vUv;
+  float windA = sin(vUv.y * 5.4 - uTime * 0.34) * 0.020;
+  float windB = cos(vUv.x * 4.1 + uTime * 0.27) * 0.015;
+  float windC = sin((vUv.x + vUv.y) * 3.0 - uTime * 0.20) * 0.012;
+  windUv.x += uTime * 0.010 + windA + windC;
+  windUv.y += uTime * 0.006 + windB - windC * 0.55;
 
-  float sweep = 0.5 + 0.5 * sin(uTime * 0.54);
-  float sheen = exp(-pow((vUv.x * 0.70 + vUv.y * 0.23) - sweep, 2.0) * 16.0);
+  float velvetA =
+    0.5 + 0.5 * sin(
+      windUv.y * 610.0 +
+      sin(windUv.x * 34.0 + uTime * 0.16) * 1.05
+    );
+  float velvetB =
+    0.5 + 0.5 * sin(
+      windUv.y * 180.0 -
+      windUv.x * 20.0 +
+      uTime * 0.32
+    );
+  float nap = (velvetA - 0.5) * 0.010 + (velvetB - 0.5) * 0.008;
+
+  float sweep =
+    0.5 +
+    sin(uTime * 0.34) * 0.23 +
+    sin(uTime * 0.13 + 1.7) * 0.08;
+  float sheenAxis =
+    windUv.x * 0.70 +
+    windUv.y * 0.23 +
+    sin(windUv.y * 4.0 - uTime * 0.22) * 0.025;
+  float sheen = exp(-pow(sheenAxis - sweep, 2.0) * 14.0);
 
   vec2 pm = uPointerMotion;
   float pSpeed = clamp(length(pm) * 9.0, 0.0, 1.0);
