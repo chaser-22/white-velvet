@@ -7,7 +7,6 @@ const nav = [
   ["Tjänster", "#tjanster"],
   ["Resultat", "#resultat"],
   ["Metod", "#metod"],
-  ["Om", "#om"],
   ["FAQ", "#faq"],
 ];
 

@@ -125,14 +125,8 @@ export default function BookingWizard() {
     <div className="section-shell booking" id="boka">
       <div className="booking-shell">
         <div className="booking-heading">
-          <p className="eyebrow light">BOKNINGSFÖRFRÅGAN</p>
-          <h2>Börja med det du behöver hjälp med.</h2>
-          <p>Det tar ungefär två minuter. Din önskade tid bekräftas av White Velvet efteråt.</p>
-          <div className="booking-assurances" aria-label="Så fungerar bokningsförfrågan">
-            <div><strong>Önskad tid</strong><span>Du väljer ett tidsfönster</span></div>
-            <div><strong>Personlig bekräftelse</strong><span>White Velvet bekräftar efteråt</span></div>
-            <div><strong>Ca 2 minuter</strong><span>Kort och tydlig förfrågan</span></div>
-          </div>
+          <h2>Boka på några minuter.</h2>
+          <p>Välj tjänst och önskad tid. White Velvet bekräftar bokningen efteråt.</p>
         </div>
 
         <form
@@ -161,7 +155,6 @@ export default function BookingWizard() {
             >
             {step === 0 && (
               <>
-                <p className="step-kicker">STEG 1</p>
                 <h3>Vad vill du boka?</h3>
                 <div className="choice-grid">
                   {bookingServices.map((service) => (
@@ -182,7 +175,6 @@ export default function BookingWizard() {
 
             {step === 1 && (
               <>
-                <p className="step-kicker">STEG 2</p>
                 <h3>Berätta lite mer.</h3>
                 <div className="field-grid">
                   <label>
@@ -203,7 +195,6 @@ export default function BookingWizard() {
 
             {step === 2 && (
               <>
-                <p className="step-kicker">STEG 3</p>
                 <h3>Var ska vi komma?</h3>
                 <label><span>Adress *</span><input required value={data.address} onChange={(e) => update("address", e.target.value)} placeholder="Gatuadress" /></label>
                 <div className="field-grid">
@@ -215,7 +206,6 @@ export default function BookingWizard() {
 
             {step === 3 && (
               <>
-                <p className="step-kicker">STEG 4</p>
                 <h3>När passar det?</h3>
                 <p className="step-note">Välj en önskad tid. Detta är ännu inte en bekräftad bokning.</p>
                 <div className="field-grid">
@@ -237,7 +227,6 @@ export default function BookingWizard() {
 
             {step === 4 && (
               <>
-                <p className="step-kicker">STEG 5</p>
                 <h3>Hur når vi dig?</h3>
                 <div className="field-grid">
                   <label><span>Namn *</span><input required value={data.name} onChange={(e) => update("name", e.target.value)} autoComplete="name" /></label>

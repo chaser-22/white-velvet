@@ -37,7 +37,6 @@ function Comparison({
     <article className="v2-compare">
       <div className="v2-compare-topline">
         <p>{item.title}</p>
-        <strong>VERKLIGT KUNDARBETE</strong>
       </div>
 
       <div className="v2-compare-stage">

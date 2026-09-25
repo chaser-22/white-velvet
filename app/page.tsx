@@ -10,7 +10,7 @@ import V2FAQ from "@/components/v2/V2FAQ";
 import V2Footer from "@/components/v2/V2Footer";
 import V2BeforeAfter from "@/components/v2/V2BeforeAfter";
 import BookingWizard from "@/components/BookingWizard";
-import { ArrowDownRight, ArrowUpRight, Clock3, Leaf, MapPin, ScanLine } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -60,13 +60,6 @@ export default function Home() {
                 </a>
               </div>
             </div>
-
-            <aside className="v2-hero-index v2-main-trust" aria-label="Viktiga fördelar">
-              <div><Leaf size={19} strokeWidth={1.45} /><span>ANSVARSFULLT</span><p>Miljömedvetna metoder</p></div>
-              <div><ScanLine size={19} strokeWidth={1.45} /><span>PRECISION</span><p>Materialanpassad rengöring</p></div>
-              <div><Clock3 size={19} strokeWidth={1.45} /><span>ANPASSAT</span><p>Flexibla tider</p></div>
-              <div><MapPin size={19} strokeWidth={1.45} /><span>LOKALT</span><p>Västerås</p></div>
-            </aside>
           </div>
 
         </section>
@@ -91,11 +84,7 @@ export default function Home() {
 
           <div className="v2-process-grid">
             <div className="v2-process-intro">
-              <h2>En enkel väg till ett renare resultat.</h2>
-              <p className="v2-process-lead">
-                Rengöring ska kännas trygg från första kontakt till sista detalj. Därför håller vi
-                processen tydlig, personlig och lätt att följa.
-              </p>
+              <h2>Från förfrågan till besök.</h2>
             </div>
 
             <div className="v2-process-steps">
@@ -121,25 +110,6 @@ export default function Home() {
                 </div>
               </article>
             </div>
-          </div>
-        </section>
-
-        <section className="v2-about" id="om">
-          <div className="v2-about-copy">
-            <p className="v2-overline">WHITE VELVET</p>
-            <h2>Renare ytor. Lugnare helhet.</h2>
-            <p>
-              White Velvet arbetar med professionell rengöring i Västerås och kombinerar modern
-              utrustning med ett materialmedvetet arbetssätt. Målet är enkelt: ett resultat som känns
-              lika genomtänkt som det ser ut.
-            </p>
-          </div>
-
-          <div className="v2-about-matrix">
-            <div><strong>Precision</strong><p>Varje uppdrag bedöms efter material, skick och behov.</p></div>
-            <div><strong>Miljömedvetet</strong><p>Skonsamma och noggrant utvalda rengöringsprodukter.</p></div>
-            <div><strong>Flexibelt</strong><p>Tider och upplägg anpassas efter uppdragets praktiska förutsättningar.</p></div>
-            <div><strong>Omsorg</strong><p>Fokus på ett välskött resultat utan onödigt hårda metoder.</p></div>
           </div>
         </section>
 

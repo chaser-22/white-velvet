@@ -1347,3 +1347,45 @@ html:has(.v2-site) {
     background: rgba(248,245,238,.78);
   }
 }
+
+
+/* V2 simplification pass — content earns its space */
+.v2-hero-grid {
+  min-height: calc(100svh - 172px);
+  gap: 0;
+}
+
+.v2-service-intro {
+  display: block;
+}
+
+.v2-process-grid {
+  gap: 34px;
+}
+
+.v2-compare-topline {
+  grid-template-columns: 1fr;
+}
+
+.v2-booking-wrap .booking-shell {
+  gap: 34px;
+}
+
+.v2-booking-wrap .booking-heading > p:not(.eyebrow) {
+  margin-top: 22px;
+}
+
+.v2-faq-grid {
+  gap: 22px;
+}
+
+@media (max-width: 760px) {
+  .v2-hero-grid {
+    min-height: calc(100svh - 126px);
+  }
+
+  .v2-process-grid,
+  .v2-booking-wrap .booking-shell {
+    gap: 28px;
+  }
+}

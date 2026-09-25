@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { ArrowUpRight } from "lucide-react";
 import { services } from "@/lib/content";
 
 export default function V2Services() {
@@ -10,7 +9,6 @@ export default function V2Services() {
       </div>
 
       <div className="v2-service-intro">
-        <p>Vi utgår från material, skick och användning — inte en standardlösning.</p>
         <h2>Rätt metod för varje yta.</h2>
       </div>
 
@@ -31,7 +29,6 @@ export default function V2Services() {
               <strong>{service.short}</strong>
               <div className="v2-service-detail">
                 <span>{service.body}</span>
-                <a href="#boka">Boka behandling <ArrowUpRight size={16} /></a>
               </div>
             </div>
           </article>
