@@ -434,6 +434,20 @@ export default function V2Scene() {
   const [quality, setQuality] = useState<Quality>("medium");
   const [reduced, setReduced] = useState(false);
   const [ready, setReady] = useState(false);
+  const [canStart, setCanStart] = useState(false);
+
+  useEffect(() => {
+    const win = window as Window & { __wvV2IntroHandoff?: boolean };
+    const start = () => setCanStart(true);
+
+    if (win.__wvV2IntroHandoff) {
+      start();
+      return;
+    }
+
+    window.addEventListener("wv:intro-handoff", start, { once: true });
+    return () => window.removeEventListener("wv:intro-handoff", start);
+  }, []);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -456,6 +470,10 @@ export default function V2Scene() {
     win.__wvV2SceneReady = true;
     window.dispatchEvent(new Event("wv:v2-scene-ready"));
   }, [reduced]);
+
+  if (!canStart) {
+    return <div className="v2-canvas-shell v2-canvas-fallback" aria-hidden="true" />;
+  }
 
   if (reduced) {
     return <div className="v2-canvas-shell v2-canvas-fallback is-ready" aria-hidden="true" />;

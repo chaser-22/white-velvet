@@ -2,6 +2,7 @@
 
 import gsap from "gsap";
 import { useLayoutEffect, useRef, useState } from "react";
+import V2LoaderScene from "./V2LoaderScene";
 
 const MIN_DURATION = 3200;
 const SAFETY_DURATION = 7000;
@@ -12,8 +13,10 @@ type IntroState = {
 };
 
 type WVWindow = Window & {
-  __wvV2SceneReady?: boolean;
+  __wvV2LoaderReady?: boolean;
   __wvV2IntroState?: IntroState;
+  __wvV2IntroHandoff?: boolean;
+  __wvV2IntroComplete?: boolean;
 };
 
 export default function V2Intro() {
@@ -40,7 +43,7 @@ export default function V2Intro() {
     let lastDisplayed = -1;
     let lastFrame = performance.now();
 
-    let sceneReady = Boolean(win.__wvV2SceneReady);
+    let loaderReady = Boolean(win.__wvV2LoaderReady);
     let fontsReady = !document.fonts;
     let windowReady = document.readyState === "complete";
     let minimumReady = false;
@@ -104,10 +107,16 @@ export default function V2Intro() {
       displayed = 100;
       renderProgress(100);
       win.__wvV2IntroState = { active: false, progress: 100 };
+      win.__wvV2IntroHandoff = true;
+      document.documentElement.classList.add("v2-intro-handoff");
+      window.dispatchEvent(new Event("wv:intro-handoff"));
 
       const finalize = () => {
         if (!alive) return;
         document.documentElement.classList.remove("v2-intro-lock");
+      document.documentElement.classList.remove("v2-intro-handoff");
+        document.documentElement.classList.remove("v2-intro-handoff");
+        win.__wvV2IntroComplete = true;
         window.dispatchEvent(new Event("wv:intro-complete"));
         setVisible(false);
       };
@@ -204,15 +213,15 @@ export default function V2Intro() {
         }, 0.75);
     };
 
-    const onSceneReady = () => {
-      sceneReady = true;
+    const onLoaderReady = () => {
+      loaderReady = true;
     };
 
     const onWindowLoad = () => {
       windowReady = true;
     };
 
-    window.addEventListener("wv:v2-scene-ready", onSceneReady);
+    window.addEventListener("wv:v2-loader-ready", onLoaderReady);
     window.addEventListener("load", onWindowLoad, { once: true });
 
     if (document.fonts) {
@@ -226,7 +235,7 @@ export default function V2Intro() {
     }, minimumDuration);
 
     safetyTimer = window.setTimeout(() => {
-      sceneReady = true;
+      loaderReady = true;
       fontsReady = true;
       windowReady = true;
       minimumReady = true;
@@ -243,11 +252,11 @@ export default function V2Intro() {
       const timeReady = Math.min(elapsed / minimumDuration, 1);
 
       const readinessBoost =
-        (sceneReady ? 3.0 : 0) +
+        (loaderReady ? 3.0 : 0) +
         (fontsReady ? 1.5 : 0) +
         (windowReady ? 1.5 : 0);
 
-      const allReady = sceneReady && fontsReady && windowReady && minimumReady;
+      const allReady = loaderReady && fontsReady && windowReady && minimumReady;
       const target = allReady ? 100 : Math.min(96, 6 + timeReady * 84 + readinessBoost);
       const smoothing = 1 - Math.exp(-delta * (target === 100 ? 7.0 : 4.0));
 
@@ -268,7 +277,7 @@ export default function V2Intro() {
       gsap.ticker.remove(tick);
       window.clearTimeout(safetyTimer);
       window.clearTimeout(minimumTimer);
-      window.removeEventListener("wv:v2-scene-ready", onSceneReady);
+      window.removeEventListener("wv:v2-loader-ready", onLoaderReady);
       window.removeEventListener("load", onWindowLoad);
       entryTimeline?.kill();
       exitTimeline?.kill();
@@ -288,6 +297,7 @@ export default function V2Intro() {
       aria-valuemax={100}
       aria-valuenow={0}
     >
+      <V2LoaderScene />
       <div className="v2-loader-sheen" aria-hidden="true" />
       <div className="v2-loader-core">
         <div className="v2-loader-seal" aria-hidden="true">WV</div>

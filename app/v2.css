@@ -46,6 +46,10 @@ html.v2-intro-lock .v2-hero-copy > * {
 
 
 .v2-site:has(> .v2-loader) .v2-canvas-shell {
+  opacity: 0;
+}
+
+html.v2-intro-handoff .v2-site:has(> .v2-loader) .v2-canvas-shell {
   opacity: 1;
 }
 
@@ -95,9 +99,23 @@ html.v2-intro-lock .v2-hero-copy > * {
   place-items: center;
   overflow: hidden;
   color: #121717;
-  background: linear-gradient(180deg, rgba(9,13,13,.05), rgba(9,13,13,.16));
+  background: #d8d2c5;
   transform-origin: center;
   isolation: isolate;
+}
+
+.v2-loader-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: #d8d2c5;
+}
+
+.v2-loader-canvas canvas {
+  position: absolute !important;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .v2-loader::before {
@@ -112,6 +130,7 @@ html.v2-intro-lock .v2-hero-copy > * {
 
 .v2-loader-sheen {
   position: absolute;
+  z-index: 1;
   inset: -18%;
   pointer-events: none;
   opacity: .36;

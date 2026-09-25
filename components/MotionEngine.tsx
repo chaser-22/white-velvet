@@ -5,78 +5,101 @@ import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+type WVWindow = Window & {
+  __wvV2IntroComplete?: boolean;
+};
+
 export default function MotionEngine() {
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
+    let stopEngine: (() => void) | null = null;
+    let disposed = false;
 
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduceMotion) {
-      ScrollTrigger.refresh();
-      return;
-    }
+    const startEngine = () => {
+      if (disposed || stopEngine) return;
 
-    const previousScrollBehavior = document.documentElement.style.scrollBehavior;
-    document.documentElement.style.scrollBehavior = "auto";
+      gsap.registerPlugin(ScrollTrigger);
 
-    const lenis = new Lenis({
-      lerp: 0.085,
-      smoothWheel: true,
-      wheelMultiplier: 0.9,
-      touchMultiplier: 1,
-      syncTouch: false,
-      anchors: {
-        offset: -88,
-        duration: 1,
-      },
-    });
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduceMotion) {
+        ScrollTrigger.refresh();
+        stopEngine = () => {};
+        return;
+      }
 
-    let resizeTimer = 0;
-    let alive = true;
+      const previousScrollBehavior = document.documentElement.style.scrollBehavior;
+      document.documentElement.style.scrollBehavior = "auto";
 
-    const onScroll = () => ScrollTrigger.update();
-    const raf = (time: number) => lenis.raf(time * 1000);
+      const lenis = new Lenis({
+        lerp: 0.085,
+        smoothWheel: true,
+        wheelMultiplier: 0.9,
+        touchMultiplier: 1,
+        syncTouch: false,
+        anchors: {
+          offset: -88,
+          duration: 1,
+        },
+      });
 
-    const refresh = () => {
-      if (!alive) return;
-      requestAnimationFrame(() => {
+      let resizeTimer = 0;
+      let alive = true;
+
+      const onScroll = () => ScrollTrigger.update();
+      const raf = (time: number) => lenis.raf(time * 1000);
+
+      const refresh = () => {
+        if (!alive) return;
         requestAnimationFrame(() => {
-          if (!alive) return;
-          lenis.resize();
-          ScrollTrigger.refresh();
+          requestAnimationFrame(() => {
+            if (!alive) return;
+            lenis.resize();
+            ScrollTrigger.refresh();
+          });
         });
-      });
+      };
+
+      const onResize = () => {
+        window.clearTimeout(resizeTimer);
+        resizeTimer = window.setTimeout(refresh, 90);
+      };
+
+      lenis.on("scroll", onScroll);
+      gsap.ticker.add(raf);
+      gsap.ticker.lagSmoothing(0);
+
+      window.addEventListener("resize", onResize, { passive: true });
+      window.addEventListener("load", refresh, { once: true });
+
+      if (document.fonts) {
+        document.fonts.ready.then(() => {
+          if (alive) refresh();
+        });
+      }
+
+      refresh();
+
+      stopEngine = () => {
+        alive = false;
+        window.clearTimeout(resizeTimer);
+        window.removeEventListener("resize", onResize);
+        window.removeEventListener("load", refresh);
+        gsap.ticker.remove(raf);
+        lenis.destroy();
+        document.documentElement.style.scrollBehavior = previousScrollBehavior;
+      };
     };
 
-    const onResize = () => {
-      window.clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(refresh, 90);
-    };
-
-    lenis.on("scroll", onScroll);
-    gsap.ticker.add(raf);
-    gsap.ticker.lagSmoothing(0);
-
-    window.addEventListener("wv:intro-complete", refresh);
-    window.addEventListener("resize", onResize, { passive: true });
-    window.addEventListener("load", refresh, { once: true });
-
-    if (document.fonts) {
-      document.fonts.ready.then(() => {
-        if (alive) refresh();
-      });
+    const win = window as WVWindow;
+    if (win.__wvV2IntroComplete) {
+      startEngine();
+    } else {
+      window.addEventListener("wv:intro-complete", startEngine, { once: true });
     }
-
-    refresh();
 
     return () => {
-      alive = false;
-      window.clearTimeout(resizeTimer);
-      window.removeEventListener("wv:intro-complete", refresh);
-      window.removeEventListener("resize", onResize);
-      window.removeEventListener("load", refresh);
-      gsap.ticker.remove(raf);
-      lenis.destroy();
-      document.documentElement.style.scrollBehavior = previousScrollBehavior;
+      disposed = true;
+      window.removeEventListener("wv:intro-complete", startEngine);
+      stopEngine?.();
     };
   }, []);
 
