@@ -12,6 +12,8 @@ uniform float uScroll;
 uniform float uVelocity;
 uniform float uIdle;
 uniform vec2 uPointer;
+uniform vec2 uPointerMotion;
+uniform vec2 uPointerMotion;
 uniform float uEntrance;
 
 varying vec2 vUv;
@@ -25,7 +27,7 @@ void main() {
   float t = uTime;
   float scroll = uScroll;
   float energy = min(abs(uVelocity) * 0.75, 1.0);
-  float idleT = t * mix(1.0, 1.65, uIdle);
+  float idleT = t * mix(1.25, 2.15, uIdle);
 
   float macroFold =
     sin(p.x * 0.62 + idleT * 0.24 + scroll * 4.2) * 0.22 +
@@ -45,11 +47,22 @@ void main() {
     cos(p.x * 0.92 - t * 1.35) * 0.07 * energy;
 
   vec2 pointerDelta = uPointer - vec2(0.5);
-  float pointerLift = exp(-distance(uv, uPointer) * 7.8) * 0.10;
+  vec2 fromPointer = uv - uPointer;
+  float pointerDistance = length(fromPointer);
+  float pointerInfluence = exp(-pointerDistance * 4.6);
+  float pointerLift = pointerInfluence * 0.16;
 
-  p.z += (macroFold + breath + treatment + scrollWave + pointerLift) * mix(0.58, 1.0, uEntrance);
-  p.x += pointerDelta.x * 0.055 + sin(idleT * 0.17 + p.y * 0.18) * mix(0.018, 0.024, uIdle);
-  p.y += pointerDelta.y * 0.038 + cos(idleT * 0.14 + p.x * 0.15) * mix(0.014, 0.019, uIdle);
+  float pointerSpeed = clamp(length(uPointerMotion) * 8.0, 0.0, 1.0);
+  vec2 pointerDir = pointerSpeed > 0.001 ? normalize(uPointerMotion) : vec2(1.0, 0.0);
+  vec2 tangent = vec2(-pointerDir.y, pointerDir.x);
+  float pointerWave = sin(pointerDistance * 34.0 - t * 6.2 + dot(fromPointer, pointerDir) * 20.0);
+  float pointerFlow = pointerWave * pointerInfluence * pointerSpeed;
+
+  p.z += (macroFold + breath + treatment + scrollWave + pointerLift + pointerFlow * 0.18) * mix(0.58, 1.0, uEntrance);
+  p.xy += tangent * pointerFlow * 0.055;
+  p.xy += pointerDir * pointerInfluence * pointerSpeed * 0.035;
+  p.x += pointerDelta.x * 0.082 + sin(idleT * 0.20 + p.y * 0.18) * mix(0.020, 0.030, uIdle);
+  p.y += pointerDelta.y * 0.058 + cos(idleT * 0.17 + p.x * 0.15) * mix(0.016, 0.024, uIdle);
 
   vHeight = p.z;
   vLight = 0.5 + 0.5 * sin((uv.x * 0.68 + uv.y * 0.42) * 9.0 - idleT * 0.27 + scroll * 3.0);
@@ -85,15 +98,24 @@ void main() {
   float fibersB = 0.5 + 0.5 * sin(vUv.y * 166.0 + vUv.x * 23.0);
   float nap = (fibersA - 0.5) * 0.024 + (fibersB - 0.5) * 0.018;
 
-  float sheenTime = uTime * mix(0.17, 0.29, uIdle);
+  float sheenTime = uTime * mix(0.24, 0.42, uIdle);
   float travelingSheen = exp(-pow((vUv.x * 0.74 + vUv.y * 0.18) - (0.5 + 0.5 * sin(sheenTime)), 2.0) * 11.0);
-  float pointerGlow = exp(-distance(vUv, uPointer) * 8.0);
+
+  vec2 pointerDeltaUv = vUv - uPointer;
+  float pointerDistance = length(pointerDeltaUv);
+  float pointerSpeed = clamp(length(uPointerMotion) * 8.0, 0.0, 1.0);
+  vec2 pointerDir = pointerSpeed > 0.001 ? normalize(uPointerMotion) : vec2(1.0, 0.0);
+  float pointerGlow = exp(-pointerDistance * 5.0);
+  float flowStreak = exp(-abs(dot(pointerDeltaUv, vec2(-pointerDir.y, pointerDir.x))) * 16.0)
+    * exp(-max(dot(pointerDeltaUv, pointerDir), 0.0) * 5.0)
+    * pointerSpeed;
 
   float shade = 0.78 + vHeight * 0.32 + vLight * 0.10;
   vec3 color = base * shade;
   color += nap;
-  color += travelingSheen * (0.05 + (1.0 - darkChapter) * 0.08);
-  color += pointerGlow * 0.025;
+  color += travelingSheen * (0.065 + (1.0 - darkChapter) * 0.10);
+  color += pointerGlow * (0.035 + pointerSpeed * 0.055);
+  color += flowStreak * (0.06 + (1.0 - darkChapter) * 0.04);
 
   gl_FragColor = vec4(color, 0.97);
 }
@@ -114,6 +136,8 @@ function VelvetSurface({ quality }: { quality: Quality }) {
   const scrollTarget = useRef(0);
   const velocityTarget = useRef(0);
   const pointerTarget = useRef(new THREE.Vector2(0.5, 0.5));
+  const pointerMotionTarget = useRef(new THREE.Vector2(0, 0));
+  const previousPointer = useRef(new THREE.Vector2(0.5, 0.5));
   const lastScroll = useRef(0);
   const lastTime = useRef(0);
   const lastScrollAt = useRef(0);
@@ -125,6 +149,7 @@ function VelvetSurface({ quality }: { quality: Quality }) {
       uVelocity: { value: 0 },
       uIdle: { value: 1 },
       uPointer: { value: new THREE.Vector2(0.5, 0.5) },
+      uPointerMotion: { value: new THREE.Vector2(0, 0) },
       uEntrance: { value: 0 },
     },
     vertexShader,
@@ -150,10 +175,17 @@ function VelvetSurface({ quality }: { quality: Quality }) {
 
     const onPointer = (event: PointerEvent) => {
       if (quality === "low") return;
-      pointerTarget.current.set(
-        event.clientX / Math.max(window.innerWidth, 1),
-        1 - event.clientY / Math.max(window.innerHeight, 1),
+
+      const nextX = event.clientX / Math.max(window.innerWidth, 1);
+      const nextY = 1 - event.clientY / Math.max(window.innerHeight, 1);
+
+      pointerMotionTarget.current.set(
+        THREE.MathUtils.clamp((nextX - previousPointer.current.x) * 3.6, -0.18, 0.18),
+        THREE.MathUtils.clamp((nextY - previousPointer.current.y) * 3.6, -0.18, 0.18),
       );
+
+      pointerTarget.current.set(nextX, nextY);
+      previousPointer.current.set(nextX, nextY);
     };
 
     updateScroll();
@@ -196,8 +228,15 @@ function VelvetSurface({ quality }: { quality: Quality }) {
 
     material.uniforms.uPointer.value.lerp(
       pointerTarget.current,
-      1 - Math.exp(-2.1 * delta),
+      1 - Math.exp(-5.4 * delta),
     );
+
+    material.uniforms.uPointerMotion.value.lerp(
+      pointerMotionTarget.current,
+      1 - Math.exp(-10.0 * delta),
+    );
+    pointerMotionTarget.current.multiplyScalar(Math.pow(0.0008, delta));
+
     material.uniforms.uEntrance.value = THREE.MathUtils.damp(
       material.uniforms.uEntrance.value,
       1,
@@ -211,26 +250,26 @@ function VelvetSurface({ quality }: { quality: Quality }) {
 
     const idleBlend = material.uniforms.uIdle.value;
     const idleX =
-      Math.sin(time * (0.17 + idleBlend * 0.11)) * (0.13 + idleBlend * 0.025) +
-      Math.sin(time * (0.31 + idleBlend * 0.15)) * (0.05 + idleBlend * 0.012);
-    const idleY = Math.cos(time * (0.14 + idleBlend * 0.10)) * (0.09 + idleBlend * 0.018);
-    const pointerX = quality === "low" ? 0 : (pointer.x - 0.5) * 0.16;
-    const pointerY = quality === "low" ? 0 : (pointer.y - 0.5) * 0.11;
+      Math.sin(time * (0.22 + idleBlend * 0.16)) * (0.145 + idleBlend * 0.032) +
+      Math.sin(time * (0.39 + idleBlend * 0.19)) * (0.058 + idleBlend * 0.015);
+    const idleY = Math.cos(time * (0.19 + idleBlend * 0.14)) * (0.102 + idleBlend * 0.022);
+    const pointerX = quality === "low" ? 0 : (pointer.x - 0.5) * 0.24;
+    const pointerY = quality === "low" ? 0 : (pointer.y - 0.5) * 0.17;
 
     mesh.current.position.x = THREE.MathUtils.damp(mesh.current.position.x, idleX + pointerX, 2.0, delta);
     mesh.current.position.y = THREE.MathUtils.damp(mesh.current.position.y, idleY + pointerY, 2.0, delta);
     mesh.current.position.z = THREE.MathUtils.damp(mesh.current.position.z, -0.48 + scroll * 0.12, 2.0, delta);
     mesh.current.rotation.x = THREE.MathUtils.damp(mesh.current.rotation.x, -0.28 + scroll * 0.12 - velocity * 0.03, 2.1, delta);
     mesh.current.rotation.y = THREE.MathUtils.damp(mesh.current.rotation.y, pointerX * 0.16 + velocity * 0.018, 2.0, delta);
-    mesh.current.rotation.z = THREE.MathUtils.damp(mesh.current.rotation.z, -0.08 + Math.sin(time * (0.12 + idleBlend * 0.08)) * (0.025 + idleBlend * 0.008) + scroll * 0.10, 2.0, delta);
+    mesh.current.rotation.z = THREE.MathUtils.damp(mesh.current.rotation.z, -0.08 + Math.sin(time * (0.16 + idleBlend * 0.11)) * (0.029 + idleBlend * 0.010) + scroll * 0.10, 2.0, delta);
 
-    const scale = 1.42 + Math.sin(time * (0.18 + idleBlend * 0.09)) * (0.018 + idleBlend * 0.005) + Math.abs(velocity) * 0.016;
+    const scale = 1.42 + Math.sin(time * (0.24 + idleBlend * 0.13)) * (0.021 + idleBlend * 0.007) + Math.abs(velocity) * 0.016;
     mesh.current.scale.x = THREE.MathUtils.damp(mesh.current.scale.x, scale, 2.4, delta);
     mesh.current.scale.y = THREE.MathUtils.damp(mesh.current.scale.y, scale * 0.94, 2.4, delta);
 
     camera.position.x = THREE.MathUtils.damp(camera.position.x, idleX * 0.16 + pointerX * 0.22, 1.9, delta);
     camera.position.y = THREE.MathUtils.damp(camera.position.y, idleY * 0.16 + pointerY * 0.18, 1.9, delta);
-    camera.position.z = THREE.MathUtils.damp(camera.position.z, 5.25 - scroll * 0.18 + Math.sin(time * (0.13 + idleBlend * 0.07)) * (0.05 + idleBlend * 0.014), 1.7, delta);
+    camera.position.z = THREE.MathUtils.damp(camera.position.z, 5.25 - scroll * 0.18 + Math.sin(time * (0.18 + idleBlend * 0.10)) * (0.058 + idleBlend * 0.018), 1.7, delta);
     camera.lookAt(0, 0, 0);
   });
 
@@ -262,8 +301,8 @@ function Fibers({ quality }: { quality: Quality }) {
 
   useFrame(({ clock }, delta) => {
     if (!points.current) return;
-    points.current.rotation.z += delta * 0.02;
-    points.current.rotation.y = Math.sin(clock.elapsedTime * 0.12) * 0.045;
+    points.current.rotation.z += delta * 0.03;
+    points.current.rotation.y = Math.sin(clock.elapsedTime * 0.17) * 0.055;
   });
 
   return (
