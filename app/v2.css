@@ -1719,3 +1719,76 @@ html.v2-intro-lock body {
     aspect-ratio: 1.02;
   }
 }
+
+
+/* Production-content integration inside the V2 visual system */
+.v2-main-trust > div {
+  grid-template-columns: 26px 104px 1fr;
+  gap: 12px;
+}
+
+.v2-main-trust svg {
+  opacity: .62;
+}
+
+.v2-main-trust span {
+  font-size: 8px;
+  letter-spacing: .16em;
+}
+
+.v2-main-trust p {
+  font-size: 12px;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+
+.v2-service-intro > p {
+  max-width: 360px;
+}
+
+.v2-process-lead {
+  max-width: 590px;
+  margin: 30px 0 0;
+  color: var(--v2-muted);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.v2-faq-note {
+  max-width: 620px;
+  margin: 0 0 34px;
+  color: var(--v2-muted);
+  line-height: 1.7;
+}
+
+@media (max-width: 1080px) {
+  .v2-main-trust > div {
+    grid-template-columns: 24px 1fr;
+    align-content: center;
+  }
+
+  .v2-main-trust > div p {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .v2-main-trust > div {
+    min-height: 112px;
+    padding: 14px 12px;
+  }
+
+  .v2-main-trust > div p {
+    font-size: 11px;
+  }
+
+  .v2-process-lead {
+    margin-top: 24px;
+    font-size: 15px;
+  }
+
+  .v2-faq-note {
+    margin-bottom: 28px;
+    font-size: 14px;
+  }
+}
