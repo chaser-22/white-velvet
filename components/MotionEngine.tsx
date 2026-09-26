@@ -130,15 +130,17 @@ export default function MotionEngine() {
           const label = services.querySelector(".v2-section-label");
           const heading = services.querySelector(".v2-service-intro h2");
 
-          reveal({
-            trigger: services,
-            targets: [heading].filter(Boolean) as Element[],
-            y: isMobile ? 14 : 24,
-            blur: isMobile ? 2 : 5,
-            stagger: 0,
-            duration: isMobile ? 0.82 : 1.02,
-            start: isMobile ? "top 90%" : "top 84%",
-          });
+          if (heading) {
+            reveal({
+              trigger: heading,
+              targets: [heading],
+              y: isMobile ? 16 : 28,
+              blur: isMobile ? 2 : 5,
+              stagger: 0,
+              duration: isMobile ? 0.86 : 1.08,
+              start: isMobile ? "top 94%" : "top 90%",
+            });
+          }
 
           elements(".v2-service-row", services).forEach((row, index) => {
             const media = row.querySelector(".v2-service-media");
@@ -163,20 +165,32 @@ export default function MotionEngine() {
         const results = site.querySelector(".v2-results");
         if (results) {
 
-          const introTargets = [
-            results.querySelector(".v2-results-intro h2"),
-            results.querySelector(".v2-results-intro > span"),
-          ].filter(Boolean) as Element[];
+          const resultsHeading = results.querySelector(".v2-results-intro h2");
+          const resultsDescription = results.querySelector(".v2-results-intro > span");
 
-          reveal({
-            trigger: results,
-            targets: introTargets,
-            y: isMobile ? 18 : 32,
-            blur: isMobile ? 3 : 6,
-            stagger: isMobile ? 0.075 : 0.11,
-            duration: isMobile ? 0.76 : 0.96,
-            start: isMobile ? "top 89%" : "top 83%",
-          });
+          if (resultsHeading) {
+            reveal({
+              trigger: resultsHeading,
+              targets: [resultsHeading],
+              y: isMobile ? 16 : 30,
+              blur: isMobile ? 2 : 5,
+              stagger: 0,
+              duration: isMobile ? 0.86 : 1.08,
+              start: isMobile ? "top 94%" : "top 90%",
+            });
+          }
+
+          if (resultsDescription) {
+            reveal({
+              trigger: resultsDescription,
+              targets: [resultsDescription],
+              y: isMobile ? 10 : 18,
+              blur: isMobile ? 1.5 : 3,
+              stagger: 0,
+              duration: isMobile ? 0.72 : 0.88,
+              start: isMobile ? "top 95%" : "top 91%",
+            });
+          }
 
           const compareGrid = results.querySelector(".v2-compare-grid");
           if (compareGrid) {
@@ -200,15 +214,17 @@ export default function MotionEngine() {
             ? elements("h2, p", heading)
             : [];
 
-          reveal({
-            trigger: booking,
-            targets: headingTargets.filter(Boolean) as Element[],
-            y: isMobile ? 16 : 28,
-            blur: isMobile ? 2 : 5,
-            stagger: isMobile ? 0.07 : 0.105,
-            duration: isMobile ? 0.72 : 0.9,
-            start: isMobile ? "top 89%" : "top 83%",
-          });
+          if (heading && headingTargets.length) {
+            reveal({
+              trigger: heading,
+              targets: headingTargets.filter(Boolean) as Element[],
+              y: isMobile ? 14 : 26,
+              blur: isMobile ? 2 : 5,
+              stagger: isMobile ? 0.07 : 0.10,
+              duration: isMobile ? 0.82 : 1.02,
+              start: isMobile ? "top 94%" : "top 90%",
+            });
+          }
 
           const bookingCard = booking.querySelector(".booking-card");
           if (bookingCard) {
@@ -228,19 +244,19 @@ export default function MotionEngine() {
         const faq = site.querySelector(".v2-faq");
         if (faq) {
 
-          const faqHeaderTargets = [
-            faq.querySelector(".v2-faq-grid h2"),
-          ].filter(Boolean) as Element[];
+          const faqHeading = faq.querySelector(".v2-faq-grid h2");
 
-          reveal({
-            trigger: faq,
-            targets: faqHeaderTargets,
-            y: isMobile ? 16 : 28,
-            blur: isMobile ? 2 : 5,
-            stagger: 0.1,
-            duration: isMobile ? 0.72 : 0.9,
-            start: isMobile ? "top 89%" : "top 83%",
-          });
+          if (faqHeading) {
+            reveal({
+              trigger: faqHeading,
+              targets: [faqHeading],
+              y: isMobile ? 16 : 28,
+              blur: isMobile ? 2 : 5,
+              stagger: 0,
+              duration: isMobile ? 0.84 : 1.04,
+              start: isMobile ? "top 94%" : "top 90%",
+            });
+          }
 
           const faqList = faq.querySelector(".v2-faq-list");
           if (faqList) {
