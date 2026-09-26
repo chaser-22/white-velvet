@@ -1,6 +1,6 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 
@@ -70,6 +70,8 @@ void main() {
 
 function LoaderFabric() {
   const mesh = useRef<THREE.Mesh>(null);
+  const { size } = useThree();
+  const mobile = size.width < 760;
 
   const material = useMemo(() => new THREE.ShaderMaterial({
     uniforms: {
@@ -116,7 +118,7 @@ function LoaderFabric() {
 
   return (
     <mesh ref={mesh}>
-      <planeGeometry args={[10.2, 8.1, 64, 48]} />
+      <planeGeometry args={[10.2, 8.1, mobile ? 44 : 64, mobile ? 34 : 48]} />
       <primitive object={material} attach="material" />
     </mesh>
   );
@@ -127,7 +129,7 @@ export default function V2LoaderScene() {
     <div className="v2-loader-canvas" aria-hidden="true">
       <Canvas
         frameloop="always"
-        dpr={[1, 1.15]}
+        dpr={[1, 1.08]}
         camera={{ position: [0, 0, 4.3], fov: 42 }}
         gl={{
           alpha: false,

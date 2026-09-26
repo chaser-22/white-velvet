@@ -2048,3 +2048,663 @@ html:has(.v2-site) {
     min-height: 72px;
   }
 }
+
+
+/* PHONE OPTIMIZATION V2 — authoritative final layer */
+@media (max-width: 760px) {
+  html:has(.v2-site),
+  body:has(.v2-site) {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+    overscroll-behavior-x: none;
+  }
+
+  body:has(.v2-site) {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .v2-site {
+    min-width: 0;
+    overflow-x: clip;
+  }
+
+  .v2-site :is(a, button, input, select, textarea) {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .v2-site-header,
+  .v2-site-header.is-compact {
+    top: max(7px, env(safe-area-inset-top));
+    width: calc(100% - 16px);
+    min-height: 56px;
+    padding: 6px 7px 6px 10px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px) saturate(106%);
+    -webkit-backdrop-filter: blur(10px) saturate(106%);
+    box-shadow: 0 10px 32px rgba(8,12,13,.05);
+  }
+
+  .v2-brand {
+    min-width: 0;
+    gap: 9px;
+  }
+
+  .v2-brand span {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+  }
+
+  .v2-brand strong {
+    overflow: hidden;
+    font-size: 9px;
+    letter-spacing: .15em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .v2-menu-button {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+  }
+
+  .v2-mobile-menu {
+    min-height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: rgba(238,233,223,.94);
+    backdrop-filter: blur(11px);
+    -webkit-backdrop-filter: blur(11px);
+  }
+
+  .v2-mobile-menu-inner {
+    width: calc(100% - 32px);
+    min-height: 100dvh;
+    margin-inline: auto;
+    padding:
+      max(88px, calc(env(safe-area-inset-top) + 78px))
+      0
+      max(24px, env(safe-area-inset-bottom));
+  }
+
+  .v2-mobile-menu-inner > p {
+    font-size: 9px;
+    letter-spacing: .18em;
+  }
+
+  .v2-mobile-menu nav {
+    margin-top: 24px;
+  }
+
+  .v2-mobile-menu nav a {
+    display: flex;
+    align-items: center;
+    min-height: 66px;
+    padding: 14px 0;
+    font-size: clamp(34px, 10.5vw, 46px);
+    line-height: 1;
+  }
+
+  .v2-mobile-book {
+    min-height: 54px;
+    margin-top: 28px;
+    padding-inline: 18px;
+  }
+
+  .v2-hero,
+  .v2-section-label,
+  .v2-service-intro,
+  .v2-service-list,
+  .v2-results-intro,
+  .v2-compare-grid,
+  .v2-booking-wrap .booking,
+  .v2-faq-grid,
+  .v2-footer-grid,
+  .v2-footer-bottom {
+    width: calc(100% - 28px);
+    max-width: none;
+  }
+
+  .v2-hero {
+    min-height: 100svh;
+    padding-top: 94px;
+    padding-bottom: 28px;
+    display: grid;
+    align-items: center;
+  }
+
+  .v2-hero-grid {
+    min-height: 0;
+    gap: 26px;
+  }
+
+  .v2-overline {
+    margin-bottom: 14px;
+    font-size: 9px;
+    letter-spacing: .16em;
+  }
+
+  .v2-hero h1 {
+    max-width: 100%;
+    font-size: clamp(50px, 15.5vw, 70px);
+    line-height: .94;
+    letter-spacing: -.05em;
+  }
+
+  .v2-hero h1 span {
+    max-width: 96%;
+    margin-top: 14px;
+    font-size: .50em;
+    line-height: 1.10;
+    letter-spacing: -.028em;
+  }
+
+  .v2-hero-lead {
+    max-width: 34rem;
+    margin-top: 20px;
+    font-size: 14.5px;
+    line-height: 1.58;
+  }
+
+  .v2-hero-actions {
+    width: min(100%, 350px);
+    margin-top: 26px;
+    gap: 9px;
+  }
+
+  .v2-primary-action,
+  .v2-secondary-action {
+    width: 100%;
+    min-height: 50px;
+    justify-content: center;
+    padding-inline: 18px;
+  }
+
+  .v2-services,
+  .v2-results,
+  .v2-faq {
+    padding-block: 72px;
+  }
+
+  .v2-booking-stage {
+    padding-top: 72px;
+    padding-bottom: 80px;
+  }
+
+  .v2-section-label {
+    min-height: 28px;
+  }
+
+  .v2-section-label > p {
+    font-size: 9px;
+    line-height: 1.2;
+    letter-spacing: .17em;
+  }
+
+  .v2-service-intro,
+  .v2-results-intro,
+  .v2-faq-grid {
+    margin-top: 30px;
+  }
+
+  .v2-service-intro {
+    margin-bottom: 28px;
+  }
+
+  .v2-service-intro h2,
+  .v2-results-intro h2,
+  .v2-booking-wrap .booking-heading h2,
+  .v2-faq-grid h2 {
+    max-width: 100%;
+    font-size: clamp(38px, 11.2vw, 50px);
+    line-height: 1;
+    letter-spacing: -.042em;
+  }
+
+  .v2-service-row {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    min-height: 0;
+    padding: 22px 0 30px;
+  }
+
+  .v2-service-media {
+    width: 100%;
+    min-height: 0;
+    aspect-ratio: 1.28;
+    border-radius: 14px;
+  }
+
+  .v2-service-copy {
+    padding-inline: 2px;
+    text-align: center;
+  }
+
+  .v2-service-copy > p {
+    margin-bottom: 11px;
+    font-size: 9px;
+    letter-spacing: .15em;
+  }
+
+  .v2-service-copy h3 {
+    font-size: clamp(39px, 11.7vw, 50px);
+    line-height: .98;
+  }
+
+  .v2-service-copy > strong {
+    max-width: 31rem;
+    margin-top: 13px;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .v2-service-detail {
+    margin-top: 20px;
+    padding-top: 18px;
+    gap: 16px;
+  }
+
+  .v2-service-detail span {
+    max-width: 34rem;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .v2-results::before,
+  .v2-booking-stage::before {
+    inset: 16px 5px;
+    border-radius: 21px;
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
+  }
+
+  .v2-results-intro {
+    margin-bottom: 28px;
+    gap: 16px;
+  }
+
+  .v2-results-intro > span,
+  .v2-booking-wrap .booking-heading > p {
+    max-width: 32rem;
+    font-size: 14px;
+    line-height: 1.58;
+  }
+
+  .v2-compare-grid {
+    gap: 30px;
+  }
+
+  .v2-compare {
+    min-width: 0;
+  }
+
+  .v2-compare-topline {
+    min-height: 40px;
+    padding-block: 8px;
+  }
+
+  .v2-compare-topline p {
+    font-size: 13px;
+  }
+
+  .v2-compare-stage {
+    aspect-ratio: 1.08;
+    border-radius: 13px;
+    touch-action: pan-y;
+  }
+
+  .v2-compare-stage input[type="range"] {
+    touch-action: pan-y;
+  }
+
+  .v2-compare-label {
+    top: 11px;
+    font-size: 9px;
+  }
+
+  .v2-booking-wrap .booking-shell {
+    gap: 22px;
+  }
+
+  .v2-booking-wrap .booking-heading > p:not(.eyebrow) {
+    margin-top: 15px;
+  }
+
+  .v2-booking-wrap .booking-card {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    padding: 14px;
+    border-radius: 17px;
+    backdrop-filter: blur(6px) saturate(104%);
+    -webkit-backdrop-filter: blur(6px) saturate(104%);
+  }
+
+  .v2-booking-wrap .booking-progress {
+    gap: 3px;
+    margin-bottom: 18px;
+  }
+
+  .v2-booking-wrap .booking-progress span {
+    height: 27px;
+    min-width: 0;
+  }
+
+  .v2-booking-wrap .booking-progress small {
+    font-size: 8px;
+    letter-spacing: 0;
+  }
+
+  .v2-booking-wrap .booking-step {
+    min-height: 0;
+  }
+
+  .v2-booking-wrap .booking-step-panel {
+    min-width: 0;
+    min-height: 300px;
+    --v2-step-enter: 10px;
+    --v2-step-exit: -7px;
+    animation-duration: .36s;
+  }
+
+  .v2-booking-wrap .booking-step-panel h3 {
+    margin-bottom: 22px;
+    font-size: clamp(28px, 8.2vw, 36px);
+    line-height: 1.05;
+  }
+
+  .v2-booking-wrap .choice-grid,
+  .v2-booking-wrap .field-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .v2-booking-wrap .choice {
+    min-height: 54px;
+    padding: 12px 13px;
+    border-radius: 12px;
+  }
+
+  .v2-booking-wrap input,
+  .v2-booking-wrap textarea,
+  .v2-booking-wrap select {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    font-size: 16px;
+    border-radius: 12px;
+  }
+
+  .v2-booking-wrap textarea {
+    min-height: 104px;
+    resize: vertical;
+  }
+
+  .v2-booking-wrap label,
+  .v2-booking-wrap .consent-row {
+    min-width: 0;
+  }
+
+  .v2-booking-wrap label > span,
+  .v2-booking-wrap .step-note,
+  .v2-booking-wrap .consent-row span {
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .v2-booking-wrap .booking-controls {
+    gap: 8px;
+    padding-top: 10px;
+  }
+
+  .v2-booking-wrap .button {
+    min-width: 0;
+    min-height: 48px;
+    padding-inline: 11px;
+  }
+
+  .v2-faq-grid {
+    gap: 16px;
+  }
+
+  .v2-faq-trigger {
+    min-height: 66px;
+    grid-template-columns: 1fr 22px;
+    gap: 12px;
+  }
+
+  .v2-faq-trigger strong {
+    font-size: 15px;
+    line-height: 1.38;
+  }
+
+  .v2-faq-answer p {
+    padding: 0 26px 20px 0;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .v2-footer {
+    padding-top: 54px;
+    padding-bottom: max(26px, env(safe-area-inset-bottom));
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .v2-footer-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin-top: 34px;
+  }
+
+  .v2-footer-grid > div {
+    min-height: 74px;
+    padding: 14px 8px;
+  }
+
+  .v2-footer-grid :is(a, p) {
+    overflow-wrap: anywhere;
+  }
+
+  .v2-footer-grid a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .v2-footer-bottom {
+    margin-top: 22px;
+    gap: 10px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .v2-loader-emblem {
+    width: 142px;
+    height: 142px;
+    margin-bottom: 24px;
+  }
+
+  .v2-loader-seal {
+    inset: 12px;
+    font-size: 40px;
+  }
+
+  .v2-loader-ring-percent {
+    bottom: 24px;
+    font-size: 9px;
+  }
+
+  .v2-loader-mark {
+    max-width: 94vw;
+    font-size: clamp(40px, 13.4vw, 56px);
+    line-height: .92;
+  }
+}
+
+@media (max-width: 430px) {
+  .v2-hero,
+  .v2-section-label,
+  .v2-service-intro,
+  .v2-service-list,
+  .v2-results-intro,
+  .v2-compare-grid,
+  .v2-booking-wrap .booking,
+  .v2-faq-grid,
+  .v2-footer-grid,
+  .v2-footer-bottom {
+    width: calc(100% - 24px);
+  }
+
+  .v2-brand strong {
+    font-size: 8.5px;
+    letter-spacing: .13em;
+  }
+
+  .v2-hero h1 {
+    font-size: clamp(48px, 15vw, 64px);
+  }
+
+  .v2-service-intro h2,
+  .v2-results-intro h2,
+  .v2-booking-wrap .booking-heading h2,
+  .v2-faq-grid h2 {
+    font-size: clamp(36px, 10.5vw, 45px);
+  }
+
+  .v2-booking-wrap .booking-progress small {
+    display: none;
+  }
+
+  .v2-booking-wrap .booking-step-panel {
+    min-height: 285px;
+  }
+}
+
+@media (max-width: 390px) {
+  .v2-site-header,
+  .v2-site-header.is-compact {
+    width: calc(100% - 12px);
+  }
+
+  .v2-brand strong {
+    letter-spacing: .10em;
+  }
+
+  .v2-hero {
+    padding-top: 88px;
+  }
+
+  .v2-hero h1 {
+    font-size: clamp(46px, 14.8vw, 58px);
+  }
+
+  .v2-hero-lead {
+    font-size: 14px;
+  }
+
+  .v2-primary-action,
+  .v2-secondary-action {
+    min-height: 48px;
+  }
+
+  .v2-service-copy h3 {
+    font-size: clamp(37px, 11.2vw, 45px);
+  }
+
+  .v2-booking-wrap .booking-card {
+    padding: 12px;
+  }
+
+  .v2-booking-wrap .booking-step-panel {
+    min-height: 270px;
+  }
+
+  .v2-faq-trigger {
+    min-height: 62px;
+  }
+
+  .v2-loader-emblem {
+    width: 132px;
+    height: 132px;
+  }
+
+  .v2-loader-mark {
+    font-size: clamp(38px, 13vw, 50px);
+  }
+}
+
+@media (max-width: 360px) {
+  .v2-brand strong {
+    display: none;
+  }
+
+  .v2-hero h1 {
+    font-size: 48px;
+  }
+
+  .v2-booking-wrap .booking-controls {
+    flex-direction: column-reverse;
+  }
+
+  .v2-booking-wrap .button {
+    width: 100%;
+  }
+
+  .v2-footer-grid > div {
+    min-height: 68px;
+  }
+}
+
+@media (max-width: 760px) and (max-height: 600px) and (orientation: landscape) {
+  .v2-hero {
+    min-height: auto;
+    padding-top: 86px;
+    padding-bottom: 36px;
+  }
+
+  .v2-hero h1 {
+    font-size: clamp(46px, 10vw, 60px);
+  }
+
+  .v2-hero-actions {
+    flex-direction: row;
+    width: min(100%, 520px);
+  }
+
+  .v2-primary-action,
+  .v2-secondary-action {
+    width: auto;
+    flex: 1 1 0;
+  }
+
+  .v2-loader-emblem {
+    width: 116px;
+    height: 116px;
+    margin-bottom: 16px;
+  }
+
+  .v2-loader-seal {
+    font-size: 34px;
+  }
+
+  .v2-loader-mark {
+    font-size: clamp(36px, 9vw, 48px);
+  }
+}
+
+@media (max-width: 760px) and (hover: none) {
+  .v2-site :is(a, button):hover {
+    transform: none;
+  }
+
+  .v2-faq-trigger:hover {
+    padding-left: 0;
+    padding-right: 0;
+    background: transparent;
+  }
+}
