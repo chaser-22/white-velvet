@@ -56,6 +56,7 @@ export default function MotionEngine() {
       let resizeTimer = 0;
       let alive = true;
       const scrollAnimations: gsap.core.Animation[] = [];
+      const revealCoverage = new Set<Element>();
       const isMobile = window.matchMedia("(max-width: 760px)").matches;
       const defaultStart = isMobile ? "top 90%" : "top 84%";
       const defaultY = isMobile ? 18 : 30;
@@ -78,6 +79,8 @@ export default function MotionEngine() {
         delay = 0,
       }: RevealOptions) => {
         if (!targets.length) return;
+
+        targets.forEach((target) => revealCoverage.add(target));
 
         gsap.set(targets, {
           autoAlpha: 0,
@@ -252,6 +255,38 @@ export default function MotionEngine() {
             });
           }
         }
+
+        // Final text audit: animate only meaningful text that is not already
+        // inside another reveal target. This catches section labels without
+        // double-animating service copy, booking content, FAQ text, etc.
+        const textCandidates = elements(
+          "main .v2-section-label p, main h2, main h3, main p, main strong, main span",
+          site,
+        );
+
+        const isAlreadyCovered = (candidate: Element) =>
+          Array.from(revealCoverage).some(
+            (target) => target === candidate || target.contains(candidate),
+          );
+
+        textCandidates
+          .filter((candidate) => {
+            if (candidate.closest(".v2-hero")) return false;
+            if (candidate.closest(".v2-loader")) return false;
+            if (isAlreadyCovered(candidate)) return false;
+            return Boolean(candidate.textContent?.trim());
+          })
+          .forEach((candidate) => {
+            reveal({
+              trigger: candidate,
+              targets: [candidate],
+              y: isMobile ? 8 : 12,
+              blur: isMobile ? 1 : 2.5,
+              stagger: 0,
+              duration: isMobile ? 0.66 : 0.82,
+              start: isMobile ? "top 94%" : "top 90%",
+            });
+          });
 
         const footer = site.querySelector(".v2-footer");
         if (footer) {
