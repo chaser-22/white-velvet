@@ -119,6 +119,77 @@ export default function MotionEngine() {
         scrollAnimations.push(timeline);
       };
 
+      const revealSectionLabel = (
+        trigger: Element,
+        label: Element | null,
+        start = isMobile ? "top 92%" : "top 86%",
+      ) => {
+        if (!label) return;
+
+        const text = label.querySelector("p");
+
+        gsap.set(label, {
+          opacity: 0,
+          y: isMobile ? 6 : 10,
+          filter: isMobile ? "blur(2px)" : "blur(3.5px)",
+          force3D: true,
+          willChange: "transform, opacity, filter",
+        });
+
+        if (text) {
+          gsap.set(text, {
+            opacity: 0,
+            y: isMobile ? 5 : 8,
+            letterSpacing: isMobile ? ".23em" : ".25em",
+            force3D: true,
+            willChange: "transform, opacity, filter, letter-spacing",
+          });
+        }
+
+        const timeline = gsap.timeline({
+          scrollTrigger: {
+            trigger,
+            start,
+            once: true,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        timeline.to(label, {
+          opacity: 0.56,
+          y: 0,
+          filter: "blur(0px)",
+          duration: isMobile ? 0.9 : 1.18,
+          ease: "power3.out",
+          force3D: true,
+        });
+
+        if (text) {
+          timeline.to(
+            text,
+            {
+              opacity: 1,
+              y: 0,
+              letterSpacing: ".19em",
+              duration: isMobile ? 0.86 : 1.08,
+              ease: "power3.out",
+              force3D: true,
+              onComplete: () => {
+                gsap.set(label, {
+                  clearProps: "transform,filter,willChange",
+                });
+                gsap.set(text, {
+                  clearProps: "transform,opacity,filter,letterSpacing,willChange",
+                });
+              },
+            },
+            isMobile ? 0.08 : 0.12,
+          );
+        }
+
+        scrollAnimations.push(timeline);
+      };
+
       const site = document.querySelector(".v2-site");
 
       if (site) {
@@ -126,13 +197,21 @@ export default function MotionEngine() {
         if (services) {
           const label = services.querySelector(".v2-section-label");
           const heading = services.querySelector(".v2-service-intro h2");
+
+          revealSectionLabel(
+            services,
+            label,
+            isMobile ? "top 92%" : "top 86%",
+          );
+
           reveal({
             trigger: services,
-            targets: [label, heading].filter(Boolean) as Element[],
-            y: isMobile ? 16 : 26,
+            targets: [heading].filter(Boolean) as Element[],
+            y: isMobile ? 14 : 24,
             blur: isMobile ? 2 : 5,
-            stagger: 0.11,
-            start: isMobile ? "top 92%" : "top 86%",
+            stagger: 0,
+            duration: isMobile ? 0.82 : 1.02,
+            start: isMobile ? "top 90%" : "top 84%",
           });
 
           elements(".v2-service-row", services).forEach((row, index) => {
@@ -157,8 +236,13 @@ export default function MotionEngine() {
 
         const results = site.querySelector(".v2-results");
         if (results) {
-          const introTargets = [
+          revealSectionLabel(
+            results,
             results.querySelector(".v2-section-label"),
+            isMobile ? "top 92%" : "top 86%",
+          );
+
+          const introTargets = [
             results.querySelector(".v2-results-intro h2"),
             results.querySelector(".v2-results-intro > span"),
           ].filter(Boolean) as Element[];
@@ -170,7 +254,7 @@ export default function MotionEngine() {
             blur: isMobile ? 3 : 6,
             stagger: isMobile ? 0.075 : 0.11,
             duration: isMobile ? 0.76 : 0.96,
-            start: isMobile ? "top 92%" : "top 86%",
+            start: isMobile ? "top 89%" : "top 83%",
           });
 
           const compareGrid = results.querySelector(".v2-compare-grid");
@@ -195,17 +279,20 @@ export default function MotionEngine() {
             ? elements("h2, p", heading)
             : [];
 
+          revealSectionLabel(
+            booking,
+            booking.querySelector(".v2-section-label"),
+            isMobile ? "top 92%" : "top 86%",
+          );
+
           reveal({
             trigger: booking,
-            targets: [
-              booking.querySelector(".v2-section-label"),
-              ...headingTargets,
-            ].filter(Boolean) as Element[],
+            targets: headingTargets.filter(Boolean) as Element[],
             y: isMobile ? 16 : 28,
             blur: isMobile ? 2 : 5,
             stagger: isMobile ? 0.07 : 0.105,
             duration: isMobile ? 0.72 : 0.9,
-            start: isMobile ? "top 92%" : "top 86%",
+            start: isMobile ? "top 89%" : "top 83%",
           });
 
           const bookingCard = booking.querySelector(".booking-card");
@@ -225,8 +312,13 @@ export default function MotionEngine() {
 
         const faq = site.querySelector(".v2-faq");
         if (faq) {
-          const faqHeaderTargets = [
+          revealSectionLabel(
+            faq,
             faq.querySelector(".v2-section-label"),
+            isMobile ? "top 92%" : "top 86%",
+          );
+
+          const faqHeaderTargets = [
             faq.querySelector(".v2-faq-grid h2"),
           ].filter(Boolean) as Element[];
 
@@ -237,7 +329,7 @@ export default function MotionEngine() {
             blur: isMobile ? 2 : 5,
             stagger: 0.1,
             duration: isMobile ? 0.72 : 0.9,
-            start: isMobile ? "top 92%" : "top 86%",
+            start: isMobile ? "top 89%" : "top 83%",
           });
 
           const faqList = faq.querySelector(".v2-faq-list");
