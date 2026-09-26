@@ -154,39 +154,29 @@ export default function V2Intro() {
 
       exitTimeline = gsap.timeline({ onComplete: finalize });
       exitTimeline
-        .to(ring, {
-          opacity: 1,
-          duration: 0.24,
-          ease: "none",
-        }, 0)
-        .to(".v2-loader-ring-percent", {
-          opacity: 1,
-          y: 0,
-          duration: 0.22,
-          ease: "power1.out",
-        }, 0)
-        .call(startHandoff, [], 0.28)
+        // No 100% hold: handoff and exit start on the exact frame the ring completes.
+        .call(startHandoff, [], 0)
         .to(".v2-loader-emblem", {
           opacity: 0,
-          scale: 1.045,
+          scale: 1.04,
           filter: "blur(7px)",
-          duration: 0.50,
+          duration: 0.46,
           ease: "power2.inOut",
-        }, 0.38)
+        }, 0)
         .to(".v2-loader-mark", {
           opacity: 0,
           y: -8,
-          scale: 1.025,
+          scale: 1.02,
           filter: "blur(6px)",
           letterSpacing: "-0.03em",
-          duration: 0.54,
+          duration: 0.50,
           ease: "power2.inOut",
-        }, 0.40)
+        }, 0.02)
         .to(root, {
           autoAlpha: 0,
-          duration: 0.86,
+          duration: 0.72,
           ease: "power2.inOut",
-        }, 0.88)
+        }, 0.22)
         .fromTo(".v2-site-header", {
           y: -22,
           opacity: 0,
@@ -195,9 +185,9 @@ export default function V2Intro() {
           y: 0,
           opacity: 1,
           filter: "blur(0px)",
-          duration: 0.92,
+          duration: 0.86,
           ease: "power3.out",
-        }, 1.00)
+        }, 0.48)
         .fromTo(".v2-hero-copy .v2-overline", {
           y: 20,
           opacity: 0,
@@ -206,9 +196,9 @@ export default function V2Intro() {
           y: 0,
           opacity: 1,
           filter: "blur(0px)",
-          duration: 0.80,
+          duration: 0.76,
           ease: "power3.out",
-        }, 1.10)
+        }, 0.58)
         .fromTo(".v2-hero h1", {
           y: 32,
           opacity: 0,
@@ -217,9 +207,9 @@ export default function V2Intro() {
           y: 0,
           opacity: 1,
           filter: "blur(0px)",
-          duration: 1.04,
+          duration: 1.00,
           ease: "power4.out",
-        }, 1.16)
+        }, 0.64)
         .fromTo(".v2-hero-lead", {
           y: 24,
           opacity: 0,
@@ -228,9 +218,9 @@ export default function V2Intro() {
           y: 0,
           opacity: 1,
           filter: "blur(0px)",
-          duration: 0.88,
+          duration: 0.84,
           ease: "power3.out",
-        }, 1.31)
+        }, 0.78)
         .fromTo(".v2-hero-actions", {
           y: 18,
           opacity: 0,
@@ -239,9 +229,9 @@ export default function V2Intro() {
           y: 0,
           opacity: 1,
           filter: "blur(0px)",
-          duration: 0.82,
+          duration: 0.78,
           ease: "power3.out",
-        }, 1.44);
+        }, 0.90);
     };
     const onLoaderReady = () => {
       loaderReady = true;
