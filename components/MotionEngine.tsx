@@ -30,6 +30,7 @@ export default function MotionEngine() {
       if (disposed || stopEngine) return;
 
       gsap.registerPlugin(ScrollTrigger);
+      ScrollTrigger.config({ ignoreMobileResize: true });
 
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduceMotion) {
@@ -55,6 +56,7 @@ export default function MotionEngine() {
 
       let resizeTimer = 0;
       let alive = true;
+      let lastViewportWidth = window.innerWidth;
       const scrollAnimations: gsap.core.Animation[] = [];
       const revealCoverage = new Set<Element>();
       const isMobile = window.matchMedia("(max-width: 760px)").matches;
@@ -153,7 +155,7 @@ export default function MotionEngine() {
               trigger: row,
               targets: [media, ...copy].filter(Boolean) as Element[],
               y: isMobile ? 18 : 34,
-              blur: isMobile ? 1.5 : 5,
+              blur: isMobile ? 0.8 : 3,
               scale: index % 2 === 0 ? 0.992 : 0.988,
               stagger: isMobile ? 0.055 : 0.075,
               duration: isMobile ? 0.7 : 0.88,
@@ -198,7 +200,7 @@ export default function MotionEngine() {
               trigger: compareGrid,
               targets: elements(".v2-compare", compareGrid),
               y: isMobile ? 18 : 36,
-              blur: isMobile ? 1.5 : 5,
+              blur: isMobile ? 0.8 : 3,
               scale: 0.985,
               stagger: isMobile ? 0.08 : 0.13,
               duration: isMobile ? 0.76 : 0.96,
@@ -232,7 +234,7 @@ export default function MotionEngine() {
               trigger: bookingCard,
               targets: [bookingCard],
               y: isMobile ? 16 : 30,
-              blur: isMobile ? 1.5 : 5,
+              blur: isMobile ? 0.8 : 3,
               scale: 0.985,
               stagger: 0,
               duration: isMobile ? 0.8 : 1.02,
@@ -264,7 +266,7 @@ export default function MotionEngine() {
               trigger: faqList,
               targets: elements(".v2-faq-item", faqList),
               y: isMobile ? 12 : 20,
-              blur: isMobile ? 1 : 3,
+              blur: isMobile ? 0.6 : 2,
               stagger: isMobile ? 0.055 : 0.075,
               duration: isMobile ? 0.62 : 0.76,
               start: isMobile ? "top 91%" : "top 84%",
@@ -312,7 +314,7 @@ export default function MotionEngine() {
               trigger: footer,
               targets: elements(":scope > div", footerGrid),
               y: isMobile ? 12 : 20,
-              blur: isMobile ? 1 : 3,
+              blur: isMobile ? 0.6 : 2,
               stagger: isMobile ? 0.055 : 0.085,
               duration: isMobile ? 0.62 : 0.76,
               start: isMobile ? "top 94%" : "top 90%",
@@ -326,10 +328,10 @@ export default function MotionEngine() {
       const raf = (time: number) => lenis.raf(time * 1000);
 
       const refresh = () => {
-        if (!alive) return;
+        if (!alive || document.hidden) return;
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
-            if (!alive) return;
+            if (!alive || document.hidden) return;
             lenis.resize();
             ScrollTrigger.refresh();
           });
@@ -337,16 +339,34 @@ export default function MotionEngine() {
       };
 
       const onResize = () => {
+        const nextWidth = window.innerWidth;
+        const widthChanged = Math.abs(nextWidth - lastViewportWidth) > 1;
+
+        // Mobile browser chrome changes viewport height constantly while scrolling.
+        // Ignore those height-only resizes so ScrollTrigger does not refresh mid-flick.
+        if (isMobile && !widthChanged) return;
+
+        lastViewportWidth = nextWidth;
         window.clearTimeout(resizeTimer);
-        resizeTimer = window.setTimeout(refresh, 90);
+        resizeTimer = window.setTimeout(refresh, 120);
+      };
+
+      const onVisibilityChange = () => {
+        if (document.hidden) {
+          lenis.stop();
+          return;
+        }
+
+        lenis.start();
+        refresh();
       };
 
       lenis.on("scroll", onScroll);
       gsap.ticker.add(raf);
-      gsap.ticker.lagSmoothing(0);
 
       window.addEventListener("resize", onResize, { passive: true });
       window.addEventListener("load", refresh, { once: true });
+      document.addEventListener("visibilitychange", onVisibilityChange);
 
       if (document.fonts) {
         document.fonts.ready.then(() => {
@@ -361,6 +381,7 @@ export default function MotionEngine() {
         window.clearTimeout(resizeTimer);
         window.removeEventListener("resize", onResize);
         window.removeEventListener("load", refresh);
+        document.removeEventListener("visibilitychange", onVisibilityChange);
         gsap.ticker.remove(raf);
 
         scrollAnimations.forEach((animation) => {

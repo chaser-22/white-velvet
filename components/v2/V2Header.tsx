@@ -1,7 +1,7 @@
 "use client";
 
 import { Menu, X, ArrowUpRight } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const nav = [
   ["TJÄNSTER", "#tjanster"],
@@ -12,10 +12,18 @@ const nav = [
 export default function V2Header() {
   const [open, setOpen] = useState(false);
   const [compact, setCompact] = useState(false);
+  const compactRef = useRef(false);
 
   useEffect(() => {
-    const onScroll = () => setCompact(window.scrollY > 42);
-    onScroll();
+    const onScroll = () => {
+      const next = window.scrollY > 42;
+      if (next === compactRef.current) return;
+      compactRef.current = next;
+      setCompact(next);
+    };
+
+    compactRef.current = window.scrollY > 42;
+    setCompact(compactRef.current);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -66,23 +74,36 @@ export default function V2Header() {
         </div>
       </header>
 
-      {open && (
-        <div className="v2-mobile-menu" id="v2-mobile-nav">
-          <div className="v2-mobile-menu-inner">
-            <p>WHITE VELVET / VÄSTERÅS</p>
-            <nav aria-label="Mobilnavigation">
-              {nav.map(([label, href]) => (
-                <a href={href} key={href} onClick={() => setOpen(false)}>
-                  {label}
-                </a>
-              ))}
-            </nav>
-            <a className="v2-mobile-book" href="#boka" onClick={() => setOpen(false)}>
-              STARTA BOKNING <ArrowUpRight size={18} />
-            </a>
-          </div>
+      <div
+        className="v2-mobile-menu"
+        id="v2-mobile-nav"
+        data-open={open ? "true" : "false"}
+        aria-hidden={!open}
+      >
+        <div className="v2-mobile-menu-inner">
+          <p>WHITE VELVET / VÄSTERÅS</p>
+          <nav aria-label="Mobilnavigation">
+            {nav.map(([label, href]) => (
+              <a
+                href={href}
+                key={href}
+                tabIndex={open ? 0 : -1}
+                onClick={() => setOpen(false)}
+              >
+                {label}
+              </a>
+            ))}
+          </nav>
+          <a
+            className="v2-mobile-book"
+            href="#boka"
+            tabIndex={open ? 0 : -1}
+            onClick={() => setOpen(false)}
+          >
+            STARTA BOKNING <ArrowUpRight size={18} />
+          </a>
         </div>
-      )}
+      </div>
     </>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { CSSProperties, FormEvent, useEffect, useRef } from "react";
 
 const work = [
   {
@@ -31,7 +31,28 @@ function Comparison({
 }: {
   item: (typeof work)[number];
 }) {
-  const [value, setValue] = useState(52);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<number | null>(null);
+  const pendingValue = useRef(52);
+
+  useEffect(() => () => {
+    if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+  }, []);
+
+  const onInput = (event: FormEvent<HTMLInputElement>) => {
+    pendingValue.current = Number(event.currentTarget.value);
+    if (frameRef.current !== null) return;
+
+    frameRef.current = requestAnimationFrame(() => {
+      const value = pendingValue.current;
+      const stage = stageRef.current;
+      if (stage) {
+        stage.style.setProperty("--compare-position", `${value}%`);
+        stage.style.setProperty("--compare-clip", `${100 - value}%`);
+      }
+      frameRef.current = null;
+    });
+  };
 
   return (
     <article className="v2-compare">
@@ -39,7 +60,14 @@ function Comparison({
         <p>{item.title}</p>
       </div>
 
-      <div className="v2-compare-stage">
+      <div
+        className="v2-compare-stage"
+        ref={stageRef}
+        style={{
+          "--compare-position": "52%",
+          "--compare-clip": "48%",
+        } as CSSProperties}
+      >
         <Image
           src={item.before}
           alt={`${item.title} före rengöring`}
@@ -47,10 +75,7 @@ function Comparison({
           sizes="(max-width: 900px) 100vw, 50vw"
         />
 
-        <div
-          className="v2-compare-after"
-          style={{ clipPath: `inset(0 ${100 - value}% 0 0)` }}
-        >
+        <div className="v2-compare-after">
           <Image
             src={item.after}
             alt={`${item.title} efter rengöring`}
@@ -62,7 +87,7 @@ function Comparison({
         <span className="v2-compare-label v2-before">FÖRE</span>
         <span className="v2-compare-label v2-after">EFTER</span>
 
-        <div className="v2-compare-line" style={{ left: `${value}%` }} aria-hidden="true">
+        <div className="v2-compare-line" aria-hidden="true">
           <span />
         </div>
 
@@ -70,8 +95,8 @@ function Comparison({
           type="range"
           min="0"
           max="100"
-          value={value}
-          onChange={(event) => setValue(Number(event.target.value))}
+          defaultValue={52}
+          onInput={onInput}
           aria-label={`Jämför före och efter för ${item.title}`}
         />
       </div>

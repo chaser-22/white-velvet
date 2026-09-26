@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 
 const vertexShader = /* glsl */ `
@@ -82,8 +82,10 @@ function LoaderFabric() {
     side: THREE.DoubleSide,
   }), []);
 
+  useEffect(() => () => material.dispose(), [material]);
+
   useFrame(({ clock, camera }, delta) => {
-    if (!mesh.current) return;
+    if (!mesh.current || document.hidden) return;
 
     const t = clock.elapsedTime;
     material.uniforms.uTime.value = t;

@@ -272,6 +272,8 @@ function MaterialField({ quality }: { quality: Quality }) {
   const previousPointer = useRef(new THREE.Vector2(0.5, 0.5));
   const lastY = useRef(0);
   const lastT = useRef(0);
+  const lastPointerT = useRef(0);
+  const scrollRange = useRef(1);
 
   const material = useMemo(() => new THREE.ShaderMaterial({
     uniforms: {
@@ -292,40 +294,90 @@ function MaterialField({ quality }: { quality: Quality }) {
   }), []);
 
   useEffect(() => {
+    const updateScrollRange = () => {
+      scrollRange.current = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1,
+      );
+    };
+
     const onScroll = () => {
-      const max = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
-      scrollTarget.current = THREE.MathUtils.clamp(window.scrollY / max, 0, 1);
+      const y = window.scrollY;
+      scrollTarget.current = THREE.MathUtils.clamp(y / scrollRange.current, 0, 1);
 
       const now = performance.now();
-      const dt = lastT.current ? Math.max(now - lastT.current, 12) : 16;
-      const dy = window.scrollY - lastY.current;
+      const dt = lastT.current
+        ? THREE.MathUtils.clamp(now - lastT.current, 1, 64)
+        : 16.667;
+      const dy = y - lastY.current;
+
       velocityTarget.current = THREE.MathUtils.clamp((dy / dt) * 0.12, -1, 1);
-      lastY.current = window.scrollY;
+      lastY.current = y;
       lastT.current = now;
     };
 
     const onPointer = (event: PointerEvent) => {
-      if (quality === "low") return;
+      const now = performance.now();
+      const dt = lastPointerT.current
+        ? THREE.MathUtils.clamp(now - lastPointerT.current, 1, 64)
+        : 16.667;
+      const frameNormalize = 16.667 / dt;
 
       const x = event.clientX / Math.max(window.innerWidth, 1);
       const y = 1 - event.clientY / Math.max(window.innerHeight, 1);
 
       pointerMotionTarget.current.set(
-        THREE.MathUtils.clamp((x - previousPointer.current.x) * 4.4, -0.22, 0.22),
-        THREE.MathUtils.clamp((y - previousPointer.current.y) * 4.4, -0.22, 0.22),
+        THREE.MathUtils.clamp(
+          (x - previousPointer.current.x) * 4.4 * frameNormalize,
+          -0.22,
+          0.22,
+        ),
+        THREE.MathUtils.clamp(
+          (y - previousPointer.current.y) * 4.4 * frameNormalize,
+          -0.22,
+          0.22,
+        ),
       );
 
       pointerTarget.current.set(x, y);
       previousPointer.current.set(x, y);
+      lastPointerT.current = now;
     };
 
+    const onVisibilityChange = () => {
+      if (document.hidden) return;
+      lastY.current = window.scrollY;
+      lastT.current = performance.now();
+      lastPointerT.current = 0;
+      updateScrollRange();
+    };
+
+    updateScrollRange();
+    lastY.current = window.scrollY;
+    lastT.current = performance.now();
     onScroll();
+
+    const resizeObserver = typeof ResizeObserver !== "undefined"
+      ? new ResizeObserver(updateScrollRange)
+      : null;
+    resizeObserver?.observe(document.documentElement);
+
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("pointermove", onPointer, { passive: true });
+    window.addEventListener("resize", updateScrollRange, { passive: true });
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    if (quality !== "low") {
+      window.addEventListener("pointermove", onPointer, { passive: true });
+    }
 
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("pointermove", onPointer);
+      window.removeEventListener("resize", updateScrollRange);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      if (quality !== "low") {
+        window.removeEventListener("pointermove", onPointer);
+      }
+      resizeObserver?.disconnect();
       material.dispose();
     };
   }, [material, quality]);
@@ -473,7 +525,7 @@ function DustField({ quality }: { quality: Quality }) {
   }, [count]);
 
   useFrame(({ clock }, delta) => {
-    if (!points.current) return;
+    if (!points.current || document.hidden) return;
     points.current.rotation.z += delta * 0.024;
     points.current.rotation.y = Math.sin(clock.elapsedTime * 0.14) * 0.048;
     points.current.position.y = Math.sin(clock.elapsedTime * 0.22) * 0.10;
@@ -517,16 +569,30 @@ export default function V2Scene() {
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const sync = () => {
-      setReduced(media.matches);
-      setQuality(qualityTier());
+    let resizeFrame = 0;
+
+    const apply = () => {
+      resizeFrame = 0;
+      const nextReduced = media.matches;
+      const nextQuality = qualityTier();
+
+      setReduced((current) => current === nextReduced ? current : nextReduced);
+      setQuality((current) => current === nextQuality ? current : nextQuality);
     };
-    sync();
-    media.addEventListener("change", sync);
-    window.addEventListener("resize", sync, { passive: true });
+
+    const schedule = () => {
+      if (resizeFrame) return;
+      resizeFrame = window.requestAnimationFrame(apply);
+    };
+
+    apply();
+    media.addEventListener("change", schedule);
+    window.addEventListener("resize", schedule, { passive: true });
+
     return () => {
-      media.removeEventListener("change", sync);
-      window.removeEventListener("resize", sync);
+      if (resizeFrame) window.cancelAnimationFrame(resizeFrame);
+      media.removeEventListener("change", schedule);
+      window.removeEventListener("resize", schedule);
     };
   }, []);
 
@@ -546,7 +612,7 @@ export default function V2Scene() {
   }
 
   const dpr: [number, number] =
-    quality === "high" ? [1, 1.45] : quality === "medium" ? [1, 1.18] : [1, 1];
+    quality === "high" ? [1, 1.4] : quality === "medium" ? [1, 1.15] : [1, 1];
 
   return (
     <div className={`v2-canvas-shell ${ready ? "is-ready" : ""}`} aria-hidden="true">
