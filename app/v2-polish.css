@@ -2761,3 +2761,76 @@ html:has(.v2-site) {
     transform: none !important;
   }
 }
+
+
+/* MOBILE MOTION QA PASS — authoritative */
+@keyframes v2BookingStepInMobile {
+  from {
+    opacity: 0;
+    transform: translate3d(0,var(--v2-step-enter),0) scale(.997);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0,0,0) scale(1);
+  }
+}
+
+@keyframes v2BookingStepOutMobile {
+  from {
+    opacity: 1;
+    transform: translate3d(0,0,0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0,var(--v2-step-exit),0) scale(.997);
+  }
+}
+
+@media (max-width: 760px) {
+  .v2-site-header,
+  .v2-site-header.is-compact {
+    transition:
+      background-color .24s ease,
+      border-color .24s ease,
+      box-shadow .24s ease;
+  }
+
+  .v2-booking-wrap .booking-step-panel {
+    animation-name: v2BookingStepInMobile;
+    filter: none;
+    will-change: transform, opacity;
+  }
+
+  .v2-booking-wrap .booking-step-panel.is-exiting {
+    animation-name: v2BookingStepOutMobile;
+    filter: none;
+  }
+
+  .v2-faq-answer p {
+    filter: none;
+    will-change: auto;
+    transition:
+      opacity .48s ease .06s,
+      transform .66s cubic-bezier(.16,1,.3,1) .02s;
+  }
+
+  .v2-faq-item[data-open="true"] .v2-faq-answer p {
+    filter: none;
+  }
+
+  .v2-footer {
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+  }
+}
+
+@media (max-width: 760px) and (pointer: coarse) {
+  .v2-site :is(a, button, input, select, textarea) {
+    touch-action: manipulation;
+  }
+
+  .v2-compare-stage,
+  .v2-compare-stage input[type="range"] {
+    touch-action: pan-y;
+  }
+}

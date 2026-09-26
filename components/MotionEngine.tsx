@@ -62,7 +62,7 @@ export default function MotionEngine() {
       const isMobile = window.matchMedia("(max-width: 760px)").matches;
       const defaultStart = isMobile ? "top 90%" : "top 84%";
       const defaultY = isMobile ? 12 : 30;
-      const defaultBlur = isMobile ? 1.5 : 6;
+      const defaultBlur = isMobile ? 0.7 : 6;
       const defaultDuration = isMobile ? 0.68 : 0.9;
       const defaultStagger = isMobile ? 0.055 : 0.09;
 
@@ -137,7 +137,7 @@ export default function MotionEngine() {
               trigger: heading,
               targets: [heading],
               y: isMobile ? 16 : 28,
-              blur: isMobile ? 1.5 : 5,
+              blur: isMobile ? 0.8 : 5,
               stagger: 0,
               duration: isMobile ? 0.86 : 1.08,
               start: isMobile ? "top 94%" : "top 90%",
@@ -155,7 +155,7 @@ export default function MotionEngine() {
               trigger: row,
               targets: [media, ...copy].filter(Boolean) as Element[],
               y: isMobile ? 18 : 34,
-              blur: isMobile ? 0.8 : 3,
+              blur: isMobile ? 0.45 : 3,
               scale: index % 2 === 0 ? 0.992 : 0.988,
               stagger: isMobile ? 0.055 : 0.075,
               duration: isMobile ? 0.7 : 0.88,
@@ -175,7 +175,7 @@ export default function MotionEngine() {
               trigger: resultsHeading,
               targets: [resultsHeading],
               y: isMobile ? 16 : 30,
-              blur: isMobile ? 1.5 : 5,
+              blur: isMobile ? 0.8 : 5,
               stagger: 0,
               duration: isMobile ? 0.86 : 1.08,
               start: isMobile ? "top 94%" : "top 90%",
@@ -187,7 +187,7 @@ export default function MotionEngine() {
               trigger: resultsDescription,
               targets: [resultsDescription],
               y: isMobile ? 10 : 18,
-              blur: isMobile ? 1 : 3,
+              blur: isMobile ? 0.55 : 3,
               stagger: 0,
               duration: isMobile ? 0.72 : 0.88,
               start: isMobile ? "top 95%" : "top 91%",
@@ -200,7 +200,7 @@ export default function MotionEngine() {
               trigger: compareGrid,
               targets: elements(".v2-compare", compareGrid),
               y: isMobile ? 18 : 36,
-              blur: isMobile ? 0.8 : 3,
+              blur: isMobile ? 0.45 : 3,
               scale: 0.985,
               stagger: isMobile ? 0.08 : 0.13,
               duration: isMobile ? 0.76 : 0.96,
@@ -221,7 +221,7 @@ export default function MotionEngine() {
               trigger: heading,
               targets: headingTargets.filter(Boolean) as Element[],
               y: isMobile ? 14 : 26,
-              blur: isMobile ? 1.5 : 5,
+              blur: isMobile ? 0.8 : 5,
               stagger: isMobile ? 0.07 : 0.10,
               duration: isMobile ? 0.82 : 1.02,
               start: isMobile ? "top 94%" : "top 90%",
@@ -234,7 +234,7 @@ export default function MotionEngine() {
               trigger: bookingCard,
               targets: [bookingCard],
               y: isMobile ? 16 : 30,
-              blur: isMobile ? 0.8 : 3,
+              blur: isMobile ? 0.45 : 3,
               scale: 0.985,
               stagger: 0,
               duration: isMobile ? 0.8 : 1.02,
@@ -253,7 +253,7 @@ export default function MotionEngine() {
               trigger: faqHeading,
               targets: [faqHeading],
               y: isMobile ? 16 : 28,
-              blur: isMobile ? 1.5 : 5,
+              blur: isMobile ? 0.8 : 5,
               stagger: 0,
               duration: isMobile ? 0.84 : 1.04,
               start: isMobile ? "top 94%" : "top 90%",
@@ -266,7 +266,7 @@ export default function MotionEngine() {
               trigger: faqList,
               targets: elements(".v2-faq-item", faqList),
               y: isMobile ? 12 : 20,
-              blur: isMobile ? 0.6 : 2,
+              blur: isMobile ? 0.4 : 2,
               stagger: isMobile ? 0.055 : 0.075,
               duration: isMobile ? 0.62 : 0.76,
               start: isMobile ? "top 91%" : "top 84%",
@@ -314,7 +314,7 @@ export default function MotionEngine() {
               trigger: footer,
               targets: elements(":scope > div", footerGrid),
               y: isMobile ? 12 : 20,
-              blur: isMobile ? 0.6 : 2,
+              blur: isMobile ? 0.4 : 2,
               stagger: isMobile ? 0.055 : 0.085,
               duration: isMobile ? 0.62 : 0.76,
               start: isMobile ? "top 94%" : "top 90%",

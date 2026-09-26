@@ -33,6 +33,7 @@ export default function V2Intro() {
 
     const win = window as WVWindow;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const mobile = window.matchMedia("(max-width: 760px)").matches;
     let alive = true;
     let safetyTimer = 0;
     let minimumTimer = 0;
@@ -159,17 +160,17 @@ export default function V2Intro() {
         .to(".v2-loader-emblem", {
           opacity: 0,
           scale: 1.04,
-          filter: "blur(7px)",
-          duration: 0.46,
+          filter: `blur(${mobile ? 3 : 7}px)`,
+          duration: mobile ? 0.42 : 0.46,
           ease: "power2.inOut",
         }, 0)
         .to(".v2-loader-mark", {
           opacity: 0,
           y: -8,
           scale: 1.02,
-          filter: "blur(6px)",
+          filter: `blur(${mobile ? 3 : 6}px)`,
           letterSpacing: "-0.03em",
-          duration: 0.50,
+          duration: mobile ? 0.46 : 0.50,
           ease: "power2.inOut",
         }, 0.02)
         .to(root, {
@@ -180,56 +181,56 @@ export default function V2Intro() {
         .fromTo(".v2-site-header", {
           y: -22,
           opacity: 0,
-          filter: "blur(8px)",
+          filter: `blur(${mobile ? 3 : 8}px)`,
         }, {
           y: 0,
           opacity: 1,
           filter: "blur(0px)",
-          duration: 0.86,
+          duration: mobile ? 0.76 : 0.86,
           ease: "power3.out",
         }, 0.48)
         .fromTo(".v2-hero-copy .v2-overline", {
           y: 20,
           opacity: 0,
-          filter: "blur(7px)",
+          filter: `blur(${mobile ? 3 : 7}px)`,
         }, {
           y: 0,
           opacity: 1,
           filter: "blur(0px)",
-          duration: 0.76,
+          duration: mobile ? 0.68 : 0.76,
           ease: "power3.out",
         }, 0.58)
         .fromTo(".v2-hero h1", {
           y: 32,
           opacity: 0,
-          filter: "blur(11px)",
+          filter: `blur(${mobile ? 4 : 11}px)`,
         }, {
           y: 0,
           opacity: 1,
           filter: "blur(0px)",
-          duration: 1.00,
+          duration: mobile ? 0.90 : 1.00,
           ease: "power4.out",
         }, 0.64)
         .fromTo(".v2-hero-lead", {
           y: 24,
           opacity: 0,
-          filter: "blur(8px)",
+          filter: `blur(${mobile ? 3 : 8}px)`,
         }, {
           y: 0,
           opacity: 1,
           filter: "blur(0px)",
-          duration: 0.84,
+          duration: mobile ? 0.76 : 0.84,
           ease: "power3.out",
         }, 0.78)
         .fromTo(".v2-hero-actions", {
           y: 18,
           opacity: 0,
-          filter: "blur(6px)",
+          filter: `blur(${mobile ? 2 : 6}px)`,
         }, {
           y: 0,
           opacity: 1,
           filter: "blur(0px)",
-          duration: 0.78,
+          duration: mobile ? 0.70 : 0.78,
           ease: "power3.out",
         }, 0.90);
     };

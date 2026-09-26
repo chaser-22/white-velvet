@@ -255,10 +255,14 @@ void main() {
 
 function qualityTier(): Quality {
   if (typeof window === "undefined") return "medium";
+
   const nav = navigator as Navigator & { deviceMemory?: number };
   const memory = nav.deviceMemory ?? 8;
   const cores = navigator.hardwareConcurrency ?? 8;
-  if (window.innerWidth < 760 || memory <= 4 || cores <= 4) return "low";
+  const mobile = window.innerWidth < 760;
+
+  if (memory <= 4 || cores <= 4) return "low";
+  if (mobile) return cores >= 6 ? "medium" : "low";
   if (window.innerWidth > 1280 && memory >= 8 && cores >= 8) return "high";
   return "medium";
 }
@@ -271,7 +275,6 @@ function MaterialField({ quality }: { quality: Quality }) {
   const pointerMotionTarget = useRef(new THREE.Vector2());
   const previousPointer = useRef(new THREE.Vector2(0.5, 0.5));
   const lastY = useRef(0);
-  const lastT = useRef(0);
   const lastPointerT = useRef(0);
   const scrollRange = useRef(1);
 
@@ -301,20 +304,9 @@ function MaterialField({ quality }: { quality: Quality }) {
       );
     };
 
-    const onScroll = () => {
-      const y = window.scrollY;
-      scrollTarget.current = THREE.MathUtils.clamp(y / scrollRange.current, 0, 1);
-
-      const now = performance.now();
-      const dt = lastT.current
-        ? THREE.MathUtils.clamp(now - lastT.current, 1, 64)
-        : 16.667;
-      const dy = y - lastY.current;
-
-      velocityTarget.current = THREE.MathUtils.clamp((dy / dt) * 0.12, -1, 1);
-      lastY.current = y;
-      lastT.current = now;
-    };
+    const pointerFine =
+      quality !== "low" &&
+      window.matchMedia("(pointer: fine)").matches;
 
     const onPointer = (event: PointerEvent) => {
       const now = performance.now();
@@ -347,34 +339,29 @@ function MaterialField({ quality }: { quality: Quality }) {
     const onVisibilityChange = () => {
       if (document.hidden) return;
       lastY.current = window.scrollY;
-      lastT.current = performance.now();
       lastPointerT.current = 0;
       updateScrollRange();
     };
 
     updateScrollRange();
     lastY.current = window.scrollY;
-    lastT.current = performance.now();
-    onScroll();
 
     const resizeObserver = typeof ResizeObserver !== "undefined"
       ? new ResizeObserver(updateScrollRange)
       : null;
     resizeObserver?.observe(document.documentElement);
 
-    window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", updateScrollRange, { passive: true });
     document.addEventListener("visibilitychange", onVisibilityChange);
 
-    if (quality !== "low") {
+    if (pointerFine) {
       window.addEventListener("pointermove", onPointer, { passive: true });
     }
 
     return () => {
-      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", updateScrollRange);
       document.removeEventListener("visibilitychange", onVisibilityChange);
-      if (quality !== "low") {
+      if (pointerFine) {
         window.removeEventListener("pointermove", onPointer);
       }
       resizeObserver?.disconnect();
@@ -386,6 +373,22 @@ function MaterialField({ quality }: { quality: Quality }) {
     if (!mesh.current || document.hidden) return;
 
     const t = clock.elapsedTime;
+    const scrollY = window.scrollY;
+    const frameMs = THREE.MathUtils.clamp(delta * 1000, 1, 64);
+    const dy = scrollY - lastY.current;
+
+    scrollTarget.current = THREE.MathUtils.clamp(
+      scrollY / scrollRange.current,
+      0,
+      1,
+    );
+    velocityTarget.current = THREE.MathUtils.clamp(
+      (dy / frameMs) * 0.12,
+      -1,
+      1,
+    );
+    lastY.current = scrollY;
+
     material.uniforms.uTime.value = t;
     material.uniforms.uScroll.value = THREE.MathUtils.damp(
       material.uniforms.uScroll.value,
@@ -612,7 +615,7 @@ export default function V2Scene() {
   }
 
   const dpr: [number, number] =
-    quality === "high" ? [1, 1.4] : quality === "medium" ? [1, 1.15] : [1, 1];
+    quality === "high" ? [1, 1.4] : quality === "medium" ? [1, 1.15] : [1, 1.05];
 
   return (
     <div className={`v2-canvas-shell ${ready ? "is-ready" : ""}`} aria-hidden="true">
