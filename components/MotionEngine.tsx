@@ -119,83 +119,6 @@ export default function MotionEngine() {
         scrollAnimations.push(timeline);
       };
 
-      const revealSectionLabel = (
-        _section: Element,
-        label: Element | null,
-        _start?: string,
-      ) => {
-        if (!label) return;
-
-        const text = label.querySelector("p");
-
-        gsap.set(label, {
-          opacity: 0.035,
-          y: isMobile ? 10 : 15,
-          scale: isMobile ? 0.995 : 0.992,
-          filter: isMobile ? "blur(3px)" : "blur(5px)",
-          force3D: true,
-          willChange: "transform, opacity, filter",
-        });
-
-        if (text) {
-          gsap.set(text, {
-            opacity: 0,
-            y: isMobile ? 7 : 10,
-            letterSpacing: isMobile ? ".245em" : ".27em",
-            force3D: true,
-            willChange: "transform, opacity, letter-spacing",
-          });
-        }
-
-        const timeline = gsap.timeline({
-          defaults: { overwrite: "auto" },
-          scrollTrigger: {
-            trigger: label,
-            start: isMobile ? "top 96%" : "top 93%",
-            once: true,
-            invalidateOnRefresh: true,
-          },
-        });
-
-        timeline.to(label, {
-          opacity: 0.56,
-          y: 0,
-          scale: 1,
-          filter: "blur(0px)",
-          duration: isMobile ? 1.0 : 1.34,
-          ease: "power3.out",
-          force3D: true,
-        });
-
-        if (text) {
-          timeline.to(
-            text,
-            {
-              opacity: 1,
-              y: 0,
-              letterSpacing: ".19em",
-              duration: isMobile ? 0.94 : 1.2,
-              ease: "power3.out",
-              force3D: true,
-            },
-            isMobile ? 0.10 : 0.16,
-          );
-        }
-
-        timeline.eventCallback("onComplete", () => {
-          gsap.set(label, {
-            clearProps: "transform,filter,willChange",
-          });
-          if (text) {
-            gsap.set(text, {
-              clearProps: "transform,opacity,letterSpacing,willChange",
-            });
-          }
-        });
-
-        scrollAnimations.push(timeline);
-      };
-
       const site = document.querySelector(".v2-site");
 
       if (site) {
@@ -203,12 +126,6 @@ export default function MotionEngine() {
         if (services) {
           const label = services.querySelector(".v2-section-label");
           const heading = services.querySelector(".v2-service-intro h2");
-
-          revealSectionLabel(
-            services,
-            label,
-            isMobile ? "top 92%" : "top 86%",
-          );
 
           reveal({
             trigger: services,
@@ -242,11 +159,6 @@ export default function MotionEngine() {
 
         const results = site.querySelector(".v2-results");
         if (results) {
-          revealSectionLabel(
-            results,
-            results.querySelector(".v2-section-label"),
-            isMobile ? "top 92%" : "top 86%",
-          );
 
           const introTargets = [
             results.querySelector(".v2-results-intro h2"),
@@ -285,12 +197,6 @@ export default function MotionEngine() {
             ? elements("h2, p", heading)
             : [];
 
-          revealSectionLabel(
-            booking,
-            booking.querySelector(".v2-section-label"),
-            isMobile ? "top 92%" : "top 86%",
-          );
-
           reveal({
             trigger: booking,
             targets: headingTargets.filter(Boolean) as Element[],
@@ -318,11 +224,6 @@ export default function MotionEngine() {
 
         const faq = site.querySelector(".v2-faq");
         if (faq) {
-          revealSectionLabel(
-            faq,
-            faq.querySelector(".v2-section-label"),
-            isMobile ? "top 92%" : "top 86%",
-          );
 
           const faqHeaderTargets = [
             faq.querySelector(".v2-faq-grid h2"),
