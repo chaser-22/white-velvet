@@ -19,7 +19,11 @@ export default function V2FAQ() {
                 <strong>{item.q}</strong>
                 <Plus size={18} />
               </summary>
-              <p>{item.a}</p>
+              <div className="v2-faq-answer">
+                <div>
+                  <p>{item.a}</p>
+                </div>
+              </div>
             </details>
           ))}
           </div>
