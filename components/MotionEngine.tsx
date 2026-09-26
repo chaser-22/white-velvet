@@ -244,7 +244,7 @@ export default function MotionEngine() {
           if (faqList) {
             reveal({
               trigger: faqList,
-              targets: elements("details", faqList),
+              targets: elements(".v2-faq-item", faqList),
               y: isMobile ? 12 : 20,
               blur: isMobile ? 1.5 : 3,
               stagger: isMobile ? 0.055 : 0.075,
