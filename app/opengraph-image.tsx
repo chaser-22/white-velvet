@@ -32,7 +32,7 @@ export default function Image() {
               fontSize: 20,
             }}
           >
-            WV
+            W
           </div>
           <div style={{ fontSize: 22, letterSpacing: 5 }}>WHITE VELVET</div>
         </div>

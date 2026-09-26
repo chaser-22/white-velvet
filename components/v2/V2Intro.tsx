@@ -114,7 +114,6 @@ export default function V2Intro() {
       const finalize = () => {
         if (!alive) return;
         document.documentElement.classList.remove("v2-intro-lock");
-      document.documentElement.classList.remove("v2-intro-handoff");
         document.documentElement.classList.remove("v2-intro-handoff");
         win.__wvV2IntroComplete = true;
         window.dispatchEvent(new Event("wv:intro-complete"));
@@ -300,13 +299,13 @@ export default function V2Intro() {
       <V2LoaderScene />
       <div className="v2-loader-sheen" aria-hidden="true" />
       <div className="v2-loader-core">
-        <div className="v2-loader-seal" aria-hidden="true">WV</div>
+        <div className="v2-loader-seal" aria-hidden="true">W</div>
         <div className="v2-loader-mark">WHITE VELVET</div>
         <div className="v2-loader-progress">
+          <strong ref={percentRef}>00%</strong>
           <div className="v2-loader-rule" aria-hidden="true">
             <span ref={lineRef} />
           </div>
-          <strong ref={percentRef}>00%</strong>
         </div>
       </div>
     </div>

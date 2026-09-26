@@ -43,7 +43,7 @@ export default function V2Header() {
     <>
       <header className={`v2-site-header ${compact ? "is-compact" : ""}`}>
         <a className="v2-brand" href="#top" aria-label="White Velvet startsida">
-          <span>WV</span>
+          <span>W</span>
           <strong>WHITE VELVET</strong>
         </a>
 
