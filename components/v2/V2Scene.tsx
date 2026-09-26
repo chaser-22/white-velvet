@@ -296,6 +296,8 @@ function MaterialField({ quality }: { quality: Quality }) {
     depthWrite: false,
   }), []);
 
+  useEffect(() => () => material.dispose(), [material]);
+
   useEffect(() => {
     const updateScrollRange = () => {
       scrollRange.current = Math.max(
@@ -365,9 +367,8 @@ function MaterialField({ quality }: { quality: Quality }) {
         window.removeEventListener("pointermove", onPointer);
       }
       resizeObserver?.disconnect();
-      material.dispose();
     };
-  }, [material, quality]);
+  }, [quality]);
 
   useFrame(({ clock, camera }, delta) => {
     if (!mesh.current || document.hidden) return;
