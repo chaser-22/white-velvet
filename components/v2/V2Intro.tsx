@@ -55,14 +55,23 @@ export default function V2Intro() {
     document.documentElement.classList.add("v2-intro-lock");
 
     const renderProgress = (value: number) => {
-      const rounded = Math.max(0, Math.min(100, Math.round(value)));
-      if (rounded === lastDisplayed) return;
-      lastDisplayed = rounded;
-      percent.textContent = `${rounded.toString().padStart(2, "0")}%`;
-      line.style.transform = `scaleX(${rounded / 100})`;
-      root.setAttribute("aria-valuenow", String(rounded));
-      if (win.__wvV2IntroState) win.__wvV2IntroState.progress = rounded;
+      const clamped = Math.max(0, Math.min(100, value));
+      const rounded = Math.round(clamped);
+
+      // Keep the bar fully continuous at frame rate; only the text is quantized.
+      line.style.transform = `translateZ(0) scaleX(${clamped / 100})`;
+
+      if (rounded !== lastDisplayed) {
+        lastDisplayed = rounded;
+        percent.textContent = `${rounded.toString().padStart(2, "0")}%`;
+        root.setAttribute("aria-valuenow", String(rounded));
+      }
+
+      if (win.__wvV2IntroState) win.__wvV2IntroState.progress = clamped;
     };
+
+    gsap.set(root, { force3D: true });
+    gsap.set([line, percent], { force3D: true });
 
     entryTimeline = gsap.timeline({ defaults: { ease: "power3.out" } });
     entryTimeline
@@ -74,7 +83,7 @@ export default function V2Intro() {
         opacity: 1,
         scale: 1,
         filter: "blur(0px)",
-        duration: reduce ? 0.01 : 0.9,
+        duration: reduce ? 0.01 : 1.05,
       }, 0.08)
       .fromTo(".v2-loader-mark", {
         opacity: 0,
@@ -86,7 +95,7 @@ export default function V2Intro() {
         y: 0,
         filter: "blur(0px)",
         letterSpacing: "-0.045em",
-        duration: reduce ? 0.01 : 1.15,
+        duration: reduce ? 0.01 : 1.28,
       }, 0.18)
       .fromTo(".v2-loader-progress", {
         opacity: 0,
@@ -94,8 +103,8 @@ export default function V2Intro() {
       }, {
         opacity: 1,
         y: 0,
-        duration: reduce ? 0.01 : 0.8,
-      }, 0.72);
+        duration: reduce ? 0.01 : 0.92,
+      }, 0.68);
 
     const finish = () => {
       if (!alive || completed) return;
@@ -131,14 +140,14 @@ export default function V2Intro() {
         .to(".v2-loader-progress", {
           opacity: 0,
           y: -8,
-          duration: 0.34,
-          ease: "power2.in",
+          duration: 0.46,
+          ease: "power2.inOut",
         }, 0)
         .to(".v2-loader-seal", {
           opacity: 0,
           scale: 1.08,
           filter: "blur(8px)",
-          duration: 0.58,
+          duration: 0.72,
           ease: "power2.inOut",
         }, 0.03)
         .to(".v2-loader-mark", {
@@ -147,14 +156,14 @@ export default function V2Intro() {
           scale: 1.045,
           filter: "blur(7px)",
           letterSpacing: "-0.025em",
-          duration: 0.68,
+          duration: 0.82,
           ease: "power3.inOut",
         }, 0.04)
         .to(root, {
           autoAlpha: 0,
-          duration: 0.88,
+          duration: 1.04,
           ease: "power2.inOut",
-        }, 0.20)
+        }, 0.18)
         .fromTo(".v2-site-header", {
           y: -24,
           opacity: 0,
@@ -163,9 +172,9 @@ export default function V2Intro() {
           y: 0,
           opacity: 1,
           filter: "blur(0px)",
-          duration: 0.86,
+          duration: 1.02,
           ease: "power3.out",
-        }, 0.26)
+        }, 0.34)
         .fromTo(".v2-hero-copy .v2-overline", {
           y: 22,
           opacity: 0,
@@ -174,9 +183,9 @@ export default function V2Intro() {
           y: 0,
           opacity: 1,
           filter: "blur(0px)",
-          duration: 0.72,
+          duration: 0.86,
           ease: "power3.out",
-        }, 0.36)
+        }, 0.46)
         .fromTo(".v2-hero h1", {
           y: 34,
           opacity: 0,
@@ -185,9 +194,9 @@ export default function V2Intro() {
           y: 0,
           opacity: 1,
           filter: "blur(0px)",
-          duration: 1.0,
+          duration: 1.14,
           ease: "power4.out",
-        }, 0.45)
+        }, 0.54)
         .fromTo(".v2-hero-lead", {
           y: 26,
           opacity: 0,
@@ -196,9 +205,9 @@ export default function V2Intro() {
           y: 0,
           opacity: 1,
           filter: "blur(0px)",
-          duration: 0.84,
+          duration: 0.96,
           ease: "power3.out",
-        }, 0.62)
+        }, 0.72)
         .fromTo(".v2-hero-actions", {
           y: 20,
           opacity: 0,
@@ -207,9 +216,9 @@ export default function V2Intro() {
           y: 0,
           opacity: 1,
           filter: "blur(0px)",
-          duration: 0.76,
+          duration: 0.88,
           ease: "power3.out",
-        }, 0.75);
+        }, 0.88);
     };
 
     const onLoaderReady = () => {
@@ -256,8 +265,9 @@ export default function V2Intro() {
         (windowReady ? 1.5 : 0);
 
       const allReady = loaderReady && fontsReady && windowReady && minimumReady;
-      const target = allReady ? 100 : Math.min(96, 6 + timeReady * 84 + readinessBoost);
-      const smoothing = 1 - Math.exp(-delta * (target === 100 ? 7.0 : 4.0));
+      const easedTime = timeReady * timeReady * (3.0 - 2.0 * timeReady);
+      const target = allReady ? 100 : Math.min(96, 4 + easedTime * 86 + readinessBoost);
+      const smoothing = 1 - Math.exp(-delta * (target === 100 ? 5.4 : 3.35));
 
       displayed += (target - displayed) * smoothing;
       renderProgress(displayed);

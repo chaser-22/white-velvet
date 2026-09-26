@@ -102,6 +102,9 @@ html.v2-intro-handoff .v2-site:has(> .v2-loader) .v2-canvas-shell {
   background: #d8d2c5;
   transform-origin: center;
   isolation: isolate;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  will-change: opacity, transform;
 }
 
 .v2-loader-canvas {
@@ -150,7 +153,9 @@ html.v2-intro-handoff .v2-site:has(> .v2-loader) .v2-canvas-shell {
   justify-items: center;
   text-align: center;
   perspective: 900px;
-  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  will-change: transform, opacity;
 }
 
 .v2-loader-seal {
@@ -201,6 +206,8 @@ html.v2-intro-handoff .v2-site:has(> .v2-loader) .v2-canvas-shell {
   overflow: hidden;
   border-radius: 999px;
   background: rgba(18,23,23,.16);
+  transform: translateZ(0);
+  contain: paint;
 }
 
 .v2-loader-rule span {
@@ -212,6 +219,7 @@ html.v2-intro-handoff .v2-site:has(> .v2-loader) .v2-canvas-shell {
   border-radius: inherit;
   background: rgba(18,23,23,.78);
   will-change: transform;
+  backface-visibility: hidden;
 }
 
 .v2-loader-progress strong {
@@ -223,6 +231,8 @@ html.v2-intro-handoff .v2-site:has(> .v2-loader) .v2-canvas-shell {
   letter-spacing: .08em;
   font-variant-numeric: tabular-nums;
   text-align: center;
+  transform: translateZ(0);
+  will-change: opacity, transform;
 }
 
 @keyframes v2LoaderSheen {

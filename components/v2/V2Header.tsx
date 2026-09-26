@@ -4,8 +4,8 @@ import { Menu, X, ArrowUpRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const nav = [
-  ["Tjänster", "#tjanster"],
-  ["Resultat", "#resultat"],
+  ["TJÄNSTER", "#tjanster"],
+  ["RESULTAT", "#resultat"],
   ["FAQ", "#faq"],
 ];
 
@@ -52,7 +52,7 @@ export default function V2Header() {
         </nav>
 
         <div className="v2-header-actions">
-          <a href="#boka" className="v2-book-pill">Boka <ArrowUpRight size={15} /></a>
+          <a href="#boka" className="v2-book-pill">BOKA <ArrowUpRight size={15} /></a>
           <button
             className="v2-menu-button"
             type="button"
@@ -78,7 +78,7 @@ export default function V2Header() {
               ))}
             </nav>
             <a className="v2-mobile-book" href="#boka" onClick={() => setOpen(false)}>
-              Starta bokning <ArrowUpRight size={18} />
+              STARTA BOKNING <ArrowUpRight size={18} />
             </a>
           </div>
         </div>
