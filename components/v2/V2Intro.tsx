@@ -116,9 +116,13 @@ export default function V2Intro() {
       displayed = 100;
       renderProgress(100);
       win.__wvV2IntroState = { active: false, progress: 100 };
-      win.__wvV2IntroHandoff = true;
-      document.documentElement.classList.add("v2-intro-handoff");
-      window.dispatchEvent(new Event("wv:intro-handoff"));
+
+      const startHandoff = () => {
+        if (!alive || win.__wvV2IntroHandoff) return;
+        win.__wvV2IntroHandoff = true;
+        document.documentElement.classList.add("v2-intro-handoff");
+        window.dispatchEvent(new Event("wv:intro-handoff"));
+      };
 
       const finalize = () => {
         if (!alive) return;
@@ -130,85 +134,62 @@ export default function V2Intro() {
       };
 
       if (reduce) {
+        startHandoff();
         root.style.opacity = "0";
         finalize();
         return;
       }
 
+      // Let the ring visibly close to a complete circle before any exit motion begins.
+      gsap.set(ring, { strokeDashoffset: 0 });
+
       exitTimeline = gsap.timeline({ onComplete: finalize });
       exitTimeline
-        .to(".v2-loader-ring-percent", {
-          opacity: 0,
-          y: -5,
-          duration: 0.42,
-          ease: "power2.inOut",
+        .to(ring, {
+          strokeDashoffset: -0.42,
+          duration: 0.30,
+          ease: "power2.out",
         }, 0)
-        .to(".v2-loader-seal", {
+        .to(".v2-loader-ring-percent", {
+          opacity: 1,
+          y: 0,
+          duration: 0.22,
+          ease: "power1.out",
+        }, 0)
+        .call(startHandoff, [], 0.34)
+        .to(".v2-loader-emblem", {
           opacity: 0,
-          scale: 1.08,
-          filter: "blur(8px)",
-          duration: 0.72,
-          ease: "power2.inOut",
-        }, 0.03)
-        .to(".v2-loader-mark", {
-          opacity: 0,
-          y: -10,
           scale: 1.045,
           filter: "blur(7px)",
-          letterSpacing: "-0.025em",
-          duration: 0.82,
-          ease: "power3.inOut",
-        }, 0.04)
+          duration: 0.58,
+          ease: "power2.inOut",
+        }, 0.46)
+        .to(".v2-loader-mark", {
+          opacity: 0,
+          y: -8,
+          scale: 1.025,
+          filter: "blur(6px)",
+          letterSpacing: "-0.03em",
+          duration: 0.62,
+          ease: "power2.inOut",
+        }, 0.48)
         .to(root, {
           autoAlpha: 0,
-          duration: 1.04,
+          duration: 0.98,
           ease: "power2.inOut",
-        }, 0.18)
+        }, 1.03)
         .fromTo(".v2-site-header", {
-          y: -24,
+          y: -22,
           opacity: 0,
           filter: "blur(8px)",
         }, {
           y: 0,
           opacity: 1,
           filter: "blur(0px)",
-          duration: 1.02,
+          duration: 0.98,
           ease: "power3.out",
-        }, 0.34)
+        }, 1.18)
         .fromTo(".v2-hero-copy .v2-overline", {
-          y: 22,
-          opacity: 0,
-          filter: "blur(8px)",
-        }, {
-          y: 0,
-          opacity: 1,
-          filter: "blur(0px)",
-          duration: 0.86,
-          ease: "power3.out",
-        }, 0.46)
-        .fromTo(".v2-hero h1", {
-          y: 34,
-          opacity: 0,
-          filter: "blur(12px)",
-        }, {
-          y: 0,
-          opacity: 1,
-          filter: "blur(0px)",
-          duration: 1.14,
-          ease: "power4.out",
-        }, 0.54)
-        .fromTo(".v2-hero-lead", {
-          y: 26,
-          opacity: 0,
-          filter: "blur(9px)",
-        }, {
-          y: 0,
-          opacity: 1,
-          filter: "blur(0px)",
-          duration: 0.96,
-          ease: "power3.out",
-        }, 0.72)
-        .fromTo(".v2-hero-actions", {
           y: 20,
           opacity: 0,
           filter: "blur(7px)",
@@ -216,11 +197,43 @@ export default function V2Intro() {
           y: 0,
           opacity: 1,
           filter: "blur(0px)",
-          duration: 0.88,
+          duration: 0.84,
           ease: "power3.out",
-        }, 0.88);
+        }, 1.30)
+        .fromTo(".v2-hero h1", {
+          y: 32,
+          opacity: 0,
+          filter: "blur(11px)",
+        }, {
+          y: 0,
+          opacity: 1,
+          filter: "blur(0px)",
+          duration: 1.10,
+          ease: "power4.out",
+        }, 1.38)
+        .fromTo(".v2-hero-lead", {
+          y: 24,
+          opacity: 0,
+          filter: "blur(8px)",
+        }, {
+          y: 0,
+          opacity: 1,
+          filter: "blur(0px)",
+          duration: 0.94,
+          ease: "power3.out",
+        }, 1.55)
+        .fromTo(".v2-hero-actions", {
+          y: 18,
+          opacity: 0,
+          filter: "blur(6px)",
+        }, {
+          y: 0,
+          opacity: 1,
+          filter: "blur(0px)",
+          duration: 0.86,
+          ease: "power3.out",
+        }, 1.70);
     };
-
     const onLoaderReady = () => {
       loaderReady = true;
     };
@@ -272,7 +285,7 @@ export default function V2Intro() {
       displayed += (target - displayed) * smoothing;
       renderProgress(displayed);
 
-      if (allReady && displayed >= 99.15) {
+      if (allReady && displayed >= 99.72) {
         finish();
         return;
       }

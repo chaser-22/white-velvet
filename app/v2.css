@@ -160,9 +160,9 @@ html.v2-intro-handoff .v2-site:has(> .v2-loader) .v2-canvas-shell {
 
 .v2-loader-emblem {
   position: relative;
-  width: 132px;
-  height: 132px;
-  margin-bottom: clamp(28px, 3.5vw, 40px);
+  width: 184px;
+  height: 184px;
+  margin-bottom: clamp(32px, 4vw, 46px);
   display: grid;
   place-items: center;
   isolation: isolate;
@@ -187,12 +187,12 @@ html.v2-intro-handoff .v2-site:has(> .v2-loader) .v2-canvas-shell {
 
 .v2-loader-ring-track {
   stroke: rgba(18,23,23,.14);
-  stroke-width: 1.35;
+  stroke-width: 1.15;
 }
 
 .v2-loader-ring-progress {
   stroke: rgba(18,23,23,.86);
-  stroke-width: 2.2;
+  stroke-width: 2.65;
   stroke-dasharray: 100;
   stroke-dashoffset: 100;
   vector-effect: non-scaling-stroke;
@@ -201,7 +201,7 @@ html.v2-intro-handoff .v2-site:has(> .v2-loader) .v2-canvas-shell {
 
 .v2-loader-seal {
   position: absolute;
-  inset: 12px;
+  inset: 16px;
   display: grid;
   place-items: center;
   border: 1px solid rgba(18,23,23,.18);
@@ -215,7 +215,7 @@ html.v2-intro-handoff .v2-site:has(> .v2-loader) .v2-canvas-shell {
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
   font-family: var(--v2-serif);
-  font-size: 38px;
+  font-size: 52px;
   line-height: 1;
   letter-spacing: .02em;
   color: rgba(15,20,20,.96);
@@ -224,10 +224,10 @@ html.v2-intro-handoff .v2-site:has(> .v2-loader) .v2-canvas-shell {
 .v2-loader-ring-percent {
   position: absolute;
   left: 50%;
-  bottom: 24px;
+  bottom: 34px;
   transform: translateX(-50%);
   min-width: 48px;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1;
   font-weight: 650;
   letter-spacing: .10em;
@@ -267,19 +267,19 @@ html.v2-intro-handoff .v2-site:has(> .v2-loader) .v2-canvas-shell {
   }
 
   .v2-loader-emblem {
-    width: 116px;
-    height: 116px;
-    margin-bottom: 28px;
+    width: 152px;
+    height: 152px;
+    margin-bottom: 30px;
   }
 
   .v2-loader-seal {
-    inset: 11px;
-    font-size: 34px;
+    inset: 13px;
+    font-size: 43px;
   }
 
   .v2-loader-ring-percent {
-    bottom: 21px;
-    font-size: 9px;
+    bottom: 27px;
+    font-size: 10px;
   }
 
   .v2-loader-mark {
