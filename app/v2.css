@@ -159,9 +159,9 @@ html.v2-intro-handoff .v2-site:has(> .v2-loader) .v2-canvas-shell {
 }
 
 .v2-loader-seal {
-  width: 46px;
-  height: 46px;
-  margin-bottom: clamp(22px, 3vw, 32px);
+  width: 76px;
+  height: 76px;
+  margin-bottom: clamp(26px, 3.4vw, 38px);
   display: grid;
   place-items: center;
   border: 1px solid rgba(18,23,23,.28);
@@ -173,8 +173,8 @@ html.v2-intro-handoff .v2-site:has(> .v2-loader) .v2-canvas-shell {
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
   font-family: var(--v2-serif);
-  font-size: 13px;
-  letter-spacing: .04em;
+  font-size: 24px;
+  letter-spacing: .035em;
 }
 
 .v2-loader-mark {
@@ -252,10 +252,10 @@ html.v2-intro-handoff .v2-site:has(> .v2-loader) .v2-canvas-shell {
   }
 
   .v2-loader-seal {
-    width: 42px;
-    height: 42px;
-    margin-bottom: 22px;
-    font-size: 12px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 24px;
+    font-size: 20px;
   }
 
   .v2-loader-mark {
