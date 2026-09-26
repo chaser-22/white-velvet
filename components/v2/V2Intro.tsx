@@ -58,8 +58,12 @@ export default function V2Intro() {
       const clamped = Math.max(0, Math.min(100, value));
       const rounded = Math.round(clamped);
 
-      // The logo frame itself is the progress meter.
-      ring.style.strokeDashoffset = String(100 - clamped);
+      // Grow a single clean arc clockwise from 12 o'clock.
+      // Using dash length instead of dash offset keeps the origin fixed.
+      ring.style.strokeDasharray = `${clamped} ${Math.max(0, 100 - clamped)}`;
+      ring.style.strokeDashoffset = "0";
+      ring.style.opacity = clamped <= 0.05 ? "0" : "1";
+      ring.style.strokeLinecap = clamped >= 99.5 ? "butt" : "round";
 
       if (rounded !== lastDisplayed) {
         lastDisplayed = rounded;
@@ -140,15 +144,20 @@ export default function V2Intro() {
         return;
       }
 
-      // Let the ring visibly close to a complete circle before any exit motion begins.
-      gsap.set(ring, { strokeDashoffset: 0 });
+      // Keep a truly complete circle visible for a short beat before exit motion.
+      gsap.set(ring, {
+        strokeDasharray: "100 0",
+        strokeDashoffset: 0,
+        strokeLinecap: "butt",
+        opacity: 1,
+      });
 
       exitTimeline = gsap.timeline({ onComplete: finalize });
       exitTimeline
         .to(ring, {
-          strokeDashoffset: -0.42,
+          opacity: 1,
           duration: 0.30,
-          ease: "power2.out",
+          ease: "none",
         }, 0)
         .to(".v2-loader-ring-percent", {
           opacity: 1,
