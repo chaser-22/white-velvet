@@ -319,18 +319,6 @@ export default function MotionEngine() {
             });
           }
 
-          const footerBottom = footer.querySelector(".v2-footer-bottom");
-          if (footerBottom) {
-            reveal({
-              trigger: footerBottom,
-              targets: [footerBottom],
-              y: isMobile ? 8 : 14,
-              blur: isMobile ? 1 : 2,
-              stagger: 0,
-              duration: isMobile ? 0.56 : 0.68,
-              start: isMobile ? "top 96%" : "top 94%",
-            });
-          }
         }
       }
 
