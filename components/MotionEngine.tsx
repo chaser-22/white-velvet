@@ -148,8 +148,13 @@ export default function MotionEngine() {
         }
 
         const timeline = gsap.timeline({
-          paused: true,
           defaults: { overwrite: "auto" },
+          scrollTrigger: {
+            trigger: label,
+            start: isMobile ? "top 96%" : "top 93%",
+            once: true,
+            invalidateOnRefresh: true,
+          },
         });
 
         timeline.to(label, {
@@ -188,15 +193,6 @@ export default function MotionEngine() {
           }
         });
 
-        const trigger = ScrollTrigger.create({
-          trigger: label,
-          start: isMobile ? "top 96%" : "top 93%",
-          once: true,
-          invalidateOnRefresh: true,
-          onEnter: () => timeline.play(),
-        });
-
-        timeline.scrollTrigger = trigger;
         scrollAnimations.push(timeline);
       };
 
