@@ -368,7 +368,7 @@ function MaterialField({ quality }: { quality: Quality }) {
       }
       resizeObserver?.disconnect();
     };
-  }, [quality]);
+  }, [material, quality]);
 
   useFrame(({ clock, camera }, delta) => {
     if (!mesh.current || document.hidden) return;
