@@ -21,15 +21,15 @@ type WVWindow = Window & {
 
 export default function V2Intro() {
   const rootRef = useRef<HTMLDivElement>(null);
-  const lineRef = useRef<HTMLSpanElement>(null);
+  const ringRef = useRef<SVGCircleElement>(null);
   const percentRef = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(true);
 
   useLayoutEffect(() => {
     const root = rootRef.current;
-    const line = lineRef.current;
+    const ring = ringRef.current;
     const percent = percentRef.current;
-    if (!root || !line || !percent) return;
+    if (!root || !ring || !percent) return;
 
     const win = window as WVWindow;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -58,8 +58,8 @@ export default function V2Intro() {
       const clamped = Math.max(0, Math.min(100, value));
       const rounded = Math.round(clamped);
 
-      // Keep the bar fully continuous at frame rate; only the text is quantized.
-      line.style.transform = `translateZ(0) scaleX(${clamped / 100})`;
+      // The logo frame itself is the progress meter.
+      ring.style.strokeDashoffset = String(100 - clamped);
 
       if (rounded !== lastDisplayed) {
         lastDisplayed = rounded;
@@ -71,7 +71,7 @@ export default function V2Intro() {
     };
 
     gsap.set(root, { force3D: true });
-    gsap.set([line, percent], { force3D: true });
+    gsap.set(percent, { force3D: true });
 
     entryTimeline = gsap.timeline({ defaults: { ease: "power3.out" } });
     entryTimeline
@@ -97,14 +97,14 @@ export default function V2Intro() {
         letterSpacing: "-0.045em",
         duration: reduce ? 0.01 : 1.28,
       }, 0.18)
-      .fromTo(".v2-loader-progress", {
+      .fromTo(".v2-loader-ring-percent", {
         opacity: 0,
-        y: 10,
+        y: 7,
       }, {
         opacity: 1,
         y: 0,
-        duration: reduce ? 0.01 : 0.92,
-      }, 0.68);
+        duration: reduce ? 0.01 : 0.88,
+      }, 0.56);
 
     const finish = () => {
       if (!alive || completed) return;
@@ -137,10 +137,10 @@ export default function V2Intro() {
 
       exitTimeline = gsap.timeline({ onComplete: finalize });
       exitTimeline
-        .to(".v2-loader-progress", {
+        .to(".v2-loader-ring-percent", {
           opacity: 0,
-          y: -8,
-          duration: 0.46,
+          y: -5,
+          duration: 0.42,
           ease: "power2.inOut",
         }, 0)
         .to(".v2-loader-seal", {
@@ -309,14 +309,22 @@ export default function V2Intro() {
       <V2LoaderScene />
       <div className="v2-loader-sheen" aria-hidden="true" />
       <div className="v2-loader-core">
-        <div className="v2-loader-seal" aria-hidden="true">W</div>
-        <div className="v2-loader-mark">WHITE VELVET</div>
-        <div className="v2-loader-progress">
-          <strong ref={percentRef}>00%</strong>
-          <div className="v2-loader-rule" aria-hidden="true">
-            <span ref={lineRef} />
-          </div>
+        <div className="v2-loader-emblem" aria-hidden="true">
+          <svg className="v2-loader-ring" viewBox="0 0 120 120">
+            <circle className="v2-loader-ring-track" cx="60" cy="60" r="55" pathLength="100" />
+            <circle
+              ref={ringRef}
+              className="v2-loader-ring-progress"
+              cx="60"
+              cy="60"
+              r="55"
+              pathLength="100"
+            />
+          </svg>
+          <div className="v2-loader-seal">W</div>
+          <strong className="v2-loader-ring-percent" ref={percentRef}>00%</strong>
         </div>
+        <div className="v2-loader-mark">WHITE VELVET</div>
       </div>
     </div>
   );
