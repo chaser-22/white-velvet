@@ -120,18 +120,19 @@ export default function MotionEngine() {
       };
 
       const revealSectionLabel = (
-        trigger: Element,
+        _section: Element,
         label: Element | null,
-        start = isMobile ? "top 92%" : "top 86%",
+        _start?: string,
       ) => {
         if (!label) return;
 
         const text = label.querySelector("p");
 
         gsap.set(label, {
-          opacity: 0,
-          y: isMobile ? 6 : 10,
-          filter: isMobile ? "blur(2px)" : "blur(3.5px)",
+          opacity: 0.035,
+          y: isMobile ? 10 : 15,
+          scale: isMobile ? 0.995 : 0.992,
+          filter: isMobile ? "blur(3px)" : "blur(5px)",
           force3D: true,
           willChange: "transform, opacity, filter",
         });
@@ -139,27 +140,24 @@ export default function MotionEngine() {
         if (text) {
           gsap.set(text, {
             opacity: 0,
-            y: isMobile ? 5 : 8,
-            letterSpacing: isMobile ? ".23em" : ".25em",
+            y: isMobile ? 7 : 10,
+            letterSpacing: isMobile ? ".245em" : ".27em",
             force3D: true,
-            willChange: "transform, opacity, filter, letter-spacing",
+            willChange: "transform, opacity, letter-spacing",
           });
         }
 
         const timeline = gsap.timeline({
-          scrollTrigger: {
-            trigger,
-            start,
-            once: true,
-            invalidateOnRefresh: true,
-          },
+          paused: true,
+          defaults: { overwrite: "auto" },
         });
 
         timeline.to(label, {
           opacity: 0.56,
           y: 0,
+          scale: 1,
           filter: "blur(0px)",
-          duration: isMobile ? 0.9 : 1.18,
+          duration: isMobile ? 1.0 : 1.34,
           ease: "power3.out",
           force3D: true,
         });
@@ -171,22 +169,34 @@ export default function MotionEngine() {
               opacity: 1,
               y: 0,
               letterSpacing: ".19em",
-              duration: isMobile ? 0.86 : 1.08,
+              duration: isMobile ? 0.94 : 1.2,
               ease: "power3.out",
               force3D: true,
-              onComplete: () => {
-                gsap.set(label, {
-                  clearProps: "transform,filter,willChange",
-                });
-                gsap.set(text, {
-                  clearProps: "transform,opacity,filter,letterSpacing,willChange",
-                });
-              },
             },
-            isMobile ? 0.08 : 0.12,
+            isMobile ? 0.10 : 0.16,
           );
         }
 
+        timeline.eventCallback("onComplete", () => {
+          gsap.set(label, {
+            clearProps: "transform,filter,willChange",
+          });
+          if (text) {
+            gsap.set(text, {
+              clearProps: "transform,opacity,letterSpacing,willChange",
+            });
+          }
+        });
+
+        const trigger = ScrollTrigger.create({
+          trigger: label,
+          start: isMobile ? "top 96%" : "top 93%",
+          once: true,
+          invalidateOnRefresh: true,
+          onEnter: () => timeline.play(),
+        });
+
+        timeline.scrollTrigger = trigger;
         scrollAnimations.push(timeline);
       };
 
