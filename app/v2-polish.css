@@ -2976,3 +2976,73 @@ html:has(.v2-site) {
     font-size: 48px;
   }
 }
+
+
+/* MOBILE LOADER FIT — authoritative */
+@media (max-width: 760px) {
+  .v2-loader {
+    width: 100vw;
+    max-width: 100vw;
+    overflow: hidden;
+  }
+
+  .v2-loader-core {
+    width: calc(100vw - 32px);
+    max-width: 430px;
+    overflow: visible;
+  }
+
+  .v2-loader-emblem {
+    width: clamp(154px, 40vw, 172px);
+    height: clamp(154px, 40vw, 172px);
+    margin-bottom: 30px;
+  }
+
+  .v2-loader-seal {
+    inset: 14px;
+    font-size: clamp(44px, 11.5vw, 49px);
+  }
+
+  .v2-loader-ring-percent {
+    bottom: clamp(28px, 7vw, 31px);
+    font-size: 10px;
+  }
+
+  .v2-loader-mark {
+    width: 100%;
+    max-width: calc(100vw - 32px);
+    padding-inline: 2px;
+    box-sizing: border-box;
+    font-size: clamp(39px, 10.9vw, 47px);
+    line-height: .90;
+    letter-spacing: -.045em;
+    white-space: nowrap;
+    text-align: center;
+  }
+}
+
+@media (max-width: 390px) {
+  .v2-loader-core {
+    width: calc(100vw - 28px);
+  }
+
+  .v2-loader-mark {
+    max-width: calc(100vw - 28px);
+    font-size: clamp(37px, 10.6vw, 42px);
+  }
+
+  .v2-loader-emblem {
+    width: 154px;
+    height: 154px;
+  }
+
+  .v2-loader-seal {
+    font-size: 44px;
+  }
+}
+
+@media (max-width: 360px) {
+  .v2-loader-mark {
+    font-size: 37px;
+  }
+}
