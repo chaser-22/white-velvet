@@ -39,30 +39,34 @@ export default function MotionEngine() {
         return;
       }
 
+      const isMobile = window.matchMedia("(max-width: 760px)").matches;
       const previousScrollBehavior = document.documentElement.style.scrollBehavior;
-      document.documentElement.style.scrollBehavior = "auto";
+      document.documentElement.style.scrollBehavior = isMobile ? "smooth" : "auto";
 
-      const lenis = new Lenis({
-        lerp: 0.085,
-        smoothWheel: true,
-        wheelMultiplier: 0.9,
-        touchMultiplier: 1,
-        syncTouch: false,
-        anchors: {
-          offset: -88,
-          duration: 1,
-        },
-      });
+      // Touch scrolling stays native on phones. Lenis remains desktop-only so
+      // mobile Safari/Chrome can use their compositor scroll path directly.
+      const lenis = isMobile
+        ? null
+        : new Lenis({
+            lerp: 0.085,
+            smoothWheel: true,
+            wheelMultiplier: 0.9,
+            touchMultiplier: 1,
+            syncTouch: false,
+            anchors: {
+              offset: -88,
+              duration: 1,
+            },
+          });
 
       let resizeTimer = 0;
       let alive = true;
       let lastViewportWidth = window.innerWidth;
       const scrollAnimations: gsap.core.Animation[] = [];
       const revealCoverage = new Set<Element>();
-      const isMobile = window.matchMedia("(max-width: 760px)").matches;
       const defaultStart = isMobile ? "top 90%" : "top 84%";
       const defaultY = isMobile ? 12 : 30;
-      const defaultBlur = isMobile ? 0.7 : 6;
+      const defaultBlur = isMobile ? 0 : 6;
       const defaultDuration = isMobile ? 0.68 : 0.9;
       const defaultStagger = isMobile ? 0.055 : 0.09;
 
@@ -84,12 +88,14 @@ export default function MotionEngine() {
 
         targets.forEach((target) => revealCoverage.add(target));
 
+        const effectiveBlur = isMobile ? 0 : blur;
+
         gsap.set(targets, {
           autoAlpha: 0,
           y,
           scale,
-          filter: blur > 0 ? `blur(${blur}px)` : "none",
-          willChange: "transform, opacity, filter",
+          filter: effectiveBlur > 0 ? `blur(${effectiveBlur}px)` : "none",
+          willChange: isMobile ? "transform, opacity" : "transform, opacity, filter",
           force3D: true,
         });
 
@@ -111,7 +117,7 @@ export default function MotionEngine() {
           autoAlpha: 1,
           y: 0,
           scale: 1,
-          filter: "blur(0px)",
+          ...(isMobile ? {} : { filter: "blur(0px)" }),
           stagger,
           force3D: true,
           onComplete: () => {
@@ -325,14 +331,14 @@ export default function MotionEngine() {
       }
 
       const onScroll = () => ScrollTrigger.update();
-      const raf = (time: number) => lenis.raf(time * 1000);
+      const raf = (time: number) => lenis?.raf(time * 1000);
 
       const refresh = () => {
         if (!alive || document.hidden) return;
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             if (!alive || document.hidden) return;
-            lenis.resize();
+            lenis?.resize();
             ScrollTrigger.refresh();
           });
         });
@@ -353,16 +359,18 @@ export default function MotionEngine() {
 
       const onVisibilityChange = () => {
         if (document.hidden) {
-          lenis.stop();
+          lenis?.stop();
           return;
         }
 
-        lenis.start();
+        lenis?.start();
         refresh();
       };
 
-      lenis.on("scroll", onScroll);
-      gsap.ticker.add(raf);
+      if (lenis) {
+        lenis.on("scroll", onScroll);
+        gsap.ticker.add(raf);
+      }
 
       window.addEventListener("resize", onResize, { passive: true });
       window.addEventListener("load", refresh, { once: true });
@@ -382,14 +390,14 @@ export default function MotionEngine() {
         window.removeEventListener("resize", onResize);
         window.removeEventListener("load", refresh);
         document.removeEventListener("visibilitychange", onVisibilityChange);
-        gsap.ticker.remove(raf);
+        if (lenis) gsap.ticker.remove(raf);
 
         scrollAnimations.forEach((animation) => {
           animation.scrollTrigger?.kill();
           animation.kill();
         });
 
-        lenis.destroy();
+        lenis?.destroy();
         document.documentElement.style.scrollBehavior = previousScrollBehavior;
       };
     };

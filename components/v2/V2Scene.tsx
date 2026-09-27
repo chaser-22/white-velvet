@@ -1,7 +1,7 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
 type Quality = "high" | "medium" | "low";
@@ -253,6 +253,191 @@ void main() {
 }
 `;
 
+const mobileVertexShader = /* glsl */ `
+uniform float uTime;
+uniform float uScroll;
+uniform float uVelocity;
+uniform float uEntrance;
+uniform float uIntro;
+
+varying vec2 vUv;
+varying float vDepth;
+varying float vFold;
+varying float vPointer;
+
+void main() {
+  vUv = uv;
+  vec3 p = position;
+
+  float t = uTime;
+  float scroll = uScroll;
+  float speed = clamp(abs(uVelocity), 0.0, 1.0);
+
+  float waveA =
+    sin(p.x * 0.62 - p.y * 0.28 - t * 0.62 + scroll * 2.4) * 0.18;
+  float waveB =
+    sin(p.x * 0.34 - p.y * 0.16 - t * 0.43 + scroll * 1.35) * 0.105;
+  float waveC =
+    sin(p.x * 1.05 - p.y * 0.46 - t * 0.74) * 0.038;
+  float breathing =
+    sin(t * 0.38 + p.y * 0.22) * 0.038 +
+    cos(t * 0.27 - p.x * 0.14) * 0.026;
+
+  float introBreath =
+    (sin(p.y * 0.66 + t * 0.30) * 0.11 +
+     cos(p.x * 0.48 - t * 0.23) * 0.075) * uIntro;
+
+  float field = waveA + waveB + waveC + breathing;
+
+  p.z += field * mix(0.58, 1.0, uEntrance);
+  p.z += introBreath;
+  p.z += sin(p.y * 1.55 + t * 2.25) * speed * 0.055;
+  p.x += sin(p.y * 0.50 + t * 0.14) * 0.020 * uIntro;
+
+  float edgeCurl = smoothstep(0.58, 1.0, abs(uv.x - 0.5) * 2.0);
+  p.z += edgeCurl * sin(t * 0.26 + uv.y * 3.5) * 0.032;
+
+  vDepth = p.z;
+  vFold = field;
+  vPointer = 0.0;
+
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+}
+`;
+
+const mobileFragmentShader = /* glsl */ `
+uniform float uTime;
+uniform float uScroll;
+uniform float uIntro;
+uniform float uIntroProgress;
+
+varying vec2 vUv;
+varying float vDepth;
+varying float vFold;
+varying float vPointer;
+
+void main() {
+  float scroll = uScroll;
+
+  vec3 ivory = vec3(0.945, 0.925, 0.885);
+  vec3 pearl = vec3(0.78, 0.80, 0.77);
+  vec3 graphite = vec3(0.075, 0.090, 0.092);
+  vec3 ink = vec3(0.025, 0.035, 0.036);
+
+  float darkBand =
+    smoothstep(0.38, 0.60, scroll) *
+    (1.0 - smoothstep(0.76, 0.94, scroll));
+
+  vec3 base = mix(ivory, pearl, smoothstep(0.08, 0.48, scroll));
+  base = mix(base, graphite, darkBand * 0.92);
+  base = mix(base, ivory, smoothstep(0.84, 1.0, scroll));
+
+  vec2 windUv = vUv;
+  windUv.x += uTime * 0.016 + sin(vUv.y * 3.6 - uTime * 0.28) * 0.016;
+
+  float nap =
+    sin(windUv.y * 250.0 - windUv.x * 25.0 + uTime * 0.34) * 0.0065;
+
+  float lightTravel = fract(uTime * 0.055);
+  float sweep = mix(-0.34, 1.34, lightTravel);
+  float sheenAxis =
+    windUv.x - windUv.y * 0.31 +
+    sin(windUv.y * 3.5 - uTime * 0.20) * 0.034;
+  float sheen =
+    exp(-pow(sheenAxis - sweep, 2.0) * 7.5) * 0.48;
+
+  float shade = 0.80 + vDepth * 0.31 + vFold * 0.075;
+  vec3 color = base * shade;
+  color += nap;
+  color += sheen * mix(0.072, 0.040, darkBand);
+
+  float vignette = smoothstep(0.94, 0.30, distance(vUv, vec2(0.5)));
+  color *= mix(0.90, 1.04, vignette);
+
+  vec3 loaderIvory = vec3(0.93, 0.905, 0.855);
+  vec3 loaderShadow = vec3(0.055, 0.066, 0.065);
+  float loaderCenter =
+    1.0 - smoothstep(0.10, 0.74, distance(vUv, vec2(0.5, 0.48)));
+  float loaderLight =
+    clamp(0.19 + loaderCenter * 0.72 + vDepth * 0.42, 0.0, 1.0);
+  vec3 loaderColor = mix(loaderShadow, loaderIvory, loaderLight);
+
+  float sweepPosition =
+    mix(-0.18, 1.18, smoothstep(0.0, 1.0, uIntroProgress));
+  float loaderSweep =
+    exp(-pow((vUv.x * 0.78 + vUv.y * 0.22) - sweepPosition, 2.0) * 11.0);
+  loaderColor += loaderSweep * vec3(0.09, 0.085, 0.074);
+
+  color = mix(color, loaderColor, uIntro);
+
+  gl_FragColor = vec4(
+    mix(color, ink, darkBand * 0.055 * (1.0 - uIntro)),
+    0.985
+  );
+}
+`;
+
+function MobileFrameDriver({
+  constrained,
+  onPerformanceDrop,
+}: {
+  constrained: boolean;
+  onPerformanceDrop: () => void;
+}) {
+  const invalidate = useThree((state) => state.invalidate);
+
+  useEffect(() => {
+    let frame = 0;
+    let last = performance.now();
+    let accumulator = 0;
+    let warmup = 0;
+    let samples = 0;
+    let longFrames = 0;
+
+    const targetMs = 1000 / (constrained ? 50 : 60);
+
+    const tick = (now: number) => {
+      const dt = Math.min(Math.max(now - last, 0), 80);
+      last = now;
+
+      if (document.hidden) {
+        accumulator = 0;
+        warmup = 0;
+        samples = 0;
+        longFrames = 0;
+        frame = requestAnimationFrame(tick);
+        return;
+      }
+
+      accumulator += dt;
+      warmup += dt;
+
+      if (accumulator >= targetMs) {
+        invalidate();
+        accumulator %= targetMs;
+      }
+
+      if (!constrained && warmup >= 1200) {
+        samples += 1;
+        if (dt >= 24) longFrames += 1;
+
+        if (samples >= 90) {
+          if (longFrames >= 10) onPerformanceDrop();
+          samples = 0;
+          longFrames = 0;
+        }
+      }
+
+      frame = requestAnimationFrame(tick);
+    };
+
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [constrained, invalidate, onPerformanceDrop]);
+
+  return null;
+}
+
 function qualityTier(): Quality {
   if (typeof window === "undefined") return "medium";
 
@@ -261,13 +446,19 @@ function qualityTier(): Quality {
   const cores = navigator.hardwareConcurrency ?? 8;
   const mobile = window.innerWidth < 760;
 
+  if (mobile) return "low";
   if (memory <= 4 || cores <= 4) return "low";
-  if (mobile) return cores >= 6 ? "medium" : "low";
   if (window.innerWidth > 1280 && memory >= 8 && cores >= 8) return "high";
   return "medium";
 }
 
-function MaterialField({ quality }: { quality: Quality }) {
+function MaterialField({
+  quality,
+  mobile,
+}: {
+  quality: Quality;
+  mobile: boolean;
+}) {
   const mesh = useRef<THREE.Mesh>(null);
   const scrollTarget = useRef(0);
   const velocityTarget = useRef(0);
@@ -289,12 +480,12 @@ function MaterialField({ quality }: { quality: Quality }) {
       uIntro: { value: 1 },
       uIntroProgress: { value: 0 },
     },
-    vertexShader,
-    fragmentShader,
+    vertexShader: mobile ? mobileVertexShader : vertexShader,
+    fragmentShader: mobile ? mobileFragmentShader : fragmentShader,
     transparent: true,
     side: THREE.DoubleSide,
     depthWrite: false,
-  }), []);
+  }), [mobile]);
 
   useEffect(() => () => material.dispose(), [material]);
 
@@ -405,9 +596,17 @@ function MaterialField({ quality }: { quality: Quality }) {
     );
     velocityTarget.current *= Math.pow(0.0015, delta);
 
-    material.uniforms.uPointer.value.lerp(pointerTarget.current, 1 - Math.exp(-7.0 * delta));
-    material.uniforms.uPointerMotion.value.lerp(pointerMotionTarget.current, 1 - Math.exp(-12.0 * delta));
-    pointerMotionTarget.current.multiplyScalar(Math.pow(0.0005, delta));
+    if (!mobile) {
+      material.uniforms.uPointer.value.lerp(
+        pointerTarget.current,
+        1 - Math.exp(-7.0 * delta),
+      );
+      material.uniforms.uPointerMotion.value.lerp(
+        pointerMotionTarget.current,
+        1 - Math.exp(-12.0 * delta),
+      );
+      pointerMotionTarget.current.multiplyScalar(Math.pow(0.0005, delta));
+    }
 
     material.uniforms.uEntrance.value = THREE.MathUtils.damp(
       material.uniforms.uEntrance.value,
@@ -446,8 +645,8 @@ function MaterialField({ quality }: { quality: Quality }) {
 
     const idleX = Math.sin(t * 0.34) * 0.16 + Math.sin(t * 0.63) * 0.045;
     const idleY = Math.cos(t * 0.28) * 0.11;
-    const pointerX = quality === "low" ? 0 : (pointer.x - 0.5) * 0.32;
-    const pointerY = quality === "low" ? 0 : (pointer.y - 0.5) * 0.22;
+    const pointerX = mobile || quality === "low" ? 0 : (pointer.x - 0.5) * 0.32;
+    const pointerY = mobile || quality === "low" ? 0 : (pointer.y - 0.5) * 0.22;
 
     mesh.current.position.x = THREE.MathUtils.damp(mesh.current.position.x, idleX + pointerX, 2.7, delta);
     mesh.current.position.y = THREE.MathUtils.damp(mesh.current.position.y, idleY + pointerY, 2.7, delta);
@@ -502,7 +701,13 @@ function MaterialField({ quality }: { quality: Quality }) {
     camera.lookAt(0, 0, 0);
   });
 
-  const segments = quality === "high" ? [132, 104] : quality === "medium" ? [92, 72] : [44, 34];
+  const segments = mobile
+    ? [48, 36]
+    : quality === "high"
+      ? [132, 104]
+      : quality === "medium"
+        ? [92, 72]
+        : [44, 34];
 
   return (
     <mesh ref={mesh}>
@@ -555,8 +760,14 @@ function DustField({ quality }: { quality: Quality }) {
 export default function V2Scene() {
   const [quality, setQuality] = useState<Quality>("medium");
   const [reduced, setReduced] = useState(false);
+  const [mobile, setMobile] = useState(false);
+  const [constrained, setConstrained] = useState(false);
   const [ready, setReady] = useState(false);
   const [canStart, setCanStart] = useState(false);
+
+  const handlePerformanceDrop = useCallback(() => {
+    setConstrained(true);
+  }, []);
 
   useEffect(() => {
     const win = window as Window & { __wvV2IntroHandoff?: boolean };
@@ -578,10 +789,13 @@ export default function V2Scene() {
     const apply = () => {
       resizeFrame = 0;
       const nextReduced = media.matches;
+      const nextMobile = window.matchMedia("(max-width: 760px)").matches;
       const nextQuality = qualityTier();
 
       setReduced((current) => current === nextReduced ? current : nextReduced);
+      setMobile((current) => current === nextMobile ? current : nextMobile);
       setQuality((current) => current === nextQuality ? current : nextQuality);
+      if (!nextMobile) setConstrained(false);
     };
 
     const schedule = () => {
@@ -615,18 +829,23 @@ export default function V2Scene() {
     return <div className="v2-canvas-shell v2-canvas-fallback is-ready" aria-hidden="true" />;
   }
 
-  const dpr: [number, number] =
-    quality === "high" ? [1, 1.4] : quality === "medium" ? [1, 1.15] : [1, 1.05];
+  const dpr: [number, number] = mobile
+    ? (constrained ? [0.82, 0.9] : [0.9, 1])
+    : quality === "high"
+      ? [1, 1.4]
+      : quality === "medium"
+        ? [1, 1.15]
+        : [1, 1.05];
 
   return (
     <div className={`v2-canvas-shell ${ready ? "is-ready" : ""}`} aria-hidden="true">
       <Canvas
-        frameloop="always"
+        frameloop={mobile ? "demand" : "always"}
         dpr={dpr}
         camera={{ position: [0, 0, 5.15], fov: 42 }}
         gl={{
           alpha: true,
-          antialias: quality !== "low",
+          antialias: !mobile && quality !== "low",
           powerPreference: "high-performance",
           stencil: false,
         }}
@@ -637,8 +856,14 @@ export default function V2Scene() {
           window.dispatchEvent(new Event("wv:v2-scene-ready"));
         }}
       >
-        <MaterialField quality={quality} />
-        <DustField quality={quality} />
+        {mobile && (
+          <MobileFrameDriver
+            constrained={constrained}
+            onPerformanceDrop={handlePerformanceDrop}
+          />
+        )}
+        <MaterialField quality={quality} mobile={mobile} />
+        {!mobile && <DustField quality={quality} />}
       </Canvas>
       <div className="v2-canvas-atmosphere" />
     </div>
