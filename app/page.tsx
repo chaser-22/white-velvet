@@ -6,6 +6,7 @@ import V2Scene from "@/components/v2/V2Scene";
 import V2Intro from "@/components/v2/V2Intro";
 import V2Header from "@/components/v2/V2Header";
 import V2Services from "@/components/v2/V2Services";
+import V2Pricing from "@/components/v2/V2Pricing";
 import V2FAQ from "@/components/v2/V2FAQ";
 import V2Footer from "@/components/v2/V2Footer";
 import V2BeforeAfter from "@/components/v2/V2BeforeAfter";
@@ -65,6 +66,8 @@ export default function Home() {
         </section>
 
         <V2Services />
+
+        <V2Pricing />
 
         <section className="v2-results" id="resultat">
           <div className="v2-section-label">
