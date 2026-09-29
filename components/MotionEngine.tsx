@@ -170,6 +170,54 @@ export default function MotionEngine() {
           });
         }
 
+
+        const pricing = site.querySelector(".v2-pricing");
+        if (pricing) {
+          const intro = pricing.querySelector(".v2-pricing-intro");
+          if (intro) {
+            reveal({
+              trigger: intro,
+              targets: elements(".v2-pricing-kicker, h2, .v2-pricing-lead", intro),
+              y: isMobile ? 14 : 28,
+              blur: isMobile ? 0.6 : 4,
+              stagger: isMobile ? 0.055 : 0.085,
+              duration: isMobile ? 0.76 : 0.96,
+              start: isMobile ? "top 94%" : "top 89%",
+            });
+          }
+
+          const priceList = pricing.querySelector(".v2-pricing-list");
+          if (priceList) {
+            const priceTargets = [
+              ...elements(".v2-price-row", priceList),
+              ...elements(".v2-pricing-fineprint", pricing),
+            ];
+            reveal({
+              trigger: priceList,
+              targets: priceTargets,
+              y: isMobile ? 10 : 18,
+              blur: isMobile ? 0 : 2,
+              stagger: isMobile ? 0.045 : 0.065,
+              duration: isMobile ? 0.6 : 0.74,
+              start: isMobile ? "top 91%" : "top 84%",
+            });
+          }
+
+          const volumeCard = pricing.querySelector(".v2-volume-card");
+          if (volumeCard) {
+            reveal({
+              trigger: volumeCard,
+              targets: [volumeCard],
+              y: isMobile ? 14 : 26,
+              blur: isMobile ? 0 : 2.5,
+              scale: 0.992,
+              stagger: 0,
+              duration: isMobile ? 0.72 : 0.9,
+              start: isMobile ? "top 91%" : "top 85%",
+            });
+          }
+        }
+
         const results = site.querySelector(".v2-results");
         if (results) {
 
