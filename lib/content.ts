@@ -15,7 +15,7 @@ export const services = [
     title: "Mattvätt",
     short: "Anpassad djuprengöring för moderna, orientaliska och känsliga mattor.",
     body: "Behandlingen anpassas efter material, konstruktion och skick. För större eller heltäckande mattor kan rengöringen utföras direkt på plats.",
-    image: "/ChatGPT Image Sep 30, 2026, 06_02_09 PM.jpg",
+    image: "/media/service-mattvatt-2026.jpg",
   },
   {
     id: "mobler",
@@ -23,7 +23,7 @@ export const services = [
     title: "Möbeltvätt",
     short: "Noggrann rengöring av soffor, fåtöljer, dynor och andra textilier.",
     body: "Vi arbetar metodiskt med fläckar, damm, lukt och smuts och anpassar behandlingen efter textilens egenskaper.",
-    image: "/ChatGPT Image Sep 30, 2026, 06_02_06 PM.jpg",
+    image: "/media/service-mobeltvatt-2026.jpg",
   },
   {
     id: "golv",
@@ -31,7 +31,7 @@ export const services = [
     title: "Golvpolering",
     short: "Återställ glans och ett välskött uttryck på trä, sten, klinker och andra lämpliga golv.",
     body: "En kontrollerad process för rengöring och polering som anpassas efter golvets material och skick.",
-    image: "/ChatGPT Image Sep 30, 2026, 06_02_03 PM.jpg",
+    image: "/media/service-golvpolering-2026.jpg",
   },
   {
     id: "fordon",
@@ -39,7 +39,7 @@ export const services = [
     title: "Båt & husbil",
     short: "Invändig rengöring av säten, dynor, madrasser, golv och interiöra ytor.",
     body: "För ytor som kräver precision i mindre utrymmen, med fokus på textilier, fläckar, lukt och en fräsch helhet.",
-    image: "/ChatGPT Image Sep 30, 2026, 06_01_58 PM.jpg",
+    image: "/media/service-bat-husbil-2026.jpg",
   },
 ];
 
