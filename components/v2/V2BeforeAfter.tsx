@@ -84,8 +84,8 @@ function Comparison({
           />
         </div>
 
-        <span className="v2-compare-label v2-before">FÖRE</span>
-        <span className="v2-compare-label v2-after">EFTER</span>
+        <span className="v2-compare-label v2-before">EFTER</span>
+        <span className="v2-compare-label v2-after">FÖRE</span>
 
         <div className="v2-compare-line" aria-hidden="true">
           <span />
